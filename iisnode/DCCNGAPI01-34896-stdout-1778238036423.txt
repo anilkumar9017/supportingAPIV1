@@ -1,0 +1,5 @@
+🚀 Server running on port \\.\pipe\b65bb240-3b86-4964-8aa9-f19108931b13
+📡 Public APIs: http://localhost:\\.\pipe\b65bb240-3b86-4964-8aa9-f19108931b13/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\b65bb240-3b86-4964-8aa9-f19108931b13/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\b65bb240-3b86-4964-8aa9-f19108931b13/health
+2026-05-08T11:00:37.901Z - POST /whapi/webhook

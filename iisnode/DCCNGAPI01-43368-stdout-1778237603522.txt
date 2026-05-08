@@ -1,0 +1,16 @@
+🚀 Server running on port \\.\pipe\5c599b7b-9ed0-4064-8107-cd3f26b79e29
+📡 Public APIs: http://localhost:\\.\pipe\5c599b7b-9ed0-4064-8107-cd3f26b79e29/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\5c599b7b-9ed0-4064-8107-cd3f26b79e29/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\5c599b7b-9ed0-4064-8107-cd3f26b79e29/health
+2026-05-08T10:53:25.416Z - POST /api/auth/bi-reports
+✅ MSSQL connection pool created for DCCBusinessSuite_mowara_test
+2026-05-08T10:53:25.823Z - POST /api/auth/bi-reports
+2026-05-08T10:53:40.193Z - POST /api/auth/bi-reports
+2026-05-08T10:53:40.499Z - POST /api/auth/bi-reports
+2026-05-08T10:53:46.767Z - GET /api/auth/bi-reports
+2026-05-08T10:54:18.748Z - GET /api/webhook
+2026-05-08T10:54:40.213Z - POST /api/webhook
+2026-05-08T10:54:45.171Z - POST /webhook
+User: 3135555657 → DRIVER
+Other message: 
+2026-05-08T10:54:57.096Z - POST /webhook

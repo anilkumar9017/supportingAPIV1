@@ -1,0 +1,8 @@
+🚀 Server running on port \\.\pipe\1a1b807e-a6df-407c-8179-7e32ef06b95d
+📡 Public APIs: http://localhost:\\.\pipe\1a1b807e-a6df-407c-8179-7e32ef06b95d/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\1a1b807e-a6df-407c-8179-7e32ef06b95d/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\1a1b807e-a6df-407c-8179-7e32ef06b95d/health
+2026-05-08T10:56:04.759Z - POST /whapi/webhook
+User: 3135555657 → DRIVER
+Other message: 
+2026-05-08T10:56:11.191Z - POST /whapi/webhook

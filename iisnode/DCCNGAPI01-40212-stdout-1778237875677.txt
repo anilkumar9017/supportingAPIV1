@@ -1,0 +1,31 @@
+🚀 Server running on port \\.\pipe\55644e94-5bee-4d03-ad71-5ef3bf9179ad
+📡 Public APIs: http://localhost:\\.\pipe\55644e94-5bee-4d03-ad71-5ef3bf9179ad/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\55644e94-5bee-4d03-ad71-5ef3bf9179ad/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\55644e94-5bee-4d03-ad71-5ef3bf9179ad/health
+2026-05-08T10:57:56.906Z - POST /whapi/webhook
+User: 3135555657 → DRIVER
+Other message: 
+2026-05-08T10:58:06.209Z - POST /whapi/webhook
+User: 3135555657 → DRIVER
+Other message: 
+2026-05-08T10:58:43.990Z - POST /whapi/webhook
+User: 3135555657 → DRIVER
+Other message: 
+2026-05-08T10:58:58.318Z - POST /whapi/webhook
+User: 9017467730 → AGENT
+Message : getttttt {
+  id: 'Oyw1eWu8J4XXFQ-hVMqnAgAgFA',
+  from_me: false,
+  type: 'text',
+  chat_id: '919017467730@s.whatsapp.net',
+  timestamp: 1778237937,
+  source: 'mobile',
+  starred: false,
+  text: { body: 'Hi' },
+  from: '919017467730',
+  from_name: 'Anil Kumar',
+  userRole: 'DRIVER'
+}
+???????? null
+2026-05-08T10:58:59.452Z - POST /whapi/webhook
+2026-05-08T10:58:59.972Z - POST /whapi/webhook

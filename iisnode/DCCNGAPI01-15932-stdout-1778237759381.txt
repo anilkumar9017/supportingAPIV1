@@ -1,0 +1,4 @@
+🚀 Server running on port \\.\pipe\10baa96a-1083-462c-beef-793c71cd3b3e
+📡 Public APIs: http://localhost:\\.\pipe\10baa96a-1083-462c-beef-793c71cd3b3e/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\10baa96a-1083-462c-beef-793c71cd3b3e/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\10baa96a-1083-462c-beef-793c71cd3b3e/health

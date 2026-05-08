@@ -1,0 +1,63 @@
+🚀 Server running on port \\.\pipe\49d04347-c6af-4f4d-8d58-d8b5475e29b2
+📡 Public APIs: http://localhost:\\.\pipe\49d04347-c6af-4f4d-8d58-d8b5475e29b2/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\49d04347-c6af-4f4d-8d58-d8b5475e29b2/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\49d04347-c6af-4f4d-8d58-d8b5475e29b2/health
+2026-05-08T10:59:21.308Z - POST /whapi/webhook
+User: 9017467730 → AGENT
+Message : getttttt {
+  id: 'O9I7WbCBkMSMrw-hbkqnAgAgFA',
+  from_me: false,
+  type: 'image',
+  chat_id: '919017467730@s.whatsapp.net',
+  timestamp: 1778237959,
+  source: 'mobile',
+  starred: false,
+  image: {
+    id: 'jpeg-3bd23b59b08190c48caf-85b92a9c08008050',
+    mime_type: 'image/jpeg',
+    file_size: 93893,
+    sha256: 'Me8KwYmSnFG6Lc25/XeLmAoOinSdOPsQg+sHMSI1ATQ=',
+    width: 1280,
+    height: 832,
+    preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wgARCABIAEgDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAECBAMF/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAEC/9oADAMBAAIQAxAAAADvbZNmGN6sDeMDeMDeNcOUaGe51cJOzlB2cBW/VSaXzYmBKlyAXAAAAB4VQoAKCAP/xAAZEQEBAQADAAAAAAAAAAAAAAARAAEQITD/2gAIAQIBAT8AIiOSIyMnr3//xAAXEQEBAQEAAAAAAAAAAAAAAAARACAw/9oACAEDAQE/AGZwzMx3/8QALRAAAQMCBAUCBgMAAAAAAAAAAAECEQMEExZTYSExMlGRBiISFEFCQ1JAcYH/2gAIAQEAAT8AT07Y/Vz4Mu2Cfc8X03ZryV0C+mrX6OcZate7jLVp3cZatO7jLVp3cZatO7hK14v46Zi3unTMW902GLe6bDFvdNhi3umwxr3TYYt7+jDFvf0YK34eTUG8XQqJBDNiG7EM2IbsQ3YhuxDdh7JcqqvMZQmfco+gquSHqfL8OtRlvw61FocetT5fh1qNocOtTA9/WpcvrtqRTYjk7lur3U5qN+FwiI7iqEEIhCEIQhDZ3Hke0b/ak7E7Crw5DUcnFVknY+7l/Ckqeo2MWMGeMczM1PRj/TNVPQXyZqp6C+TNVPQXyZqp6C+TNVPQXyZqp6C+RfVNJfwL5P/+AAMA/9k='
+  },
+  from: '919017467730',
+  from_name: 'Anil Kumar',
+  userRole: 'DRIVER'
+}
+Media Handle 
+!!!!Not Get Media Url {
+  id: 'jpeg-3bd23b59b08190c48caf-85b92a9c08008050',
+  mime_type: 'image/jpeg',
+  file_size: 93893,
+  sha256: 'Me8KwYmSnFG6Lc25/XeLmAoOinSdOPsQg+sHMSI1ATQ=',
+  width: 1280,
+  height: 832,
+  preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wgARCABIAEgDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAECBAMF/8QAFgEBAQEAAAAAAAAAAAAAAAAAAAEC/9oADAMBAAIQAxAAAADvbZNmGN6sDeMDeMDeNcOUaGe51cJOzlB2cBW/VSaXzYmBKlyAXAAAAB4VQoAKCAP/xAAZEQEBAQADAAAAAAAAAAAAAAARAAEQITD/2gAIAQIBAT8AIiOSIyMnr3//xAAXEQEBAQEAAAAAAAAAAAAAAAARACAw/9oACAEDAQE/AGZwzMx3/8QALRAAAQMCBAUCBgMAAAAAAAAAAAECEQMEExZTYSExMlGRBiISFEFCQ1JAcYH/2gAIAQEAAT8AT07Y/Vz4Mu2Cfc8X03ZryV0C+mrX6OcZate7jLVp3cZatO7jLVp3cZatO7hK14v46Zi3unTMW902GLe6bDFvdNhi3umwxr3TYYt7+jDFvf0YK34eTUG8XQqJBDNiG7EM2IbsQ3YhuxDdh7JcqqvMZQmfco+gquSHqfL8OtRlvw61FocetT5fh1qNocOtTA9/WpcvrtqRTYjk7lur3U5qN+FwiI7iqEEIhCEIQhDZ3Hke0b/ak7E7Crw5DUcnFVknY+7l/Ckqeo2MWMGeMczM1PRj/TNVPQXyZqp6C+TNVPQXyZqp6C+TNVPQXyZqp6C+RfVNJfwL5P/+AAMA/9k='
+}
+Not Get Media Url <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 00 00 01 00 01 00 00 ff db 00 43 00 08 06 06 07 06 05 08 07 07 07 09 09 08 0a 0c 14 0d 0c 0b 0b 0c 19 12 13 0f ... 93843 more bytes>
+Is buffer: true
+Mime: image/jpeg
+Laplacian variance: 400.0668310934829
+OCR confidence: 54
+Text: See _____
+83 ‏ل يا‎ © YouTube B® Maps
+M2 update Group Routine Service Master © © *
+Qe x Acie ‏لاصوا‎
+Lang counts: { hindiCount: 0, arabicCount: 26, englishCount: 119 }
+Languange  {
+  isBlurry: true,
+  text: 'See _____\n' +
+    '83 ‏ل يا‎ © YouTube B® Maps\n' +
+    'M2 update Group Routine Service Master © © *\n' +
+    'Qe x Acie ‏لاصوا‎ =\n' +
+    'Ep [7 Toeween AA awe ea ws © |\n' +
+    '‏ممصو 8 2 دج‎ 20000 1000 sen ks 0\n' +
+    '@ seats\n' +
+    '© Test ‏كنا‎ wam ances Se ‏ل ب‎\n' +
+    '‏م ا ا‎ 3 ooo MBEAN 5X6 XeMM 0 NoVAT 015\n' +
+    'mw 6 « © ‏روج 8 3 ا‎ OEM',
+  lang: 'english'
+}
+2026-05-08T10:59:31.292Z - POST /whapi/webhook
+2026-05-08T10:59:31.855Z - POST /whapi/webhook
