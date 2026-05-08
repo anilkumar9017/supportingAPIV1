@@ -49,7 +49,7 @@ module.exports = {
             dropdown: {
                 sheetName: 'File',
                 query: `select id, doc_num from d_cf_filemaster`,
-                valueField: 'file_number'
+                valueField: 'doc_num'
             }
         },
 
@@ -61,7 +61,7 @@ module.exports = {
             dropdown: {
                 sheetName: 'Shipment',
                 query: `select id, doc_num from d_fm_shipmentorder`,
-                valueField: 'file_number'
+                valueField: 'doc_num'
             }
         },
 
