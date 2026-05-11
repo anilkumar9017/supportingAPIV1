@@ -95,6 +95,43 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
             bold: true
         };
 
+        const cache = getGlobalDropdownCache();
+        const dropdownValueMaps = {};
+        
+        for (const col of config.columns) {
+            if (col.type === 'dropdown') {
+                let dropdownResult = cache.get(
+                    databaseName,
+                    col.dropdown.query,
+                    col.dropdown.labelField,
+                    col.dropdown.valueField
+                );
+
+                if (!dropdownResult) {
+                    dropdownResult = await db.executeQuery(
+                        databaseName,
+                        col.dropdown.query,
+                        {},
+                        useApi
+                    );
+
+                    cache.set(
+                        databaseName,
+                        col.dropdown.query,
+                        col.dropdown.labelField,
+                        col.dropdown.valueField,
+                        dropdownResult
+                    );
+                }
+
+                dropdownValueMaps[col.key] = {};
+                dropdownResult.forEach(item => {
+                    const lookupKey = item[col.dropdown.valueField];
+                    dropdownValueMaps[col.key][String(lookupKey)] = item[col.dropdown.labelField];
+                });
+            }
+        }
+
         let dataRowCount = 0;
 
         /*
@@ -156,13 +193,19 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                     config.columns.forEach(col => {
                         let value = row[col.key];
                         
+                        // Dropdown label mapping
+                        if (col.type === 'dropdown' && value !== null && value !== undefined) {
+                            const map = dropdownValueMaps[col.key] || {};
+                            value = map[String(value)] ?? value;
+                        }
+                        
                         // Date formatting
                         if (col.type === 'date' && value) {
                             value = new Date(value);
                         }
                         
                         // Null safety
-                        if (value === undefined) {
+                        if (value === undefined || value === null) {
                             value = '';
                         }
                         
@@ -185,7 +228,6 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
         ===========================================================
         */
 
-        const cache = getGlobalDropdownCache();
         const columnIndexMap = getColumnIndexMap(config.columns);
         const maxRowsForValidation = getSmartRowRange(dataRowCount);
 
