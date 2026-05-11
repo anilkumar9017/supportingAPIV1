@@ -69,12 +69,12 @@ const getSmartRowRange = (dataRowCount, minRows = 100, bufferRows = 50) => {
  */
 const applyDataValidation = (worksheet, columnIndex, startRow, endRow, validationType, config) => {
     const columnLetter = getColumnLetter(columnIndex);
+    const cellRange = `${columnLetter}${startRow}:${columnLetter}${endRow}`;
     
-    for (let i = startRow; i <= endRow; i++) {
-        const cellRef = `${columnLetter}${i}`;
-        const cell = worksheet.getCell(cellRef);
-        cell.dataValidation = config;
-    }
+    worksheet.dataValidations.add({
+        sqref: cellRange,
+        ...config
+    });
 };
 
 /**
