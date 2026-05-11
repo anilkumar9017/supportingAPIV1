@@ -21,7 +21,9 @@ app.use((req, res, next) => {
 const publicRoutes = require('./routes/public');
 const authenticatedRoutes = require('./routes/authenticated');
 const emailRoutes = require('./routes/email');
-const excelRoutes = require('./routes/excel.routes')
+const excelRoutes = require('./routes/excel.routes');
+const sagaRoutes = require('./routes/sanaga.routes')
+
 
 // Public routes (no authentication required)
 app.use('/api/public', publicRoutes);
@@ -34,6 +36,9 @@ app.use('/api/email', emailRoutes);
 
 //import export excell routes
 app.use('/api/ie', excelRoutes);
+
+//saga routes
+app.use('/api/saga', sagaRoutes)
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -66,6 +71,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Public APIs: http://localhost:${PORT}/api/public`);
   console.log(`🔐 Authenticated APIs: http://localhost:${PORT}/api/auth`);
+  console.log(`🔐 Saga APIs: http://localhost:${PORT}/api/saga`);
   console.log(`❤️  Health Check: http://localhost:${PORT}/health`);
 });
 
