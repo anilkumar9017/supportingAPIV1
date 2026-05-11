@@ -67,9 +67,9 @@ async function generateHierarchicalExcel(menuCode, filters = {}, db, databaseNam
         await generateMainSheet(workbook, config, filters, db, databaseName, useApi);
 
         // Generate child sheets
-        for (const [childKey, childConfig] of Object.entries(config.children)) {
+        /* for (const [childKey, childConfig] of Object.entries(config.children)) {
             await generateChildSheet(workbook, config, childConfig, childKey, filters, db, databaseName, useApi);
-        }
+        } */
 
         // Generate dropdown sheets if needed
         await generateDropdownSheets(workbook, config, db, databaseName, useApi);
@@ -104,9 +104,10 @@ async function generateMainSheet(workbook, config, filters, db, databaseName, us
     config.columns.forEach((col, index) => {
         worksheet.getColumn(index + 1).width = col.width || 15;
     });
-
+    console.log("filters ", filters);
     // Get main data
     const { query, params } = buildMainQuery(config, filters);
+    
     try {
         const mainData = await db.executeQuery(databaseName, query, params, useApi);
         // Add data rows
@@ -117,8 +118,8 @@ async function generateMainSheet(workbook, config, filters, db, databaseName, us
 
         logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
     } catch (error) {
-        logger.error(`Error executing main query: ${query}`, error);
-        logger.error('Query parameters:', params);
+        //logger.error(`Error executing main query: ${query}`, error);
+        logger.error('Query parameters:', query, params);
         throw new Error(`Database error in main data query: ${error.message}`);
     }
 }
@@ -398,7 +399,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
  * Build query for main data
  */
 function buildMainQuery(config, filters) {
-    let query = `SELECT ${config.columns.map(col => col.key).join(', ')} FROM ${config.tableName}`;
+    //let query = `SELECT ${config?.column.map((col)=> col.key).join(',')} FROM ${config.tableName}`;
+    let query = `SELECT * FROM ${config.tableName}`;
+    
     const conditions = [];
     const params = {};
 
@@ -406,8 +409,9 @@ function buildMainQuery(config, filters) {
     if (filters && Object.keys(filters).length > 0) {
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
-                conditions.push(`${key} = @${key}`);
-                params[key] = value;
+                console.log("data query ", key, value);
+                /* conditions.push(`${key} = @${key}`);
+                params[key] = value; */
             }
         });
     }
