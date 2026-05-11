@@ -13,8 +13,13 @@ const logger = createLogger('HierarchicalExcelService');
  * Extract child array configurations from main config
  */
 function extractHierarchicalConfig(menuCode) {
+    if (!menuCode) {
+        throw new Error(`menuCode is required`);
+    }
+    
     const config = configs[menuCode];
     if (!config) {
+        logger.error(`Config for menu code '${menuCode}' not found. Available configs:`, Object.keys(configs));
         throw new Error(`Config for menu code '${menuCode}' not found`);
     }
 
@@ -49,7 +54,7 @@ function extractHierarchicalConfig(menuCode) {
  */
 async function generateHierarchicalExcel(menuCode, filters = {}, db, databaseName, useApi) {
     try {
-        const config = await extractHierarchicalConfig(menuCode);
+        const config = extractHierarchicalConfig(menuCode);
         if (!config) {
             throw new Error(`No hierarchical configuration found for menu code: ${menuCode}`);
         }
@@ -188,7 +193,7 @@ async function generateDropdownSheets(workbook, config, db, databaseName, useApi
  */
 async function importHierarchicalExcel(menuCode, filePath, db, databaseName, useApi, userObj) {
     try {
-        const config = await extractHierarchicalConfig(menuCode);
+        const config = extractHierarchicalConfig(menuCode);
         if (!config) {
             throw new Error(`No hierarchical configuration found for menu code: ${menuCode}`);
         }
@@ -371,6 +376,62 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     }
 
     return results;
+}
+
+/**
+ * Build query for main data
+ */
+function buildMainQuery(config, filters) {
+    let query = `SELECT ${config.columns.map(col => col.key).join(', ')} FROM ${config.tableName}`;
+    const conditions = [];
+    const params = {};
+
+    // Add filters
+    if (filters && Object.keys(filters).length > 0) {
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                conditions.push(`${key} = @${key}`);
+                params[key] = value;
+            }
+        });
+    }
+
+    if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    return { query, params };
+}
+
+/**
+ * Build query for child data with parent relationship
+ */
+function buildChildQuery(config, childConfig, filters) {
+    const parentUniqueKey = config.columns.find(col => col.key === config.uniqueKey)?.key || config.primaryKey;
+    let query = `
+        SELECT p.${parentUniqueKey} as parent_code, c.*
+        FROM ${childConfig.tableName} c
+        INNER JOIN ${config.tableName} p ON c.${childConfig.parentKey} = p.${config.primaryKey}
+    `;
+
+    const conditions = [];
+    const params = {};
+
+    // Add filters for parent records
+    if (filters && Object.keys(filters).length > 0) {
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                conditions.push(`p.${key} = @${key}`);
+                params[key] = value;
+            }
+        });
+    }
+
+    if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    return { query, params };
 }
 
 /**

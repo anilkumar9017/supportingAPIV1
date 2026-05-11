@@ -1,5 +1,5 @@
 const excelService = require('../services/excell/excell.service');
-const generateHierarchicalExcel = require('/services/excell/excell-hierarchical.service');
+const generateHierarchicalExcel = require('../services/excell/excell-hierarchical.service');
 
 const db = require('../config/database');
 
@@ -86,7 +86,7 @@ async function exportHierarchicalExcel(req, res) {
         const { menuCode, mode } = req.body;
         const useApi = req.useApi || false;
         const databaseName = req.databaseName;
-        const workbook = await generateHierarchicalExcel.generateHierarchicalExcel({ menuCode, mode, db, databaseName, useApi });
+        const workbook = await generateHierarchicalExcel.generateHierarchicalExcel(menuCode, mode, db, databaseName, useApi);
         
         res.setHeader(
             'Content-Type',
