@@ -68,7 +68,7 @@ async function generateHierarchicalExcel(menuCode, mode = 'export', db, database
 
         // Generate child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            await generateChildSheet(workbook, config, childConfig, childKey, filters, db, databaseName, useApi);
+            await generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters);
         }
 
         // Generate dropdown sheets if needed
@@ -162,6 +162,7 @@ async function generateChildSheet(workbook, config, childConfig, childKey, mode,
             }
 
             logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
+            logger.info(`Generated child query '${childConfig.sheetName}' '${query}'`);
         } catch (error) {
             logger.error(`Error executing child query for ${childConfig.sheetName}: ${query}`, error);
             logger.error('Query parameters:', params);
@@ -411,9 +412,8 @@ function buildMainQuery(config, filters) {
     if (filters && Object.keys(filters).length > 0) {
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
-                console.log("data query ", key, value);
-                /* conditions.push(`${key} = @${key}`);
-                params[key] = value; */
+                conditions.push(`${key} = @${key}`);
+                params[key] = value;
             }
         });
     }
