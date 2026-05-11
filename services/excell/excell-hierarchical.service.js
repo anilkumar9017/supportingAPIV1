@@ -107,15 +107,20 @@ async function generateMainSheet(workbook, config, filters, db, databaseName, us
 
     // Get main data
     const { query, params } = buildMainQuery(config, filters);
-    const mainData = await db.executeQuery(databaseName, query, params, useApi);
+    try {
+        const mainData = await db.executeQuery(databaseName, query, params, useApi);
+        // Add data rows
+        for (const row of mainData) {
+            const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
+            worksheet.addRow(dataRow);
+        }
 
-    // Add data rows
-    for (const row of mainData) {
-        const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
-        worksheet.addRow(dataRow);
+        logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
+    } catch (error) {
+        logger.error(`Error executing main query: ${query}`, error);
+        logger.error('Query parameters:', params);
+        throw new Error(`Database error in main data query: ${error.message}`);
     }
-
-    logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
 }
 
 /**
@@ -146,16 +151,22 @@ async function generateChildSheet(workbook, config, childConfig, childKey, filte
 
     // Get child data with parent relationship
     const { query, params } = buildChildQuery(config, childConfig, filters);
-    const childData = await db.executeQuery(databaseName, query, params, useApi);
+    try {
+        const childData = await db.executeQuery(databaseName, query, params, useApi);
 
-    // Add data rows
-    for (const row of childData) {
-        const dataRow = [row.parent_code]; // Parent identifier
-        dataRow.push(...childConfig.columns.map(col => formatCellValue(row[col.key], col)));
-        worksheet.addRow(dataRow);
+        // Add data rows
+        for (const row of childData) {
+            const dataRow = [row.parent_code]; // Parent identifier
+            dataRow.push(...childConfig.columns.map(col => formatCellValue(row[col.key], col)));
+            worksheet.addRow(dataRow);
+        }
+
+        logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
+    } catch (error) {
+        logger.error(`Error executing child query for ${childConfig.sheetName}: ${query}`, error);
+        logger.error('Query parameters:', params);
+        throw new Error(`Database error in child data query for ${childConfig.sheetName}: ${error.message}`);
     }
-
-    logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
 }
 
 /**
@@ -174,15 +185,20 @@ async function generateDropdownSheets(workbook, config, db, databaseName, useApi
         if (col.type === 'dropdown' && col.dropdown) {
             const cacheKey = `${col.dropdown.sheetName}_${col.dropdown.query}`;
             if (!dropdownCache.has(cacheKey)) {
-                const data = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
-                dropdownCache.set(cacheKey, data);
+                try {
+                    const data = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+                    dropdownCache.set(cacheKey, data);
 
-                const sheet = workbook.addWorksheet(col.dropdown.sheetName);
-                sheet.addRow([col.dropdown.labelField, col.dropdown.valueField]);
-                data.forEach(row => {
-                    sheet.addRow([row[col.dropdown.labelField], row[col.dropdown.valueField]]);
-                });
-                sheet.state = 'hidden';
+                    const sheet = workbook.addWorksheet(col.dropdown.sheetName);
+                    sheet.addRow([col.dropdown.labelField, col.dropdown.valueField]);
+                    data.forEach(row => {
+                        sheet.addRow([row[col.dropdown.labelField], row[col.dropdown.valueField]]);
+                    });
+                    sheet.state = 'hidden';
+                } catch (error) {
+                    logger.error(`Error executing dropdown query for ${col.dropdown.sheetName}: ${col.dropdown.query}`, error);
+                    throw new Error(`Database error in dropdown query for ${col.dropdown.sheetName}: ${error.message}`);
+                }
             }
         }
     }

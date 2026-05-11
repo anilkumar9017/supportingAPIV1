@@ -10,14 +10,14 @@ module.exports = {
       { header: 'Name', key: 'name', type: 'text', width: 30 },
       { header: 'Category', key: 'category', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Vehicle Categories',
-          query: 'select id, name from m_vehicle_group',
+          query: 'select id, name from m_vehicle_category',
           labelField: 'name',
           valueField: 'id'
         }
       },
       { header: 'Vehicle Status', key: 'vehicle_status', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Vehicle Status',
-          query: 'select id, name from m_vehicle_group',
+          query: 'select id, name from m_vehicle_status',
           labelField: 'name',
           valueField: 'id'
         }
@@ -34,14 +34,14 @@ module.exports = {
       { header: 'Serial No', key: 'serialno', type: 'text', width: 20 },
       { header: 'Owner', key: 'owner_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
           sheetName: 'Owners',
-          query: 'select id, code from m_vehicle_group',
-          labelField: 'code',
+          query: 'select id, name from m_owner',
+          labelField: 'name',
           valueField: 'id'
         }
       },
       { header: 'Manufacturer', key: 'manufacturer', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Manufacturers',
-          query: 'select id, name from m_vehicle_group',
+          query: 'select id, name from m_manufacturer',
           labelField: 'name',
           valueField: 'id'
         }
