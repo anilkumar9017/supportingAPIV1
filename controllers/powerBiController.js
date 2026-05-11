@@ -6,7 +6,9 @@ const poerBiService = require('../services/powerbi/powerbi.service')
 
 
 /* 
-    get powerBi details tenant, worksapace, secret, and others
+  * Token caching mechanism to avoid redundant Azure AD token requests and handle token refresh on expiration or authentication errors.
+  * Uses an in-memory Map to store tokens with their expiry times, keyed by tenant ID.
+  * The powerBIRequest function wraps API calls to automatically handle token retrieval and refresh logic.
 */
 const tokenCache = new Map();
 async function getAzureADToken(tenatObj) {
@@ -44,8 +46,8 @@ async function getAzureADToken(tenatObj) {
 }
 
 /* 
-  first check token exist not exist then generate new token
-*/
+  * First check if a valid token exists in the cache; if not, generate a new one.
+ */
 async function powerBIRequest(fn, tenantObj) {
   try {
     const token = await getAzureADToken(tenantObj);
@@ -98,6 +100,10 @@ async function powerBIRequest(fn, tenantObj) {
 } */
 
 
+/* 
+  * Generate an embed token for a Power BI report
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to generate the embed token.
+*/
 async function generateReportEmbedToken(req, res) {
     try {
         const useApi = req.useApi || false;
@@ -186,7 +192,8 @@ async function generateReportEmbedToken(req, res) {
 
 
   /* 
-    refresh embed report
+    * Refresh a Power BI dataset
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to trigger a dataset refresh.
   */
   async function refreshDataset(req, res){
     try {
@@ -233,7 +240,10 @@ async function generateReportEmbedToken(req, res) {
     }
   }
 
-  /* refresh Status */
+  /* 
+    * Check the status of the last dataset refresh
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to get the status of the most recent dataset refresh.
+  */
   async function refreshStatus(req, res) {
     try {
       const useApi = req.useApi || false;
@@ -276,9 +286,10 @@ async function generateReportEmbedToken(req, res) {
     }
   }
 
-  // ========================
-// Generate Dashboard Embed Token
-// ========================
+/* 
+    * Generate an embed token for a Power BI dashboard
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to generate the embed token.
+ */
   async function generateDashboardEmbedToken(req,res) {
     try {
         const useApi = req.useApi || false;
