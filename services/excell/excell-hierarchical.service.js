@@ -5,7 +5,8 @@
 
 const ExcelJS = require('exceljs');
 const configs = require('../../master-config/index');
-const { createLogger } = require('./excell-utils');
+const { createLogger, getColumnIndexMap, getSmartRowRange, applyDropdownValidation } = require('./excell-utils');
+const { getGlobalDropdownCache } = require('./excell-dropdown-cache');
 const { insertRecord, updateRecord } = require('./bulk.service');
 const logger = createLogger('HierarchicalExcelService');
 
@@ -23,7 +24,7 @@ function extractHierarchicalConfig(menuCode) {
         throw new Error(`Config for menu code '${menuCode}' not found`);
     }
 
-    const mainColumns = config.columns.filter(col => col.type !== 'child_array');
+    const mainColumns = config.columns.filter(col => col.type !== 'child_array' && !col.hideColumn);
     const childConfigs = {};
 
     config.columns
@@ -34,7 +35,7 @@ function extractHierarchicalConfig(menuCode) {
                 tableName: child.tableName,
                 parentKey: child.parentKey || 'parent_id',
                 foreignKey: child.foreignKey || 'id',
-                columns: child.columns || []
+                columns: (child.columns || []).filter(col => !col.hideColumn)
             };
         });
 
@@ -63,16 +64,16 @@ async function generateHierarchicalExcel(menuCode, mode = 'export', db, database
         workbook.creator = 'Supporting API';
         workbook.created = new Date();
 
+        // Prepare dropdown metadata for label mapping and validation
+        const dropdownMeta = await prepareDropdownMetadata(workbook, config, db, databaseName, useApi);
+
         // Generate main sheet
-        await generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters);
+        await generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters, dropdownMeta);
 
         // Generate child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            await generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters);
+            await generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters, dropdownMeta);
         }
-
-        // Generate dropdown sheets if needed
-        await generateDropdownSheets(workbook, config, db, databaseName, useApi);
 
         return workbook;
     } catch (error) {
@@ -84,7 +85,7 @@ async function generateHierarchicalExcel(menuCode, mode = 'export', db, database
 /**
  * Generate main sheet with parent records
  */
-async function generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters = {}) {
+async function generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters = {}, dropdownMeta = {}) {
     const worksheet = workbook.addWorksheet(config.sheetName);
 
     // Add headers
@@ -105,28 +106,61 @@ async function generateMainSheet(workbook, config, mode, db, databaseName, useAp
         worksheet.getColumn(index + 1).width = col.width || 15;
     });
 
-    // Get main data
-    const { query, params } = buildMainQuery(config, filters);
-    try {
-        const mainData = await db.executeQuery(databaseName, query, params, useApi);
-        // Add data rows
-        for (const row of mainData) {
-            const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
-            worksheet.addRow(dataRow);
-        }
+    let dataRowCount = 0;
+    const dropdownValueMaps = dropdownMeta.valueMaps || {};
 
-        logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
-    } catch (error) {
-        logger.error(`Error executing main query: ${query}`, error);
-        logger.error('Query parameters:', params);
-        throw new Error(`Database error in main data query: ${error.message}`);
+    if (mode === 'export') {
+        const { query, params } = buildMainQuery(config, filters);
+        try {
+            const mainData = await db.executeQuery(databaseName, query, params, useApi);
+
+            // Add data rows
+            for (const row of mainData) {
+                const dataRow = config.columns.map(col => {
+                    let value = row[col.key];
+                    if (col.type === 'dropdown' && value !== null && value !== undefined) {
+                        const map = dropdownValueMaps[col.key] || {};
+                        value = map[String(value)] ?? value;
+                    }
+                    return formatCellValue(value, col);
+                });
+                worksheet.addRow(dataRow);
+            }
+
+            dataRowCount = mainData.length;
+            logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
+        } catch (error) {
+            logger.error(`Error executing main query: ${query}`, error);
+            logger.error('Query parameters:', params);
+            throw new Error(`Database error in main data query: ${error.message}`);
+        }
     }
+
+    const maxRowsForValidation = getSmartRowRange(dataRowCount);
+    const columnIndexMap = getColumnIndexMap(config.columns);
+
+    config.columns.forEach(col => {
+        if (col.type === 'dropdown' && col.dropdown) {
+            const sheetInfo = dropdownMeta.sheetInfo?.[col.key];
+            if (sheetInfo) {
+                const columnIndex = columnIndexMap.get(col.key);
+                applyDropdownValidation(
+                    worksheet,
+                    columnIndex,
+                    2,
+                    maxRowsForValidation,
+                    sheetInfo.sheetName,
+                    sheetInfo.totalRows
+                );
+            }
+        }
+    });
 }
 
 /**
  * Generate child sheet for a specific child relationship
  */
-async function generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters = {}) {
+async function generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters = {}, dropdownMeta = {}) {
     const worksheet = workbook.addWorksheet(childConfig.sheetName);
 
     // Add parent identifier column
@@ -149,6 +183,9 @@ async function generateChildSheet(workbook, config, childConfig, childKey, mode,
         worksheet.getColumn(index + 2).width = col.width || 15;
     });
 
+    let dataRowCount = 0;
+    const dropdownValueMaps = dropdownMeta.valueMaps || {};
+
     if (mode === 'export') {
         const { query, params } = buildChildQuery(config, childConfig, filters);
         try {
@@ -157,10 +194,18 @@ async function generateChildSheet(workbook, config, childConfig, childKey, mode,
             // Add data rows
             for (const row of childData) {
                 const dataRow = [row.parent_code]; // Parent identifier
-                dataRow.push(...childConfig.columns.map(col => formatCellValue(row[col.key], col)));
+                dataRow.push(...childConfig.columns.map(col => {
+                    let value = row[col.key];
+                    if (col.type === 'dropdown' && value !== null && value !== undefined) {
+                        const map = dropdownValueMaps[col.key] || {};
+                        value = map[String(value)] ?? value;
+                    }
+                    return formatCellValue(value, col);
+                }));
                 worksheet.addRow(dataRow);
             }
 
+            dataRowCount = childData.length;
             logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
             logger.info(`Generated child query '${childConfig.sheetName}' '${query}'`);
         } catch (error) {
@@ -171,41 +216,99 @@ async function generateChildSheet(workbook, config, childConfig, childKey, mode,
     } else {
         logger.info(`Generated template/dummy child sheet '${childConfig.sheetName}' with headers only (mode=${mode})`);
     }
+
+    const maxRowsForValidation = getSmartRowRange(dataRowCount);
+    childConfig.columns.forEach((col, index) => {
+        if (col.type === 'dropdown' && col.dropdown) {
+            const sheetInfo = dropdownMeta.sheetInfo?.[col.key];
+            if (sheetInfo) {
+                applyDropdownValidation(
+                    worksheet,
+                    index + 2,
+                    2,
+                    maxRowsForValidation,
+                    sheetInfo.sheetName,
+                    sheetInfo.totalRows
+                );
+            }
+        }
+    });
 }
 
 /**
- * Generate dropdown sheets for validation
+ * Prepare dropdown metadata for label mapping and validation
  */
-async function generateDropdownSheets(workbook, config, db, databaseName, useApi) {
-    const dropdownCache = new Map();
+async function prepareDropdownMetadata(workbook, config, db, databaseName, useApi) {
+    const cache = getGlobalDropdownCache();
+    const dropdownValueMaps = {};
+    const dropdownSheetInfo = {};
+    const usedSheetNames = new Set();
+    const createdSheets = new Map();
 
-    // Collect all dropdown queries from main and child configs
     const allColumns = [...config.columns];
     Object.values(config.children).forEach(child => {
         allColumns.push(...child.columns);
     });
 
     for (const col of allColumns) {
-        if (col.type === 'dropdown' && col.dropdown) {
-            const cacheKey = `${col.dropdown.sheetName}_${col.dropdown.query}`;
-            if (!dropdownCache.has(cacheKey)) {
-                try {
-                    const data = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
-                    dropdownCache.set(cacheKey, data);
+        if (col.type !== 'dropdown' || !col.dropdown) continue;
 
-                    const sheet = workbook.addWorksheet(col.dropdown.sheetName);
-                    sheet.addRow([col.dropdown.labelField, col.dropdown.valueField]);
-                    data.forEach(row => {
-                        sheet.addRow([row[col.dropdown.labelField], row[col.dropdown.valueField]]);
-                    });
-                    sheet.state = 'hidden';
-                } catch (error) {
-                    logger.error(`Error executing dropdown query for ${col.dropdown.sheetName}: ${col.dropdown.query}`, error);
-                    throw new Error(`Database error in dropdown query for ${col.dropdown.sheetName}: ${error.message}`);
-                }
-            }
+        const cacheKey = `${databaseName}:${col.dropdown.query}:${col.dropdown.labelField}:${col.dropdown.valueField}`;
+        let dropdownResult = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
+
+        if (!dropdownResult) {
+            dropdownResult = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+            cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, dropdownResult);
         }
+
+        const valueMap = {};
+        dropdownResult.forEach(item => {
+            valueMap[String(item[col.dropdown.valueField])] = item[col.dropdown.labelField];
+        });
+
+        dropdownValueMaps[col.key] = valueMap;
+
+        const sheetKey = `${col.dropdown.sheetName}:${col.dropdown.query}:${col.dropdown.labelField}:${col.dropdown.valueField}`;
+        let hiddenSheetName = createdSheets.get(sheetKey);
+
+        if (!hiddenSheetName) {
+            hiddenSheetName = col.dropdown.sheetName;
+            if (usedSheetNames.has(hiddenSheetName)) {
+                let suffix = 2;
+                while (usedSheetNames.has(`${hiddenSheetName}_${suffix}`)) {
+                    suffix += 1;
+                }
+                hiddenSheetName = `${hiddenSheetName}_${suffix}`;
+            }
+
+            const hiddenSheet = workbook.addWorksheet(hiddenSheetName);
+            hiddenSheet.state = 'hidden';
+            hiddenSheet.columns = [
+                {
+                    header: col.dropdown.labelField,
+                    key: 'value',
+                    width: 30
+                }
+            ];
+
+            dropdownResult.forEach(item => {
+                hiddenSheet.addRow({ value: item[col.dropdown.labelField] });
+            });
+
+            usedSheetNames.add(hiddenSheetName);
+            createdSheets.set(sheetKey, hiddenSheetName);
+        }
+
+        dropdownSheetInfo[col.key] = {
+            sheetName: hiddenSheetName,
+            totalRows: dropdownResult.length + 1
+        };
     }
+
+    return {
+        valueMaps: dropdownValueMaps,
+        sheetInfo: dropdownSheetInfo
+    };
 }
 
 /**
@@ -221,17 +324,19 @@ async function importHierarchicalExcel(menuCode, filePath, db, databaseName, use
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(filePath);
 
+        const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
+
         const results = {
             main: { inserted: 0, updated: 0, errors: [] },
             children: {}
         };
 
         // Import main sheet
-        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj);
+        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings);
 
         // Import child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj);
+            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings);
         }
 
         return results;
@@ -244,7 +349,7 @@ async function importHierarchicalExcel(menuCode, filePath, db, databaseName, use
 /**
  * Import main sheet data
  */
-async function importMainSheet(workbook, config, db, databaseName, useApi, userObj) {
+async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}) {
     const worksheet = workbook.getWorksheet(config.sheetName);
     if (!worksheet) {
         throw new Error(`Main sheet '${config.sheetName}' not found in Excel file`);
@@ -261,7 +366,11 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
             try {
                 const record = {};
                 config.columns.forEach((col, colIndex) => {
-                    record[col.key] = parseCellValue(row.getCell(colIndex + 1).value, col);
+                    let cellValue = row.getCell(colIndex + 1).value;
+                    if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
+                        cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
+                    }
+                    record[col.key] = parseCellValue(cellValue, col);
                 });
 
                 // Check if record exists
@@ -312,7 +421,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
 /**
  * Import child sheet data
  */
-async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj) {
+async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}) {
     const worksheet = workbook.getWorksheet(childConfig.sheetName);
     if (!worksheet) {
         logger.warn(`Child sheet '${childConfig.sheetName}' not found, skipping`);
@@ -341,7 +450,11 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
 
                 // Parse child columns
                 childConfig.columns.forEach((col, colIndex) => {
-                    record[col.key] = parseCellValue(row.getCell(colIndex + 2).value, col);
+                    let cellValue = row.getCell(colIndex + 2).value;
+                    if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
+                        cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
+                    }
+                    record[col.key] = parseCellValue(cellValue, col);
                 });
 
                 // Check if child record exists (using parent_id + unique field)
@@ -454,6 +567,61 @@ function buildChildQuery(config, childConfig, filters) {
     }
 
     return { query, params };
+}
+
+/**
+ * Prepare dropdown mappings for hierarchical import
+ */
+async function prepareImportDropdownMappings(config, db, databaseName, useApi) {
+    const cache = getGlobalDropdownCache();
+    const dropdownMappings = {};
+
+    const allColumns = [...config.columns];
+    Object.values(config.children).forEach(child => {
+        allColumns.push(...child.columns);
+    });
+
+    for (const col of allColumns) {
+        if (col.type !== 'dropdown' || !col.dropdown) continue;
+
+        let result = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
+        if (!result) {
+            result = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+            cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, result);
+        }
+
+        const map = {};
+        result.forEach(item => {
+            map[String(item[col.dropdown.labelField])] = item[col.dropdown.valueField];
+        });
+
+        dropdownMappings[col.key] = map;
+    }
+
+    return dropdownMappings;
+}
+
+/**
+ * Map import dropdown label to stored value
+ */
+function mapImportDropdownValue(value, col, dropdownMappings, rowNumber) {
+    if (value === null || value === undefined || value === '') {
+        return value;
+    }
+
+    const map = dropdownMappings[col.key] || {};
+    const stringValue = String(value).trim();
+
+    if (Object.prototype.hasOwnProperty.call(map, stringValue)) {
+        return map[stringValue];
+    }
+
+    const numericValue = Number(stringValue);
+    if (!Number.isNaN(numericValue) && String(numericValue) === stringValue) {
+        return numericValue;
+    }
+
+    throw new Error(`Invalid dropdown value '${value}' for ${col.header} on row ${rowNumber}`);
 }
 
 /**
