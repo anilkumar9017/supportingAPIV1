@@ -3,8 +3,10 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 
 // Export controllers
-const exportDummyController = require('../controllers/exportDummyController');
-const controller = require('../controllers/excellController');
+const excellController = require('../controllers/excellController');
+
+//upload file
+const upload = require('../middleware/upload');
 
 // Import middleware
 const domainMiddleware = require('../middleware/domainMiddleware');
@@ -27,11 +29,11 @@ router.use((req, res, next) => {
  */
 router.use(domainMiddleware);
 
-//projects
-router.get('/export-dummy-projects', exportDummyController.exportDummyExcell);
+//export template, dummy, export
+router.post('/export', excellController.exportExcel);
 
-//
-router.post('/export', controller.exportExcel);
+//import excell
+router.post('/import', upload.single('file'), excellController.importExcel);
 
 
 

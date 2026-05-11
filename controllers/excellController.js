@@ -35,6 +35,51 @@ async function exportExcel(req, res) {
     }
 }
 
+/* 
+    
+*/
+async function importExcel(req, res) {
+    try {
+        const { menuCode } = req.body;
+        const useApi = req.useApi || false;
+        const userObj = req?.user;
+        const databaseName = req.databaseName;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Excel file is required.'
+            });
+        }
+
+        const result = await excelService.importExcel({menuCode, file, db, databaseName: databaseName, useApi: useApi, userObj});
+        if(result?.errors){
+            return res.status(200).json({
+                success: false,
+                message: 'Import completed.',
+                errors: result?.errors
+            });
+        }
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Import completed.',
+            data: result,
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 module.exports = {
-    exportExcel
+    exportExcel,
+    importExcel
 };

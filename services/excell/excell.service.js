@@ -2,8 +2,17 @@
 const ExcelJs = require('exceljs');
 const configs = require('../../master-config/index');
 
+const {validateDate, validateRequired, validateCheckbox, validateDuplicateExcel, mappedDropdown} = require('../excell/validation.service');
+const {insertRecord,updateRecord} = require('../excell/bulk.service');
+const mssql = require('mssql');
+
 const db = require('../../config/database');
 const axios = require('axios');
+const moment = require('moment');
+
+
+
+
 
 async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
 
@@ -139,7 +148,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
 
             dropdownResult.forEach(item => {
                 hiddenSheet.addRow({
-                    value: item[col.dropdown.valueField]
+                    value: item[col.dropdown.labelField]
                 });
             });
 
@@ -262,6 +271,204 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
     return workbook;
 }
 
+/* 
+
+*/
+async function importExcel({menuCode, file, db, databaseName, useApi, userObj}) {
+  /* CONFIG */
+  const config = configs[menuCode];
+
+  if (!config) {
+    throw new Error("Invalid menu code.");
+  }
+
+  /*
+    LOAD WORKBOOK
+  */
+  const workbook = new ExcelJs.Workbook();
+  await workbook.xlsx.load(file.buffer);
+  const worksheet = workbook.getWorksheet(config.sheetName);
+  if (!worksheet) {
+    throw new Error(`Sheet '${config.sheetName}' not found.`);
+  }
+
+  /* VARIABLES */
+  const rows = [];
+  const errors = [];
+  const duplicateSet = new Set();
+  const dropdownMappings = {};
+
+    //get dropdown mappings
+    for (const col of config.columns) {
+        if (col.type === 'dropdown') {
+            const result = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+            dropdownMappings[col.key] = {};
+            result.forEach(item => {
+                const id = item[col.dropdown.valueField];
+                const label = item[col.dropdown.labelField];
+                dropdownMappings[col.key][label] = id;
+            });
+        }
+    }
+
+
+  /*  READ EXCEL ROWS */
+  worksheet.eachRow((row, rowNumber) => {
+    /* SKIP HEADER */
+    if (rowNumber === 1) {
+      return;
+    }
+
+    const rowData = {};
+    let hasValue = false;
+    
+    /*
+       READ COLUMNS
+    */
+    config.columns.forEach((col, index) => {
+      const cell = row.getCell(index + 1);
+      let value = cell.value;
+      /* DATE VALIDATION */
+      value = validateDate({value, col, rowNumber, errors});
+
+      /* DROPDOWN VALIDATION (IMPORTANT) */
+      if (col.type === 'dropdown' && value) {
+        value = mappedDropdown({value, col, rowNumber, errors}, dropdownMappings);
+      }
+
+      /* REQUIRED VALIDATION */
+      validateRequired({value, col, rowNumber, errors});
+
+      /* CHECKBOX VALIDATION */
+      validateCheckbox({value, col, rowNumber, errors});
+
+      /* UNDEFINED → NULL */
+      if (value === undefined) {
+        value = null;
+      }
+
+      rowData[col.key] = value;
+
+      /* CHECK EMPTY ROW */
+      if (value !== null && value !== "") {
+        hasValue = true;
+      }
+    });
+
+    /* DUPLICATE VALIDATION */
+    if (config.uniqueKey && rowData[config.uniqueKey]) {
+      validateDuplicateExcel({
+        duplicateSet,
+        value: rowData[config.uniqueKey],
+        rowNumber,
+        errors,
+      });
+    }
+
+    /* SKIP EMPTY ROWS */
+    if (hasValue) {
+      rows.push(rowData);
+    }
+  });
+
+  /* VALIDATION ERRORS */
+  if (errors.length > 0) {
+    return {
+      success: false,
+      errors,
+    };
+  }
+
+  /* FETCH EXISTING RECORDS*/
+  const uniqueValues = rows.map((r) => r[config.uniqueKey]);
+  let existingMap = new Map();
+  if (uniqueValues.length > 0) {
+    const inClause = uniqueValues.map((_, i) => `@p${i}`).join(",");
+    const query = `
+            SELECT
+                ${config.primaryKey || "id"},
+                ${config.uniqueKey}
+            FROM ${config.tableName}
+            WHERE ${config.uniqueKey}
+            IN (${inClause})
+        `;
+
+    const params = {};
+    uniqueValues.forEach((val, i) => {
+      params[`p${i}`] = val;
+    });
+    const existingRows = await db.executeQuery(databaseName, query, params, useApi);
+    existingMap = new Map(
+      existingRows.map((item) => [item[config.uniqueKey], item])
+    );
+  }
+
+  /*
+    =====================================================
+    START TRANSACTION
+    =====================================================
+  */
+  const pool = await db.getConnection(databaseName, useApi);
+  const transaction = new mssql.Transaction(pool);
+  await transaction.begin();
+
+  /*
+    =====================================================
+    INSERT / UPDATE
+    =====================================================
+  */
+  let createdCount = 0;
+  let updatedCount = 0;
+  try {
+    for (const row of rows) {
+      const uniqueValue = row[config.uniqueKey];
+      const existing = existingMap.get(uniqueValue);
+
+      /* UPDATE */
+      if (existing) {
+        row.updatedate = new Date();
+        row.updatedby = Number(userObj?.userid) || 0;
+        delete row.createdate;
+        delete row.createdby;
+
+        await updateRecord({transaction, db, databaseName, tableName: config.tableName, row, id: existing[config.primaryKey || "id"],});
+
+        updatedCount++;
+      } else {
+        /* INSERT */
+        row.createdate = new Date();
+        row.createdby = Number(userObj?.userid) || 0;
+        row.updatedate = null;
+        row.updatedby = null;
+
+        await insertRecord({ transaction, db, databaseName, tableName: config.tableName, row, useApi,});
+
+        createdCount++;
+      }
+    }
+
+    /*COMMIT*/
+    await transaction.commit();
+  } catch (error) {
+    /* ROLLBACK */
+    await transaction.rollback();
+    console.log("error ", error);
+    return {
+        success: false,
+        error: error,
+    }
+  }
+
+  return {
+    success: true,
+    totalRows: rows.length,
+    created: createdCount,
+    updated: updatedCount,
+    failed: errors.length,
+  };
+}
+
 module.exports = {
-    generateExcel
+    generateExcel,
+    importExcel
 };

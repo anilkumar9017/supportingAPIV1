@@ -10,6 +10,9 @@ const shipmentController = require('../controllers/shipmentController');
 const syncController = require('../controllers/syncController');
 const powerBiController = require('../controllers/powerBiController');
 
+//
+const upload = require('../middleware/upload');
+
 // Import middleware
 const domainMiddleware = require('../middleware/domainMiddleware');
 

@@ -208,6 +208,101 @@ async function executeQuery(dbName, query, params = {}, useApi = false) {
   }
 }
 
+
+/* 
+  here we will apply transection
+
+*/
+async function executeTransactionQuery(dbType='mssql', transaction, query, params = {}) {
+    try {
+        switch(dbType) {
+          case 'mssql':
+          case 'sqlserver':
+            const request = new mssql.Request(transaction);
+            //ADD PARAMETERS
+            Object.keys(params).forEach(key => {
+                request.input(
+                    key,
+                    params[key]
+                );
+            });
+            const result = await request.query(query);
+            return result.recordset;
+          default:
+            throw new Error(`Unsupported database type: ${dbType}`);
+        }
+    }
+    catch (error) {
+        console.error('Transaction query error:', error);
+        throw error;
+    }
+}
+
+/* 
+  * generate query based on database type
+  * @param {string} dbType - Database Type
+  * @param {string} tableName - Table name 
+  * @param {Object} row - row it holds object with value
+  * 
+*/
+function buildInsertQuery(dbType, tableName, row) {
+
+  const columns = Object.keys(row);
+
+  const columnNames = columns.join(',');
+
+  let query = '';
+
+  switch (dbType) {
+      case 'mssql':
+      case 'sqlserver':
+
+          query = `
+              INSERT INTO ${tableName}
+              (${columnNames})
+              VALUES (
+                  ${columns.map(
+                      col => `@${col}`
+                  ).join(',')}
+              )
+          `;
+
+          break;
+
+      case 'mysql':
+      case 'mariadb':
+
+          query = `
+              INSERT INTO ${tableName}
+              (${columnNames})
+              VALUES (
+                  ${columns.map(
+                      () => '?'
+                  ).join(',')}
+              )
+          `;
+
+          break;
+
+      case 'postgres':
+      case 'postgresql':
+
+          query = `
+              INSERT INTO ${tableName}
+              (${columnNames})
+              VALUES (
+                  ${columns.map(
+                      (_, i) => `$${i + 1}`
+                  ).join(',')}
+              )
+          `;
+
+          break;
+  }
+
+  return query;
+}
+
 /**
  * Close all connection pools
  */
@@ -232,6 +327,8 @@ module.exports = {
   getConnection,
   executeQuery,
   getDatabaseConfig,
-  closeAllConnections
+  closeAllConnections,
+  buildInsertQuery,
+  executeTransactionQuery
 };
 

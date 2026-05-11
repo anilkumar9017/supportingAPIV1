@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 const publicRoutes = require('./routes/public');
 const authenticatedRoutes = require('./routes/authenticated');
 const emailRoutes = require('./routes/email');
-const importExportRoutes = require('./routes/importExportExcell.routes')
+const excelRoutes = require('./routes/excel.routes')
 
 // Public routes (no authentication required)
 app.use('/api/public', publicRoutes);
@@ -33,7 +33,7 @@ app.use('/api/auth', authenticatedRoutes);
 app.use('/api/email', emailRoutes);
 
 //import export excell routes
-app.use('/api/ie', importExportRoutes);
+app.use('/api/ie', excelRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
