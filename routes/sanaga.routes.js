@@ -40,12 +40,34 @@ router.get('/health', (req, res) => {
  * Sanga Agreement Routes
  */
 
+/* check saga gomain */
+function domainVerify(req, res, next) {
+  const domain = req.headers['x-domain'] || req.headers.domain;
+
+  if (!domain) {
+    return res.status(400).json({
+      success: false,
+      message: 'X-Domain header is required'
+    });
+  }
+
+  if (domain.toLowerCase() !== 'saga') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied: invalid domain'
+    });
+  }
+
+  // domain is valid, proceed to next middleware / route handler
+  next();
+}
+
 /**
  * Sanga powerbi Routes
  */
-router.post('/bi-reports-out', powerBiController.generateReportToken);
-router.post('/bi-refresh-out', powerBiController.refreshDatasetCustom);
-router.post('/refresh-status-out', powerBiController.refreshStatusCustom);
+router.post('/bi-reports-out', domainVerify, powerBiController.generateReportToken);
+router.post('/bi-refresh-out', domainVerify, powerBiController.refreshDatasetCustom);
+router.post('/refresh-status-out', domainVerify, powerBiController.refreshStatusCustom);
 
 
 module.exports = router;
