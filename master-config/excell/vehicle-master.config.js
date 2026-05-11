@@ -10,7 +10,7 @@ module.exports = {
       { header: 'Name', key: 'name', type: 'text', width: 30 },
       { header: 'Category', key: 'category', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Vehicle Categories',
-          query: 'select id, name from m_vehicle_category',
+          query: 'select id, name from m_vehicle_type',
           labelField: 'name',
           valueField: 'id'
         }
@@ -34,14 +34,14 @@ module.exports = {
       { header: 'Serial No', key: 'serialno', type: 'text', width: 20 },
       { header: 'Owner', key: 'owner_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
           sheetName: 'Owners',
-          query: 'select id, name from m_owner',
-          labelField: 'name',
+          query: "select id, card_code from m_customer where card_type = 'S'",
+          labelField: 'card_code',
           valueField: 'id'
         }
       },
       { header: 'Manufacturer', key: 'manufacturer', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Manufacturers',
-          query: 'select id, name from m_manufacturer',
+          query: 'select id, name from m_manufacture',
           labelField: 'name',
           valueField: 'id'
         }
@@ -133,8 +133,8 @@ module.exports = {
           { header: 'Valid Upto', key: 'valid_upto', type: 'date', width: 15 },
           { header: 'Currency', key: 'currency', type: 'dropdown', dataType: 'number', width: 10, dropdown: {
               sheetName: 'Currencies',
-              query: 'select id, code from m_currency',
-              labelField: 'code',
+              query: 'select id, cur_code from m_currencies',
+              labelField: 'cur_code',
               valueField: 'id'
             }
           },
@@ -163,19 +163,26 @@ module.exports = {
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
           { header: 'Effective From', key: 'effective_from', type: 'date', width: 15 },
           { header: 'Valid Upto', key: 'valid_upto', type: 'date', width: 15 },
-          { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+          { header: 'Service Type', key: 'servicetype', type: 'number', width: 15},
+          /* { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
               sheetName: 'Service Types',
-              query: 'select id, name from m_service_type',
+              query: 'select id, name from m_routine_service_type',
               labelField: 'name',
               valueField: 'id'
             }
-          },
+          }, */
           { header: 'Odometer', key: 'odometer', type: 'number', width: 15 },
           { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 20 },
           { header: 'Next Odometer', key: 'next_odometer', type: 'number', width: 15 },
           { header: 'Next Service Date', key: 'next_servicedate', type: 'date', width: 18 },
           { header: 'Jobcard Line ID', key: 'jobcard_lineid', type: 'number', width: 15 },
-          { header: 'Service Interval', key: 'service_interval', type: 'text', width: 15 },
+          { header: 'Service Interval', key: 'service_interval', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
+            sheetName: 'Service Interval',
+            query: 'select id, name from m_routine_service_type',
+            labelField: 'name',
+            valueField: 'id'
+          }
+        },
           { header: 'UOM', key: 'uom', type: 'text', width: 10 },
           { header: 'KM', key: 'km', type: 'number', width: 10 }
         ]
@@ -238,13 +245,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Attachments',
         columns: [
-          { header: 'Attachment Type', key: 'attachment_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
-              sheetName: 'Attachment Types',
-              query: 'select id, name from m_attachment_type',
-              labelField: 'name',
-              valueField: 'id'
-            }
-          },
+          { header: 'Attachment Type', key: 'attachment_type', type: 'number', width: 15 },
           { header: 'File Name', key: 'file_name', type: 'text', width: 30 },
           { header: 'File Path', key: 'file_path', type: 'text', width: 40 },
           { header: 'File Size', key: 'file_size', type: 'number', width: 15 },
@@ -261,16 +262,15 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Compartments',
         columns: [
-          { header: 'Compartment Number', key: 'compartment_num', type: 'number', width: 15 },
+          /* { header: 'Compartment Number', key: 'compartment_num', type: 'dropdwon', dataType: 'number', width: 15,  dropdown: {
+            sheetName: 'Product Types',
+            query: 'select id, name from m_product_type',
+            labelField: 'name',
+            valueField: 'id'
+          } }, */
           { header: 'Capacity', key: 'capacity', type: 'number', width: 15 },
           { header: 'UOM', key: 'uom', type: 'text', width: 10 },
-          { header: 'Product Type', key: 'product_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
-              sheetName: 'Product Types',
-              query: 'select id, name from m_product_type',
-              labelField: 'name',
-              valueField: 'id'
-            }
-          },
+          { header: 'Product Type', key: 'product_type', type: 'number', width: 20},
           { header: 'Is Active', key: 'is_active', type: 'checkbox', values: ['Y', 'N'], width: 10 },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
         ]

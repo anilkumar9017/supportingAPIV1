@@ -68,7 +68,7 @@ async function generateHierarchicalExcel(menuCode, mode = 'export', db, database
 
         // Generate child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            await generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters);
+            await generateChildSheet(workbook, config, childConfig, childKey, filters, db, databaseName, useApi);
         }
 
         // Generate dropdown sheets if needed
@@ -105,24 +105,21 @@ async function generateMainSheet(workbook, config, mode, db, databaseName, useAp
         worksheet.getColumn(index + 1).width = col.width || 15;
     });
 
-    if (mode === 'export') {
-        const { query, params } = buildMainQuery(config, filters);
-        try {
-            const mainData = await db.executeQuery(databaseName, query, params, useApi);
-            // Add data rows
-            for (const row of mainData) {
-                const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
-                worksheet.addRow(dataRow);
-            }
-
-            logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
-        } catch (error) {
-            logger.error(`Error executing main query: ${query}`, error);
-            logger.error('Query parameters:', params);
-            throw new Error(`Database error in main data query: ${error.message}`);
+    // Get main data
+    const { query, params } = buildMainQuery(config, filters);
+    try {
+        const mainData = await db.executeQuery(databaseName, query, params, useApi);
+        // Add data rows
+        for (const row of mainData) {
+            const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
+            worksheet.addRow(dataRow);
         }
-    } else {
-        logger.info(`Generated template/dummy main sheet '${config.sheetName}' with headers only (mode=${mode})`);
+
+        logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
+    } catch (error) {
+        logger.error(`Error executing main query: ${query}`, error);
+        logger.error('Query parameters:', params);
+        throw new Error(`Database error in main data query: ${error.message}`);
     }
 }
 
@@ -404,7 +401,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
  * Build query for main data
  */
 function buildMainQuery(config, filters) {
-    let query = `SELECT ${config.columns.map(col => col.key).join(', ')} FROM ${config.tableName}`;
+    //let query = `SELECT ${config?.column.map((col)=> col.key).join(',')} FROM ${config.tableName}`;
+    let query = `SELECT * FROM ${config.tableName}`;
+    
     const conditions = [];
     const params = {};
 
@@ -412,8 +411,9 @@ function buildMainQuery(config, filters) {
     if (filters && Object.keys(filters).length > 0) {
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
-                conditions.push(`${key} = @${key}`);
-                params[key] = value;
+                console.log("data query ", key, value);
+                /* conditions.push(`${key} = @${key}`);
+                params[key] = value; */
             }
         });
     }
