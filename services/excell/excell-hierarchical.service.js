@@ -52,7 +52,7 @@ function extractHierarchicalConfig(menuCode) {
 /**
  * Generate hierarchical Excel file with main sheet and child sheets
  */
-async function generateHierarchicalExcel(menuCode, filters = {}, db, databaseName, useApi) {
+async function generateHierarchicalExcel(menuCode, mode = 'export', db, databaseName, useApi, filters = {}) {
     try {
         const config = extractHierarchicalConfig(menuCode);
         if (!config) {
@@ -64,11 +64,11 @@ async function generateHierarchicalExcel(menuCode, filters = {}, db, databaseNam
         workbook.created = new Date();
 
         // Generate main sheet
-        await generateMainSheet(workbook, config, filters, db, databaseName, useApi);
+        await generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters);
 
         // Generate child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            await generateChildSheet(workbook, config, childConfig, childKey, filters, db, databaseName, useApi);
+            await generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters);
         }
 
         // Generate dropdown sheets if needed
@@ -84,7 +84,7 @@ async function generateHierarchicalExcel(menuCode, filters = {}, db, databaseNam
 /**
  * Generate main sheet with parent records
  */
-async function generateMainSheet(workbook, config, filters, db, databaseName, useApi) {
+async function generateMainSheet(workbook, config, mode, db, databaseName, useApi, filters = {}) {
     const worksheet = workbook.addWorksheet(config.sheetName);
 
     // Add headers
@@ -105,28 +105,31 @@ async function generateMainSheet(workbook, config, filters, db, databaseName, us
         worksheet.getColumn(index + 1).width = col.width || 15;
     });
 
-    // Get main data
-    const { query, params } = buildMainQuery(config, filters);
-    try {
-        const mainData = await db.executeQuery(databaseName, query, params, useApi);
-        // Add data rows
-        for (const row of mainData) {
-            const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
-            worksheet.addRow(dataRow);
-        }
+    if (mode === 'export') {
+        const { query, params } = buildMainQuery(config, filters);
+        try {
+            const mainData = await db.executeQuery(databaseName, query, params, useApi);
+            // Add data rows
+            for (const row of mainData) {
+                const dataRow = config.columns.map(col => formatCellValue(row[col.key], col));
+                worksheet.addRow(dataRow);
+            }
 
-        logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
-    } catch (error) {
-        logger.error(`Error executing main query: ${query}`, error);
-        logger.error('Query parameters:', params);
-        throw new Error(`Database error in main data query: ${error.message}`);
+            logger.info(`Generated main sheet '${config.sheetName}' with ${mainData.length} rows`);
+        } catch (error) {
+            logger.error(`Error executing main query: ${query}`, error);
+            logger.error('Query parameters:', params);
+            throw new Error(`Database error in main data query: ${error.message}`);
+        }
+    } else {
+        logger.info(`Generated template/dummy main sheet '${config.sheetName}' with headers only (mode=${mode})`);
     }
 }
 
 /**
  * Generate child sheet for a specific child relationship
  */
-async function generateChildSheet(workbook, config, childConfig, childKey, filters, db, databaseName, useApi) {
+async function generateChildSheet(workbook, config, childConfig, childKey, mode, db, databaseName, useApi, filters = {}) {
     const worksheet = workbook.addWorksheet(childConfig.sheetName);
 
     // Add parent identifier column
@@ -149,23 +152,26 @@ async function generateChildSheet(workbook, config, childConfig, childKey, filte
         worksheet.getColumn(index + 2).width = col.width || 15;
     });
 
-    // Get child data with parent relationship
-    const { query, params } = buildChildQuery(config, childConfig, filters);
-    try {
-        const childData = await db.executeQuery(databaseName, query, params, useApi);
+    if (mode === 'export') {
+        const { query, params } = buildChildQuery(config, childConfig, filters);
+        try {
+            const childData = await db.executeQuery(databaseName, query, params, useApi);
 
-        // Add data rows
-        for (const row of childData) {
-            const dataRow = [row.parent_code]; // Parent identifier
-            dataRow.push(...childConfig.columns.map(col => formatCellValue(row[col.key], col)));
-            worksheet.addRow(dataRow);
+            // Add data rows
+            for (const row of childData) {
+                const dataRow = [row.parent_code]; // Parent identifier
+                dataRow.push(...childConfig.columns.map(col => formatCellValue(row[col.key], col)));
+                worksheet.addRow(dataRow);
+            }
+
+            logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
+        } catch (error) {
+            logger.error(`Error executing child query for ${childConfig.sheetName}: ${query}`, error);
+            logger.error('Query parameters:', params);
+            throw new Error(`Database error in child data query for ${childConfig.sheetName}: ${error.message}`);
         }
-
-        logger.info(`Generated child sheet '${childConfig.sheetName}' with ${childData.length} rows`);
-    } catch (error) {
-        logger.error(`Error executing child query for ${childConfig.sheetName}: ${query}`, error);
-        logger.error('Query parameters:', params);
-        throw new Error(`Database error in child data query for ${childConfig.sheetName}: ${error.message}`);
+    } else {
+        logger.info(`Generated template/dummy child sheet '${childConfig.sheetName}' with headers only (mode=${mode})`);
     }
 }
 

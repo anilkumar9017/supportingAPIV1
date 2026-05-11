@@ -83,10 +83,10 @@ async function importExcel(req, res) {
 
 async function exportHierarchicalExcel(req, res) {
     try {
-        const { menuCode, mode } = req.body;
+        const { menuCode, mode, filters} = req.body;
         const useApi = req.useApi || false;
         const databaseName = req.databaseName;
-        const workbook = await generateHierarchicalExcel.generateHierarchicalExcel(menuCode, mode, db, databaseName, useApi);
+        const workbook = await generateHierarchicalExcel.generateHierarchicalExcel(menuCode, mode, db, databaseName, useApi, filters);
         
         res.setHeader(
             'Content-Type',
