@@ -68,61 +68,108 @@ const getSmartRowRange = (dataRowCount, minRows = 100, bufferRows = 50) => {
  * Apply data validation to a range of cells
  */
 const applyDataValidation = (worksheet, columnIndex, startRow, endRow, validationType, config) => {
-    const columnLetter = getColumnLetter(columnIndex);
-    const cellRange = `${columnLetter}${startRow}:${columnLetter}${endRow}`;
-    
-    worksheet.dataValidations.add({
-        sqref: cellRange,
-        ...config
-    });
+    try {
+        // Validate inputs
+        if (!worksheet || !worksheet.dataValidations || startRow > endRow) {
+            return;
+        }
+
+        const columnLetter = getColumnLetter(columnIndex);
+        const cellRange = `${columnLetter}${startRow}:${columnLetter}${endRow}`;
+        
+        // Build complete validation config with required ExcelJS properties
+        const validationObj = {
+            type: config.type,
+            allowBlank: config.allowBlank !== false,
+            showErrorMessage: true,
+            showInputMessage: true,
+            sqref: cellRange,
+            ...config
+        };
+
+        worksheet.dataValidations.add(validationObj);
+    } catch (error) {
+        console.warn(`[applyDataValidation] Error applying validation: ${error.message}`);
+    }
 };
 
 /**
  * Apply dropdown validation efficiently
  */
 const applyDropdownValidation = (worksheet, columnIndex, startRow, endRow, sheetName, totalRows) => {
-    const validationConfig = {
-        type: 'list',
-        allowBlank: true,
-        formulae: [`=${sheetName}!$A$2:$A$${totalRows}`]
-    };
-    
-    applyDataValidation(worksheet, columnIndex, startRow, endRow, 'dropdown', validationConfig);
+    try {
+        if (!worksheet || startRow > endRow || totalRows < 2) {
+            return;
+        }
+
+        const validationConfig = {
+            type: 'list',
+            allowBlank: true,
+            showErrorMessage: true,
+            showInputMessage: true,
+            formulae: [`=${sheetName}!$A$2:$A$${totalRows}`]
+        };
+        
+        applyDataValidation(worksheet, columnIndex, startRow, endRow, 'dropdown', validationConfig);
+    } catch (error) {
+        console.warn(`[applyDropdownValidation] Error applying dropdown validation: ${error.message}`);
+    }
 };
 
 /**
  * Apply checkbox validation efficiently
  */
 const applyCheckboxValidation = (worksheet, columnIndex, startRow, endRow, values) => {
-    const validationConfig = {
-        type: 'list',
-        allowBlank: true,
-        formulae: [`"${values.join(',')}"`]
-    };
-    
-    applyDataValidation(worksheet, columnIndex, startRow, endRow, 'checkbox', validationConfig);
+    try {
+        if (!worksheet || !values || startRow > endRow) {
+            return;
+        }
+
+        const validationConfig = {
+            type: 'list',
+            allowBlank: true,
+            showErrorMessage: true,
+            showInputMessage: true,
+            formulae: [`"${values.join(',')}"`]
+        };
+        
+        applyDataValidation(worksheet, columnIndex, startRow, endRow, 'checkbox', validationConfig);
+    } catch (error) {
+        console.warn(`[applyCheckboxValidation] Error applying checkbox validation: ${error.message}`);
+    }
 };
 
 /**
  * Apply date validation efficiently
  */
 const applyDateValidation = (worksheet, columnIndex, startRow, endRow) => {
-    const columnLetter = getColumnLetter(columnIndex);
-    
-    for (let i = startRow; i <= endRow; i++) {
-        const cellRef = `${columnLetter}${i}`;
-        const cell = worksheet.getCell(cellRef);
+    try {
+        if (!worksheet || startRow > endRow) {
+            return;
+        }
+
+        const columnLetter = getColumnLetter(columnIndex);
+        const cellRange = `${columnLetter}${startRow}:${columnLetter}${endRow}`;
         
-        cell.dataValidation = {
+        worksheet.dataValidations.add({
+            sqref: cellRange,
             type: 'date',
             operator: 'greaterThan',
             allowBlank: true,
             showErrorMessage: true,
+            showInputMessage: true,
             errorTitle: 'Invalid Date',
             error: 'Please enter a valid date.'
-        };
-        
-        cell.numFmt = 'yyyy-mm-dd';
+        });
+
+        // Apply number format to range
+        for (let i = startRow; i <= endRow; i++) {
+            const cellRef = `${columnLetter}${i}`;
+            const cell = worksheet.getCell(cellRef);
+            cell.numFmt = 'yyyy-mm-dd';
+        }
+    } catch (error) {
+        console.warn(`[applyDateValidation] Error applying date validation: ${error.message}`);
     }
 };
 
