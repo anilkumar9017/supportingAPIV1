@@ -1,0 +1,6 @@
+(node:51824) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Application has thrown an uncaught exception and is terminated:
+ReferenceError: logger is not defined
+    at C:\inetpub\wwwroot\ng_supporting_api\test\server.js:57:5
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

@@ -1,0 +1,72 @@
+🚀 Server running on port \\.\pipe\7e53f80e-6551-4d62-9e4b-6bac82884526
+📡 Public APIs: http://localhost:\\.\pipe\7e53f80e-6551-4d62-9e4b-6bac82884526/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\7e53f80e-6551-4d62-9e4b-6bac82884526/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\7e53f80e-6551-4d62-9e4b-6bac82884526/health
+2026-05-08T11:05:02.047Z - POST /whapi/webhook
+User: 9017467730 → AGENT
+Message : getttttt {
+  id: 'O7bxGJkmyK5VSA-hWYqnAgAgFA',
+  from_me: false,
+  type: 'image',
+  chat_id: '919017467730@s.whatsapp.net',
+  timestamp: 1778238299,
+  source: 'mobile',
+  starred: false,
+  image: {
+    id: 'jpeg-3bb6f1189926c8ae5548-85662a9c08008050',
+    mime_type: 'image/jpeg',
+    file_size: 156487,
+    sha256: '2imBA/4xd/2lswWa87QaKRtO166bRiILxF1NatbLZI8=',
+    width: 1280,
+    height: 979,
+    preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wgARCABIAEgDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAECAwQF/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAH/2gAMAwEAAhADEAAAALfbScJ3hwHeHnr0JPPO0K0zo0IC1MmkGRoQGmvH1LbHCHI4pEiCqGueiY0MU1KZFgUCtgjAJkFQB//EABoRAAMBAAMAAAAAAAAAAAAAAAABESESMEH/2gAIAQIBAT8ApyKUphhERGDS87//xAAYEQEBAQEBAAAAAAAAAAAAAAAAEQEhMP/aAAgBAwEBPwCIiI66urrrL7//xAAqEAACAgAFAgUEAwAAAAAAAAAAAQIRAwQSQVEhMRNCUmGRIiMyoVNxsf/aAAgBAQABPwBLPeuJWf8AXErP+uIln7/OJWf9cSs8vPEaz38kRrPLzxHLOrhihB+YWEuTw0eEjwkPCQ8JDwx4ZqhaVIjJbDmkKafA5pboWImzxFyh40boc4vceFGU2xYEa3J5dNJK/kjlkufklgJRb6mHl1p7seXS5IYCcpNksuuWKUJz+nETfAk6GpPs6EpcjTkqIx0qrGnyKLi37jT5MDJ6JKWrt7Cw68zIqlXXoVtsf6OSQmmiTpF2iCoauLViVderX9mquj7F7P5NSbao1Ik6j2+C3wzT04RXv0FBL6kum6FFRV94s0pKu5pQ4ocUxxrc+5vQtfCPuN7dP2K+/wChVsPoNy4HKXpG3uqP//4AAwD/2Q=='
+  },
+  from: '919017467730',
+  from_name: 'Anil Kumar',
+  userRole: 'AGENT'
+}
+Media Handle 
+!!!!Not Get Media Url {
+  id: 'jpeg-3bb6f1189926c8ae5548-85662a9c08008050',
+  mime_type: 'image/jpeg',
+  file_size: 156487,
+  sha256: '2imBA/4xd/2lswWa87QaKRtO166bRiILxF1NatbLZI8=',
+  width: 1280,
+  height: 979,
+  preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABsSFBcUERsXFhceHBsgKEIrKCUlKFE6PTBCYFVlZF9VXVtqeJmBanGQc1tdhbWGkJ6jq62rZ4C8ybqmx5moq6T/2wBDARweHigjKE4rK06kbl1upKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKT/wgARCABIAEgDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAECAwQF/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAH/2gAMAwEAAhADEAAAALfbScJ3hwHeHnr0JPPO0K0zo0IC1MmkGRoQGmvH1LbHCHI4pEiCqGueiY0MU1KZFgUCtgjAJkFQB//EABoRAAMBAAMAAAAAAAAAAAAAAAABESESMEH/2gAIAQIBAT8ApyKUphhERGDS87//xAAYEQEBAQEBAAAAAAAAAAAAAAAAEQEhMP/aAAgBAwEBPwCIiI66urrrL7//xAAqEAACAgAFAgUEAwAAAAAAAAAAAQIRAwQSQVEhMRNCUmGRIiMyoVNxsf/aAAgBAQABPwBLPeuJWf8AXErP+uIln7/OJWf9cSs8vPEaz38kRrPLzxHLOrhihB+YWEuTw0eEjwkPCQ8JDwx4ZqhaVIjJbDmkKafA5pboWImzxFyh40boc4vceFGU2xYEa3J5dNJK/kjlkufklgJRb6mHl1p7seXS5IYCcpNksuuWKUJz+nETfAk6GpPs6EpcjTkqIx0qrGnyKLi37jT5MDJ6JKWrt7Cw68zIqlXXoVtsf6OSQmmiTpF2iCoauLViVderX9mquj7F7P5NSbao1Ik6j2+C3wzT04RXv0FBL6kum6FFRV94s0pKu5pQ4ocUxxrc+5vQtfCPuN7dP2K+/wChVsPoNy4HKXpG3uqP//4AAwD/2Q=='
+}
+Not Get Media Url <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 00 00 01 00 01 00 00 ff db 00 43 00 08 06 06 07 06 05 08 07 07 07 09 09 08 0a 0c 14 0d 0c 0b 0b 0c 19 12 13 0f ... 156437 more bytes>
+Is buffer: true
+Mime: image/jpeg
+Laplacian variance: 105.11359245303615
+OCR confidence: 70
+Text: Master | : .
+Tt َ pa
+5
+Ki 2 pr ;.
+if Active Configuration |
+2 Service Type Seguence Kilometer Tolera
+Lang counts: { hindiCount: 2, arabicCount: 15, englishCount: 249 }
+Languange  {
+  isBlurry: false,
+  text: 'Master | : .\n' +
+    'Tt َ pa\n' +
+    '5\n' +
+    'Ki 2 pr ;.\n' +
+    'if Active Configuration |\n' +
+    '2 Service Type Seguence Kilometer Tolerance KM Frequency\n' +
+    'EE EA Sequence FRE a Fit 10000 87 ‏ا‎ 1\n' +
+    '٠ ‏شتات الا تس اق‎ 08111 =\n' +
+    '‏و‎ Service B Sequence 1 20000 1000 Each\n' +
+    '3 Service C 0 25000 1000 Each\n' +
+    '4 Service A Sequence 1 10000 1000 Each\n' +
+    'osm\n' +
+    '# tem Code item Name Qty Remarks Vat Group\n' +
+    '1 5 OIL FILLING CAP 12 UK Std rate 17.5% + E\n' +
+    '2 00002 SQUARE PIPE 4° X 4° X 8 12 UK Std rate 17.5% +\n' +
+    '3 00001 HBEAM 6 267 X BMM 10 No VAT v\n' +
+    'नए',
+  lang: 'english'
+}
+2026-05-08T11:05:13.540Z - POST /whapi/webhook
+2026-05-08T11:05:14.294Z - POST /whapi/webhook

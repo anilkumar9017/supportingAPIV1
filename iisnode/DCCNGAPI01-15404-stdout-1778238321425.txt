@@ -1,0 +1,22 @@
+🚀 Server running on port \\.\pipe\5891e691-fbd7-4938-bdd9-606b34d4293c
+📡 Public APIs: http://localhost:\\.\pipe\5891e691-fbd7-4938-bdd9-606b34d4293c/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\5891e691-fbd7-4938-bdd9-606b34d4293c/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\5891e691-fbd7-4938-bdd9-606b34d4293c/health
+2026-05-08T11:05:22.656Z - POST /whapi/webhook
+User: 9017467730 → AGENT
+Message : getttttt {
+  id: 'O8STtrx7KP5f_w-hWQqnAgAgFA',
+  from_me: false,
+  type: 'text',
+  chat_id: '919017467730@s.whatsapp.net',
+  timestamp: 1778238321,
+  source: 'mobile',
+  starred: false,
+  text: { body: 'Invoice' },
+  from: '919017467730',
+  from_name: 'Anil Kumar',
+  userRole: 'AGENT'
+}
+???????? null
+2026-05-08T11:05:23.828Z - POST /whapi/webhook
+2026-05-08T11:05:24.271Z - POST /whapi/webhook

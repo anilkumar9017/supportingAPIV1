@@ -1,0 +1,69 @@
+🚀 Server running on port \\.\pipe\e5d4ae2b-9606-4498-a9ee-067107d7f25e
+📡 Public APIs: http://localhost:\\.\pipe\e5d4ae2b-9606-4498-a9ee-067107d7f25e/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\e5d4ae2b-9606-4498-a9ee-067107d7f25e/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\e5d4ae2b-9606-4498-a9ee-067107d7f25e/health
+2026-05-08T11:19:50.378Z - POST /whapi/webhook
+User: 6387848896 → AGENT
+Message : getttttt {
+  id: 'rND2okIyJCaKSFY6weB.WA-hTNogAoA8HU',
+  from_me: false,
+  type: 'image',
+  chat_id: '916387848896@s.whatsapp.net',
+  timestamp: 1778239187,
+  source: 'mobile',
+  starred: false,
+  image: {
+    id: 'jpeg-acd0f6a2423224268a48563ac1e07e58-853368800a00f075',
+    mime_type: 'image/jpeg',
+    file_size: 197122,
+    sha256: '9GDFcTwykIHNG3dOslgZiSwX5TY1PJRq9w23kDEgMXQ=',
+    width: 1579,
+    height: 861,
+    preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIACcASAMBIgACEQEDEQH/xAArAAADAQEAAAAAAAAAAAAAAAAAAgMBBAEBAQAAAAAAAAAAAAAAAAAAAAH/2gAMAwEAAhADEAAAAO+/NWOlV0mlRESqrylgKStTaZDGiYrzWZgQqEtsAYCwQBAD/8QAIRAAAgEDBQEBAQAAAAAAAAAAAAECAxESBBAhUmFRFDH/2gAIAQEAAT8AgJCiOn6yVOD/AKz8tNi01JLmCJaej0RLTUeiEJifpltb057Db7DfpdcCFbZWGl8QvEiV/iGtoDimJc8mI4pmFiSkWsKRFszMrmRlc5G9v//EABcRAQADAAAAAAAAAAAAAAAAABEAIDD/2gAIAQIBAT8AyY0//8QAFhEAAwAAAAAAAAAAAAAAAAAAESAw/9oACAEDAQE/AJhP/9k='
+  },
+  from: '916387848896',
+  from_name: 'SHREYANSH TRIPATHI',
+  userRole: 'AGENT'
+}
+Media Handle 
+!!!!Not Get Media Url {
+  id: 'jpeg-acd0f6a2423224268a48563ac1e07e58-853368800a00f075',
+  mime_type: 'image/jpeg',
+  file_size: 197122,
+  sha256: '9GDFcTwykIHNG3dOslgZiSwX5TY1PJRq9w23kDEgMXQ=',
+  width: 1579,
+  height: 861,
+  preview: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/2c7Z//////////////8BGxsbGxwbHiEhHiotKC0qPTgzMzg9XUJHQkdCXY1YZ1hYZ1iNfZd7c3uXfeCwnJyw4P/Zztn////////////////CABEIACcASAMBIgACEQEDEQH/xAArAAADAQEAAAAAAAAAAAAAAAAAAgMBBAEBAQAAAAAAAAAAAAAAAAAAAAH/2gAMAwEAAhADEAAAAO+/NWOlV0mlRESqrylgKStTaZDGiYrzWZgQqEtsAYCwQBAD/8QAIRAAAgEDBQEBAQAAAAAAAAAAAAECAxESBBAhUmFRFDH/2gAIAQEAAT8AgJCiOn6yVOD/AKz8tNi01JLmCJaej0RLTUeiEJifpltb057Db7DfpdcCFbZWGl8QvEiV/iGtoDimJc8mI4pmFiSkWsKRFszMrmRlc5G9v//EABcRAQADAAAAAAAAAAAAAAAAABEAIDD/2gAIAQIBAT8AyY0//8QAFhEAAwAAAAAAAAAAAAAAAAAAESAw/9oACAEDAQE/AJhP/9k='
+}
+Not Get Media Url <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 00 00 01 00 01 00 00 ff db 00 84 00 06 06 06 06 07 06 07 08 08 07 0a 0b 0a 0b 0a 0f 0e 0c 0c 0e 0f 16 10 11 10 ... 197072 more bytes>
+Is buffer: true
+Mime: image/jpeg
+Laplacian variance: 633.2469012901071
+OCR confidence: 89
+Text: ‎कहानियाँ‏ — 1772 ال
+‎राजा और रंक | कहानी (कथा-कहानियाँ)‏ |
+‎रचनाकार: रामेश्वर टांटिया‏
+‎राजस्थान के
+Lang counts: { hindiCount: 1341, arabicCount: 22, englishCount: 8 }
+Languange  {
+  isBlurry: false,
+  text: '‎कहानियाँ‏ — 1772 ال\n' +
+    '‎राजा और रंक | कहानी (कथा-कहानियाँ)‏ |\n' +
+    '‎रचनाकार: रामेश्वर टांटिया‏\n' +
+    '‎राजस्थान के बूंदी राज्य में हाड़ा-राजपूतों का शासन था। सन्‌ 1750 ई० में महाराज उमेद्र सिह यहाँ राज्य करते थे। छोटी आयु में ही पिता की मृत्यु हो जानें से इन्हें राजगहदीं‏\n' +
+    'انمد ‎मिल गयी। आपको शिकार खेलने का बड़ा शौक था। प्रायः ही, 10-15 मुसाहबों और शिकारियों को साथ लेकर पहाड़ों और जंगलों में शिकार के लिए चले‏\n' +
+    '‎माघ का महीना था। एक दिन महाराज अपने सरदारों और शिकारियों के दल के साथ पास के पहाड़ों में शिकार के लिए गए। शाम होते-होते एक बड़े चीतल को देखा at‏\n' +
+    '‎राजा ने अपना घोड़ा उसके पीछे छोड़ दिया। दौड़ते-दौड़ते जंगल में रास्ता भूलकर बहुत दूर निकल गये। सभी साथी पीछे छूट गए।‏\n' +
+    '‎रात हो गई और भयंकर तूफान के साथ ओले और वर्षा शुरू हो गई। रास्तों में चारों तरफ पानी जमा हो गया। ऊपर से बर्फीली हवा सौंय-सायं करके चल रही थीं।‏\n' +
+    '‎ऐसी भयंकर सर्दी में महाराज ठिठुर कर बेहोश हो गए, किन्तु घोड़ा बहुत ही समझदार om वह उन्हें अपनी पीठ पर लादे घूमता हुआ एक झोपड़ी के द्वार पर आया और‏\n' +
+    '‎हिंनहिनाने लगा। जब कुछ देर तक किवाड़ नहीं खुले तो घोड़े ने दरवाजे पर पैरों की टाप लगाई। हाथ में दीपक लिए एक वृद्ध बाहर आया और कुछ क्षणों में सारी परिस्थिति‏\n' +
+    '‎समझकर बेहोश युवक को पीठ पर लादकर भीतर ले गया। कीमती कपड़े और गहने देखकर वह यह तो समझ गया कि यह अवश्य ही कोई बड़े घर का युवक हैं, परन्तु‏\n' +
+    '‎उसने स्वप्न में भी यह न सोचा कि स्वयं महाराज उसके अतिथि बने हैं।‏\n' +
+    '‎झोपड़ी में उसकी किशोरी पुत्री रूपमती के सिवाय और कोई न था। पिता-पुत्री दोनों ने मिलकर युवक के भीगे वस्त्र उतारे और उसे आग के पास लिटा दिया। चम्मच से मुँह‏\n' +
+    "‎'खोलकर गरम दूध पिलाने लगे। बहुत प्रयत्न करने पर भी युवक की बेहोशी दूर नहीं हुई। शरीर ठंडा ही बनां रहा। डर लगा कि कहीं वह मर न जाय। एक क्षण को वृद्ध‏ |\n" +
+    '‎विचलित-सा हुआ किन्तु वह अनुभवी था, वैद्यक का ज्ञाता भी। उसने पुत्री को सकुचाते हुए कहा- "बेटी, इसके शरीर में गरमी. लाने का अब एक ही उपाय है। तुम इसकी‏ |\n' +
+    '‎vi;‏ <> ختاشتكتككوزلة ااا —,—,,, ‎PE‏',
+  lang: 'hindi'
+}
+2026-05-08T11:20:05.133Z - POST /whapi/webhook
+2026-05-08T11:20:05.482Z - POST /whapi/webhook
