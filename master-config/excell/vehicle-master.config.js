@@ -140,9 +140,9 @@ module.exports = {
             }
           },
           { header: 'License Amount', key: 'license_amount', type: 'number', width: 15 },
-          { header: 'Approved', key: 'approved', type: 'checkbox', values: ['Y', 'N'], width: 10 },
-          { header: 'Approved By', key: 'approvedby', type: 'number', width: 15 },
-          { header: 'JE ID', key: 'je_id', type: 'number', width: 15 }
+          { header: 'Approved', key: 'approved', type: 'checkbox', values: ['Y', 'N'], width: 10, hideColumn: true },
+          { header: 'Approved By', key: 'approvedby', type: 'number', width: 15, hideColumn: true },
+          { header: 'JE ID', key: 'je_id', type: 'number', width: 15, hideColumn: true }
         ]
       },
       {
@@ -268,16 +268,13 @@ module.exports = {
         sheetName: 'Vehicle Compartments',
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
-          /* { header: 'Compartment Number', key: 'compartment_num', type: 'dropdwon', dataType: 'number', width: 15,  dropdown: {
+          /* { header: 'Compartment Number', key: 'compartment_id', type: 'dropdwon', dataType: 'number', width: 15,  dropdown: {
             sheetName: 'Product Types',
             query: 'select id, name from m_product_type',
             labelField: 'name',
             valueField: 'id'
           } }, */
-          { header: 'Capacity', key: 'capacity', type: 'number', width: 15 },
-          { header: 'UOM', key: 'uom', type: 'text', width: 10 },
-          { header: 'Product Type', key: 'product_type', type: 'number', width: 20},
-          { header: 'Is Active', key: 'is_active', type: 'checkbox', values: ['Y', 'N'], width: 10 },
+          { header: 'Capacity', key: 'weight_cap', type: 'number', width: 15 },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
         ]
       },
@@ -298,7 +295,7 @@ module.exports = {
           { header: 'Closing ODO', key: 'closing_odo', type: 'number', width: 12 },
           { header: 'Total KM', key: 'total_km', type: 'number', width: 12 },
           { header: 'Is Active', key: 'is_active', type: 'checkbox', values: ['Y', 'N'], width: 10 },
-          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 15 },
+          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 15, hideColumn: true },
           { header: 'Jobcard No', key: 'jobcard_no', type: 'text', width: 15 },
           { header: 'Jobcard Detail ID', key: 'jobcard_detail_id', type: 'number', width: 15 },
           { header: 'ODO Next', key: 'odo_next', type: 'number', width: 12 },

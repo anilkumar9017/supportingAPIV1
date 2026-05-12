@@ -108,13 +108,13 @@ function mappedDropdown({value, col, rowNumber, errors}, dropdownMappings) {
     const mappedValue = dropdownMappings?.[col.key]?.[value];
     console.log("mappedValue ", col.key, mappedValue, value);
     if (!mappedValue) {
-        errors.push({
+        /* errors.push({
             row: rowNumber,
             column: col.header,
             message: `Invalid value '${value}' for ${col.header}`
         });
-        return null;
-        //return value;
+        return null; */
+        return value;
     }
 
     return mappedValue; // ID → ID (or keep as string if DB allows)
