@@ -9,6 +9,7 @@ const { createLogger, getColumnIndexMap, getSmartRowRange, applyDropdownValidati
 const { getGlobalDropdownCache } = require('./excell-dropdown-cache');
 const { insertRecord, updateRecord } = require('./bulk.service');
 const logger = createLogger('HierarchicalExcelService');
+const mssql = require('mssql');
 
 /**
  * Extract child array configurations from main config
