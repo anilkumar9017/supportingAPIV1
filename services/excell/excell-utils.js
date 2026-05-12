@@ -70,7 +70,19 @@ const getSmartRowRange = (dataRowCount, minRows = 100, bufferRows = 50) => {
 const applyDataValidation = (worksheet, columnIndex, startRow, endRow, validationType, config) => {
     try {
         // Validate inputs
-        if (!worksheet || !worksheet.dataValidations || startRow > endRow) {
+        if (!worksheet) {
+            console.warn(`[applyDataValidation] Invalid worksheet`);
+            return;
+        }
+
+        if (startRow > endRow) {
+            console.warn(`[applyDataValidation] Invalid row range: ${startRow} > ${endRow}`);
+            return;
+        }
+
+        // Ensure dataValidations exists
+        if (!worksheet.dataValidations) {
+            console.warn(`[applyDataValidation] worksheet.dataValidations not available`);
             return;
         }
 
@@ -83,11 +95,10 @@ const applyDataValidation = (worksheet, columnIndex, startRow, endRow, validatio
             allowBlank: config.allowBlank !== false,
             showErrorMessage: true,
             showInputMessage: true,
-            sqref: cellRange,
             ...config
         };
 
-        worksheet.dataValidations.add(validationObj);
+        worksheet.dataValidations.add(cellRange, validationObj);
     } catch (error) {
         console.warn(`[applyDataValidation] Error applying validation: ${error.message}`);
     }
@@ -96,23 +107,53 @@ const applyDataValidation = (worksheet, columnIndex, startRow, endRow, validatio
 /**
  * Apply dropdown validation efficiently
  */
+const quoteSheetName = (sheetName) => {
+    if (!sheetName || typeof sheetName !== 'string') {
+        return sheetName;
+    }
+    const escaped = sheetName.replace(/'/g, "''");
+    return `'${escaped}'`;
+};
+
 const applyDropdownValidation = (worksheet, columnIndex, startRow, endRow, sheetName, totalRows) => {
     try {
-        if (!worksheet || startRow > endRow || totalRows < 2) {
+        if (!worksheet) {
+            console.warn(`[applyDropdownValidation] Invalid worksheet`);
             return;
         }
 
+        if (!sheetName || !sheetName.trim()) {
+            console.warn(`[applyDropdownValidation] Invalid sheetName: "${sheetName}"`);
+            return;
+        }
+
+        if (startRow > endRow) {
+            console.warn(`[applyDropdownValidation] Invalid row range: ${startRow} > ${endRow}`);
+            return;
+        }
+
+        if (totalRows < 2) {
+            console.warn(`[applyDropdownValidation] Invalid totalRows: ${totalRows} < 2`);
+            return;
+        }
+
+        if (!worksheet.dataValidations) {
+            console.warn(`[applyDropdownValidation] worksheet.dataValidations not available`);
+            return;
+        }
+
+        const quotedSheetName = quoteSheetName(sheetName);
         const validationConfig = {
             type: 'list',
             allowBlank: true,
             showErrorMessage: true,
             showInputMessage: true,
-            formulae: [`=${sheetName}!$A$2:$A$${totalRows}`]
+            formulae: [`=${quotedSheetName}!$A$2:$A$${totalRows}`]
         };
         
         applyDataValidation(worksheet, columnIndex, startRow, endRow, 'dropdown', validationConfig);
     } catch (error) {
-        console.warn(`[applyDropdownValidation] Error applying dropdown validation: ${error.message}`);
+        console.warn(`[applyDropdownValidation] Error applying dropdown validation for sheet "${sheetName}": ${error.message}`);
     }
 };
 
