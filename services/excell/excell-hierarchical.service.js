@@ -362,6 +362,11 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
     let transaction;
 
     try {
+        // Determine transaction mode based on environment variable
+        // Default: ALL-OR-NOTHING (rollback on any error) unless EXCEL_PARTIAL_IMPORT is explicitly set to 'true'
+        const partialImportAllowed = process.env.EXCEL_PARTIAL_IMPORT === 'true';
+        logger.info(`Excel import mode: ${partialImportAllowed ? 'PARTIAL IMPORT' : 'ALL-OR-NOTHING (default)'}`);
+
         // Extract config and child array definitions
         const config = extractHierarchicalConfig(menuCode);
         if (!config) {
@@ -383,15 +388,28 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         // Initialize results object to track inserted/updated records and errors for main and child sheets
         const results = {
             main: { inserted: 0, updated: 0, errors: [] },
-            children: {}
+            children: {},
+            partialImportMode: partialImportAllowed,
+            modeDescription: partialImportAllowed ? 'Partial import allowed - successful records saved' : 'All-or-nothing mode - any error causes full rollback'
         };
 
         // Import main sheet
-        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction);
+        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
+
+        // Check if we should continue with child sheets based on mode
+        const mainHasErrors = results.main.errors.length > 0;
+        if (!partialImportAllowed && mainHasErrors) {
+            throw new Error(`Main sheet import failed with ${mainHasErrors} errors. Rolling back transaction.`);
+        }
 
         // Import child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction);
+            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
+            
+            const childHasErrors = results.children[childKey]?.errors?.length > 0;
+            if (!partialImportAllowed && childHasErrors) {
+                throw new Error(`Child sheet '${childKey}' import failed with ${childHasErrors} errors. Rolling back transaction.`);
+            }
         }
 
         const allErrors = [...results.main.errors];
@@ -402,14 +420,54 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         });
 
         results.errors = allErrors;
+        results.totalErrors = allErrors.length;
         results.success = allErrors.length === 0;
 
-        await transaction.commit();
+        // Compute total inserted/updated counts across main and children
+        const mainChanges = (results.main.inserted || 0) + (results.main.updated || 0);
+        let childChanges = 0;
+        Object.values(results.children).forEach(cr => {
+            if (!cr) return;
+            childChanges += (cr.inserted || 0) + (cr.updated || 0);
+        });
+        results.totalChanges = mainChanges + childChanges;
+
+        // Decide commit/rollback:
+        // - All-or-nothing (partialImportAllowed === false): commit only if no errors
+        // - Partial import: commit if there was at least one successful change, otherwise rollback
+        if (!partialImportAllowed) {
+            if (results.totalErrors === 0) {
+                await transaction.commit();
+                results.committed = true;
+                logger.info(`[Excel Import] All-or-nothing import committed. Errors: ${results.totalErrors}`);
+            } else {
+                // No commit in strict mode when errors exist; ensure rollback will occur in catch
+                results.committed = false;
+                throw new Error(`Import failed in all-or-nothing mode with ${results.totalErrors} errors`);
+            }
+        } else {
+            if (results.totalChanges > 0) {
+                await transaction.commit();
+                results.committed = true;
+                logger.info(`[Excel Import] Partial import committed. Changes: ${results.totalChanges}, Errors: ${results.totalErrors}`);
+            } else {
+                // Nothing was changed; rollback to avoid empty commits
+                try {
+                    await transaction.rollback();
+                } catch (rbErr) {
+                    logger.error('Error rolling back empty partial import transaction', rbErr);
+                }
+                results.committed = false;
+                logger.info(`[Excel Import] No changes detected; rolled back transaction. Errors: ${results.totalErrors}`);
+            }
+        }
+
         return results;
     } catch (error) {
         if (transaction) {
             try {
                 await transaction.rollback();
+                logger.info(`Transaction rolled back due to: ${error.message}`);
             } catch (rollbackError) {
                 logger.error('Error rolling back hierarchical import transaction', rollbackError);
             }
@@ -432,7 +490,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
 */
-async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction) {
+async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction, partialImportAllowed = true) {
     const worksheet = workbook.getWorksheet(config.sheetName);
     if (!worksheet) {
         throw new Error(`Main sheet '${config.sheetName}' not found in Excel file`);
@@ -485,11 +543,19 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 results.inserted++;
             }
         } catch (error) {
-            results.errors.push({
+            const errorInfo = {
                 row: i + 2,
                 error: error.message,
                 data: row.values
-            });
+            };
+            results.errors.push(errorInfo);
+            
+            // If all-or-nothing mode, throw error immediately
+            if (!partialImportAllowed) {
+                throw new Error(`Main sheet import failed at row ${i + 2}: ${error.message}`);
+            }
+            // Otherwise continue with next row in partial mode
+            logger.warn(`[Partial Mode] Skipped row ${i + 2} in main sheet:`, error.message);
         }
     }
 
@@ -509,7 +575,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
  */
-async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction) {
+async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction, partialImportAllowed = true) {
     // Check if child sheet exists in the workbook
     const worksheet = workbook.getWorksheet(childConfig.sheetName);
     if (!worksheet) {
@@ -582,10 +648,11 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 // Set foreign key in child record to establish relationship with parent record
                 record[childConfig.parentKey] = parentId;
 
-                // Categorize records for bulk operations
+                // Categorize records for bulk operations. Include rowNumber with each entry so
+                // individual fallbacks can report the correct row when errors occur.
                 if (!recordId || recordId === 0) {
                     // INSERT: New record (id is 0, null, or empty)
-                    recordsToInsert.push(record);
+                    recordsToInsert.push({ row: record, rowNumber: i + 2 });
                 } else {
                     // UPDATE: Existing record (id has a value)
                     recordsToUpdate.push({ id: recordId, row: record, rowNumber: i + 2 });
@@ -609,19 +676,25 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
 
         try {
             if (recordsToInsert.length > 0) {
+                const insertRows = recordsToInsert.map(r => r.row);
                 await bulkInsertRecords({
                     transaction,
                     db,
                     databaseName,
                     tableName: childConfig.tableName,
-                    rows: recordsToInsert
+                    rows: insertRows
                 });
-                results.inserted += recordsToInsert.length;
+                results.inserted += insertRows.length;
                 bulkInsertSuccess = true;
-                logger.info(`Bulk inserted ${recordsToInsert.length} records in '${childConfig.sheetName}'`);
+                logger.info(`Bulk inserted ${insertRows.length} records in '${childConfig.sheetName}'`);
             }
         } catch (bulkInsertError) {
             logger.warn(`Bulk insert failed for '${childConfig.sheetName}', falling back to individual inserts:`, bulkInsertError.message);
+            
+            // If all-or-nothing mode, throw error immediately
+            if (!partialImportAllowed) {
+                throw new Error(`Bulk insert failed for child sheet '${childConfig.sheetName}': ${bulkInsertError.message}`);
+            }
         }
 
         try {
@@ -639,30 +712,44 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
             }
         } catch (bulkUpdateError) {
             logger.warn(`Bulk update failed for '${childConfig.sheetName}', falling back to individual updates:`, bulkUpdateError.message);
+            
+            // If all-or-nothing mode, throw error immediately
+            if (!partialImportAllowed) {
+                throw new Error(`Bulk update failed for child sheet '${childConfig.sheetName}': ${bulkUpdateError.message}`);
+            }
         }
 
         // Phase 3: Tier 2 - Individual processing for failed bulk operations
         if (!bulkInsertSuccess && recordsToInsert.length > 0) {
             logger.info(`Processing ${recordsToInsert.length} inserts individually for '${childConfig.sheetName}'`);
             for (let i = 0; i < recordsToInsert.length; i++) {
+                const insertEntry = recordsToInsert[i];
                 try {
                     await insertRecord({
                         transaction,
                         db,
                         databaseName,
                         tableName: childConfig.tableName,
-                        row: recordsToInsert[i],
+                        row: insertEntry.row,
                         useApi
                     });
                     results.inserted++;
                 } catch (error) {
-                    logger.error(`Error inserting row ${rowData.find(r => r.data === recordsToInsert[i])?.rowNumber || 'unknown'} in '${childConfig.sheetName}':`, error);
+                    const rowNumber = insertEntry.rowNumber || (rowData.find(r => r.data === insertEntry.row)?.rowNumber) || 'unknown';
+                    logger.error(`Error inserting row ${rowNumber} in '${childConfig.sheetName}':`, error);
                     results.errors.push({
-                        row: rowData.find(r => r.data === recordsToInsert[i])?.rowNumber || 'unknown',
+                        row: rowNumber,
                         sheet: childConfig.sheetName,
                         error: error.message,
-                        data: recordsToInsert[i]
+                        data: insertEntry.row
                     });
+                    
+                    // If all-or-nothing mode, throw error immediately
+                    if (!partialImportAllowed) {
+                        throw new Error(`Insert failed at row ${rowNumber} in '${childConfig.sheetName}': ${error.message}`);
+                    }
+                    // Otherwise continue with next row in partial mode
+                    logger.warn(`[Partial Mode] Skipped insert at row ${rowNumber}`);
                 }
             }
         }
@@ -689,6 +776,13 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                         error: error.message,
                         data: update.row
                     });
+                    
+                    // If all-or-nothing mode, throw error immediately
+                    if (!partialImportAllowed) {
+                        throw new Error(`Update failed at row ${update.rowNumber} in '${childConfig.sheetName}': ${error.message}`);
+                    }
+                    // Otherwise continue with next row in partial mode
+                    logger.warn(`[Partial Mode] Skipped update at row ${update.rowNumber}`);
                 }
             }
         }
