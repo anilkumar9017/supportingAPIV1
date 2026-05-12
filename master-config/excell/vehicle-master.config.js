@@ -236,7 +236,7 @@ module.exports = {
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
         ]
       },
-      {
+      /* {
         header: 'Vehicle Attachments',
         key: 'm_vehicle_attachments',
         type: 'child_array',
@@ -252,7 +252,7 @@ module.exports = {
           { header: 'Upload Date', key: 'upload_date', type: 'date', width: 15 },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
         ]
-      },
+      }, */
       {
         header: 'Vehicle Compartments',
         key: 'm_vehicle_compartments',

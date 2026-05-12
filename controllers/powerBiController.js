@@ -47,7 +47,9 @@ async function getAzureADToken(tenatObj) {
 
 /* 
   * First check if a valid token exists in the cache; if not, generate a new one.
- */
+  * If an API call fails due to an authentication error, the token is automatically refreshed and the API call is retried with the new token. This ensures seamless authentication handling for Power BI API requests without requiring manual intervention for token management.
+   * Overall, this mechanism optimizes performance by reducing unnecessary token requests and provides robustness by automatically handling token expiration and authentication errors, ensuring that API calls to Power BI are consistently authenticated with valid tokens.
+*/
 async function powerBIRequest(fn, tenantObj) {
   try {
     const token = await getAzureADToken(tenantObj);
@@ -103,6 +105,9 @@ async function powerBIRequest(fn, tenantObj) {
 /* 
   * Generate an embed token for a Power BI report
     * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to generate the embed token.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for generating the embed token, which includes automatic token management. The response from the Power BI API is augmented with the embed URL before being returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for generating embed tokens, it promotes code reusability and maintainability, allowing for consistent handling of Power BI API interactions across the application.
+    * Overall, this function serves as a key part of the application's integration with Power BI, enabling secure and efficient generation of embed tokens for reports while managing authentication seamlessly through token caching and refresh logic.
 */
 async function generateReportEmbedToken(req, res) {
     try {
@@ -118,8 +123,9 @@ async function generateReportEmbedToken(req, res) {
             });
         }
 
+        // Query the database for Power BI configuration details
         const query = `select * from vw_bi_basic_configuration`;
-        const result = await db.executeQuery(databaseName, query, {}, useApi);
+        const result = await db.executeQuery(databaseName, query, {}, useApi);  // Pass useApi flag to control database name resolution in the query execution
 
         //console.log("get tenant ", result);
         if(result?.length==0 || !result){
@@ -128,7 +134,7 @@ async function generateReportEmbedToken(req, res) {
                 message: 'Power BI configuration not found.'
             });
         }
-
+        // Extract workspace ID from the configuration result
         const workspaceId = result[0]?.POWERBI_WORKSPACE_ID;
 
         //
@@ -168,7 +174,7 @@ async function generateReportEmbedToken(req, res) {
         response.data.embedUrl = `https://app.powerbi.com/reportEmbed?reportId=${report_id}`;
         response.data.datasetId = reportResponse?.data?.datasetId;
         //response.data.tn = azureToken;
-        console.log("generateEmbedToken ", response);
+        //console.log("generateEmbedToken ", response);
         return res.json({
             success: true,
             message: 'success',
@@ -194,6 +200,9 @@ async function generateReportEmbedToken(req, res) {
   /* 
     * Refresh a Power BI dataset
     * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to trigger a dataset refresh.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for refreshing the dataset, which includes automatic token management. The response from the Power BI API is returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for refreshing datasets, it promotes code reusability and maintainability, allowing for consistent handling of Power BI API interactions across the application.
+    * Overall, this function serves as a key part of the application's integration with Power BI, enabling secure and efficient triggering of dataset refreshes while managing authentication seamlessly through token caching and refresh logic.
   */
   async function refreshDataset(req, res){
     try {
@@ -202,17 +211,20 @@ async function generateReportEmbedToken(req, res) {
       //console.log("datasetId ", datasetId);
 
       //get worspace id
-      const databaseName = req.databaseName;
-      const query = `select * from vw_bi_basic_configuration`;
-      const result = await db.executeQuery(databaseName, query, {}, useApi);
+      const databaseName = req.databaseName;  // Get database name from middleware (already resolved)
+      const query = `select * from vw_bi_basic_configuration`;  // Ensure this view returns the necessary Power BI configuration details, including the workspace ID
+      const result = await db.executeQuery(databaseName, query, {}, useApi);  // Pass useApi flag to control database name resolution in the query execution
+      //when no configuration return error
       if(result?.length==0 || !result){
         return res.status(400).json({
             success: false,
             message: 'Power BI configuration not found.'
         });
       }
-      const config = result[0];
-      //refresh dataset
+
+      const config = result[0]; // Extract workspace ID from the configuration result
+
+      // Trigger dataset refresh using the Power BI API with automatic token management
       let response  = await powerBIRequest(async (token) => {
        return axios.post(
         `https://api.powerbi.com/v1.0/myorg/groups/${config?.POWERBI_WORKSPACE_ID}/datasets/${datasetId}/refreshes`,
@@ -243,15 +255,19 @@ async function generateReportEmbedToken(req, res) {
   /* 
     * Check the status of the last dataset refresh
     * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to get the status of the most recent dataset refresh.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for checking the refresh status, which includes automatic token management. The response from the Power BI API is returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for checking refresh status, it promotes code reusability and maintainability, allowing for consistent handling of Power BI API interactions across the application.
+    * Overall, this function serves as a key part of the application's integration with Power BI, enabling secure and efficient retrieval of dataset refresh status while managing authentication seamlessly through token caching and refresh logic.
   */
   async function refreshStatus(req, res) {
     try {
       const useApi = req.useApi || false;
       const {datasetId, tn} = req.body;
   
-      const databaseName = req.databaseName;
-      const query = `select * from vw_bi_basic_configuration`;
-      const result = await db.executeQuery(databaseName, query, {}, useApi);
+      const databaseName = req.databaseName;  // Get database name from middleware (already resolved)
+      const query = `select * from vw_bi_basic_configuration`;  // Ensure this view returns the necessary Power BI configuration details, including the workspace ID
+      const result = await db.executeQuery(databaseName, query, {}, useApi);  // Pass useApi flag to control database name resolution in the query execution
+      //when no configuration return error
       if(result?.length==0 || !result){
         return res.status(400).json({
             success: false,
@@ -259,8 +275,9 @@ async function generateReportEmbedToken(req, res) {
         });
       }
   
-      const config = result[0];
+      const config = result[0]; // Extract workspace ID from the configuration result
   
+      // Call Power BI API to get the status of the most recent dataset refresh with automatic token management
       const response = await powerBIRequest(async (token) => {
         return axios.get(
           `https://api.powerbi.com/v1.0/myorg/groups/${config.POWERBI_WORKSPACE_ID}/datasets/${datasetId}/refreshes?$top=1`,
@@ -289,13 +306,16 @@ async function generateReportEmbedToken(req, res) {
 /* 
     * Generate an embed token for a Power BI dashboard
     * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to generate the embed token.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for generating the embed token, which includes automatic token management. The response from the Power BI API is augmented with the embed URL before being returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for generating embed tokens, it promotes code reusability and maintainability, allowing for consistent handling of Power BI API interactions across the application.
+    * Overall, this function serves as a key part of the application's integration with Power BI, enabling secure and efficient generation of embed tokens for dashboards while managing authentication seamlessly through token caching and refresh logic.
  */
   async function generateDashboardEmbedToken(req,res) {
     try {
         const useApi = req.useApi || false;
         const {dashboard_id} = req.body;
         // Get database name from middleware (already resolved)
-        const databaseName = req.databaseName;
+        const databaseName = req.databaseName;  // Ensure this view returns the necessary Power BI configuration details, including the workspace ID
         if (!databaseName) {
             return res.status(400).json({
                 success: false,
@@ -303,10 +323,11 @@ async function generateReportEmbedToken(req, res) {
             });
         }
 
-        const query = `select * from vw_bi_basic_configuration`;
-        const result = await db.executeQuery(databaseName, query, {}, useApi);
+        const query = `select * from vw_bi_basic_configuration`;  // Ensure this view returns the necessary Power BI configuration details, including the workspace ID
+        const result = await db.executeQuery(databaseName, query, {}, useApi);  // Pass useApi flag to control database name resolution in the query execution
 
         console.log("get tenant ", result);
+        //when no configuration return error
         if(result?.length==0 || !result){
             return res.status(400).json({
                 success: false,
@@ -357,7 +378,13 @@ async function generateReportEmbedToken(req, res) {
   }
   
 
-  /* other databse */
+  /* 
+    other databse with custom token and dataset refresh, status check - for more control from client side, currently not in use, can be used for future extension if needed, for example when we want to trigger dataset refresh from other system with custom token and just want to use the API without database call for configuration
+     * Generate an embed token for a Power BI report
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to generate the embed token.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for generating the embed token, which includes automatic token management. The response from the Power BI API is augmented with the embed URL before being returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing
+  */
   async function generateReportToken(req, res){
     try {
       const result = await poerBiService.generateReportEmbedToken(req, res);
@@ -375,6 +402,13 @@ async function generateReportEmbedToken(req, res) {
     }
   }
 
+  /* 
+    custom dataset refresh and status check with token from client, currently not in use, can be used for future extension if needed, for example when we want to trigger dataset refresh from other system with custom token and just want to use the API without database call for configuration
+     * Refresh a Power BI dataset
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to trigger a dataset refresh.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for refreshing the dataset, which includes automatic token management. The response from the Power BI API is returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for refreshing datasets, it promotes code reusability and maintainability, allowing for consistent handling of Power BI API interactions across the application
+  */
   async function refreshDatasetCustom(req, res){
     try {
       const result = await poerBiService.refreshDataset(req, res);
@@ -391,6 +425,13 @@ async function generateReportEmbedToken(req, res) {
     }
   }
 
+  /* 
+    custom dataset refresh status check with token from client, currently not in use, can be used for future extension if needed, for example when we want to trigger dataset refresh from other system with custom token and just want to use the API without database call for configuration
+     * Check the status of the last dataset refresh
+    * Retrieves necessary configuration from the database, obtains an Azure AD token, and calls the Power BI API to get the status of the most recent dataset refresh.
+    * The function first checks if the database name is resolved from the middleware. It then queries the database for Power BI configuration details, including the workspace ID. If the configuration is found, it uses the `powerBIRequest` function to handle the API call for checking the refresh status, which includes automatic token management. The response from the Power BI API is returned to the client. If any errors occur during this process, they are caught and an appropriate error message is returned in the response.
+    * The function also includes error handling to manage scenarios where the database configuration is missing or when API calls fail, ensuring that the client receives informative responses in case of issues. By centralizing the logic for checking refresh status, it promotes code reusability and maintainability, allowing for
+  */
   async function refreshStatusCustom(req, res){
     try {
       const result = await poerBiService.refreshStatus(req, res);

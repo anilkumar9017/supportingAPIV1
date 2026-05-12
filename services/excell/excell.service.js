@@ -84,20 +84,22 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
         MAIN COLUMNS
         ===========================================================
         */
-        
+        // Set up columns in the worksheet based on the configuration, including headers and widths. This defines the structure of the Excel sheet and ensures that the columns are properly formatted according to the specified configuration.
         worksheet.columns = config.columns.map(col => ({
             header: col.header,
             key: col.key,
             width: col.width || 25
         }));
-
+        // Style header row
         worksheet.getRow(1).font = {
             bold: true
         };
-
+        
+        // Initialize dropdown value maps for columns that have dropdown configurations. This involves querying the database for the dropdown options and caching the results to optimize performance. The dropdown value maps are used later during data export to convert stored values into their corresponding labels for better readability in the Excel file.
         const cache = getGlobalDropdownCache();
         const dropdownValueMaps = {};
         
+        // Load dropdown options for columns with dropdown type, utilizing caching to avoid redundant database queries. For each dropdown column, the service checks if the dropdown options are already cached; if not, it queries the database to retrieve the options and then caches the results for future use. This approach improves performance by reducing the number of database queries needed when generating Excel files that include dropdowns.
         for (const col of config.columns) {
             if (col.type === 'dropdown') {
                 let dropdownResult = cache.get(
@@ -106,7 +108,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                     col.dropdown.labelField,
                     col.dropdown.valueField
                 );
-
+                // If dropdown options are not in cache, query the database and cache the results
                 if (!dropdownResult) {
                     dropdownResult = await db.executeQuery(
                         databaseName,
@@ -114,7 +116,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                         {},
                         useApi
                     );
-
+                    // Cache the result for future use
                     cache.set(
                         databaseName,
                         col.dropdown.query,
@@ -123,7 +125,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                         dropdownResult
                     );
                 }
-
+                // Create a mapping of dropdown values to labels for export purposes, which will be used to convert stored values into human-readable labels in the Excel file. This mapping is essential for ensuring that the exported Excel file contains meaningful information that corresponds to the underlying data in the database, especially for columns that use dropdowns to represent relationships or enumerated values.
                 dropdownValueMaps[col.key] = {};
                 dropdownResult.forEach(item => {
                     const lookupKey = item[col.dropdown.valueField];
@@ -155,7 +157,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
             logger.debug('Generating dummy mode');
             
             const sampleRow = {};
-
+            // Populate sample row with dummy data based on column types, which provides a template for users to understand the expected format and types of data for each column when filling out the Excel file. This is particularly useful for guiding users in providing the correct data and ensuring that the imported data can be processed successfully without validation errors.
             config.columns.forEach(col => {
                 if (col.type === 'checkbox') {
                     sampleRow[col.key] = col.values[0];
@@ -189,7 +191,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                 
                 data.forEach(row => {
                     const formattedRow = {};
-                    
+                    // Format each row of data for export, applying necessary transformations based on column types. This includes mapping dropdown values to their corresponding labels for better readability in the Excel file, formatting date fields appropriately, and ensuring that null or undefined values are handled gracefully. This step is crucial for ensuring that the exported Excel file contains data that is both accurate and user-friendly, reflecting the underlying data in a way that is meaningful to users.
                     config.columns.forEach(col => {
                         let value = row[col.key];
                         
@@ -234,7 +236,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
         logger.debug(`Applying validations for ${maxRowsForValidation} rows`);
 
         for (const col of config.columns) {
-
+            // Apply dropdown validations by creating hidden sheets for dropdown options and setting up data validation rules on the main worksheet. This ensures that users can only select valid options from the dropdowns when filling out the Excel file, which helps maintain data integrity and prevents invalid data from being entered during import.
             if (col.type === 'dropdown') {
                 try {
                     logger.debug(`Processing dropdown for column: ${col.key}`);
@@ -246,7 +248,7 @@ async function generateExcel({menuCode, mode, db, databaseName, useApi}) {
                         col.dropdown.labelField,
                         col.dropdown.valueField
                     );
-
+                    // If dropdown options are not in cache, query the database and cache the results
                     if (!dropdownResult) {
                         logger.debug(`Cache miss for ${col.key}, querying database`);
                         dropdownResult = await db.executeQuery(
