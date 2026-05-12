@@ -45,7 +45,13 @@ const validateColumn = (column, columnIndex) => {
     });
     
     // Validate column type
-    if (column.type && !VALID_COLUMN_TYPES.includes(column.type)) {
+    if (column.type === 'child_array') {
+        const columnName = column.header || column.key || `Column ${columnIndex}`;
+        errors.push(
+            `Column ${columnIndex} ('${columnName}'): type 'child_array' is only supported for hierarchical Excel configurations. ` +
+            `Use generateHierarchicalExcel/importHierarchicalExcel or remove child array definitions from standard import/export config.`
+        );
+    } else if (column.type && !VALID_COLUMN_TYPES.includes(column.type)) {
         errors.push(`Column ${columnIndex}: Invalid type '${column.type}'. Valid types: ${VALID_COLUMN_TYPES.join(', ')}`);
     }
     
