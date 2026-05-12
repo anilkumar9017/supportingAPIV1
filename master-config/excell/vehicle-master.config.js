@@ -112,6 +112,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Licenses',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'License ID', key: 'licenseid', type: 'text', width: 15, required: true },
           { header: 'License Type', key: 'license_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'License Types',
@@ -153,6 +154,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Service History',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'Maintenance Types',
               query: 'select id, name from m_maintenance_type',
@@ -196,6 +198,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Connections',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'Vehicle ID', key: 'vehicleid', type: 'number', width: 15 },
           { header: 'Vehicle Name', key: 'vehiclename', type: 'text', width: 25 },
           { header: 'Vehicle Type', key: 'vehicletype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
@@ -225,6 +228,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Accessories',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'Part Type', key: 'part_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'Part Types',
               query: 'select id, name from m_part_type',
@@ -245,6 +249,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Attachments',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'Attachment Type', key: 'attachment_type', type: 'number', width: 15 },
           { header: 'File Name', key: 'file_name', type: 'text', width: 30 },
           { header: 'File Path', key: 'file_path', type: 'text', width: 40 },
@@ -262,6 +267,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Vehicle Compartments',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           /* { header: 'Compartment Number', key: 'compartment_num', type: 'dropdwon', dataType: 'number', width: 15,  dropdown: {
             sheetName: 'Product Types',
             query: 'select id, name from m_product_type',
@@ -284,6 +290,7 @@ module.exports = {
         foreignKey: 'id',
         sheetName: 'Preventive Maintenance',
         columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
           { header: 'Service ID', key: 'service_id', type: 'number', width: 12 },
           { header: 'From Date', key: 'fromdate', type: 'date', width: 15 },
           { header: 'To Date', key: 'todate', type: 'date', width: 15 },

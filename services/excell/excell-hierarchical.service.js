@@ -554,10 +554,10 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 // Set foreign key in child record to establish relationship with parent record
                 record[childConfig.parentKey] = parentId;
 
-                // Parse child columns
+                // Parse child columns (starting from column 3: parent code, then child columns including ID)
                 childConfig.columns.forEach((col, colIndex) => {
                     // Map dropdown labels to values for import
-                    let cellValue = row.getCell(colIndex + 2).value;
+                    let cellValue = row.getCell(colIndex + 2).value; // +2 because column 1 is parent code
                     if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
                         // Map dropdown label to value for import
                         cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
@@ -566,34 +566,29 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     record[col.key] = parseCellValue(cellValue, col);
                 });
 
-                // Store row data for error reporting
+                // Store row data for error reporting (before removing id)
+                const originalRecord = { ...record };
                 rowData.push({
                     rowNumber: i + 2,
                     sheet: childConfig.sheetName,
-                    data: record,
+                    data: originalRecord,
                     rawRow: row.values
                 });
 
-                // Check if child record exists (using parent_id + unique field)
-                const uniqueField = childConfig.columns.find(col => col.required)?.key;
-                let existing = null;
-                // If a unique field is defined, check for existing record using parent ID and unique field value to determine if we should perform an update or insert
-                if (uniqueField) {
-                    const existingQuery = `SELECT id FROM ${childConfig.tableName} WHERE ${childConfig.parentKey} = @parentId AND ${uniqueField} = @uniqueValue`;
-                    console.log(`Checking for existing child record with query: ${existingQuery} and params: parentId=${record[childConfig.parentKey]}, uniqueValue=${record[uniqueField]}`);
-                    const existingResult = await db.executeQuery(databaseName, existingQuery, {
-                        parentId: record[childConfig.parentKey],
-                        uniqueValue: record[uniqueField]
-                    }, useApi);
-                    // If an existing record is found, we will perform an update; otherwise, we will perform an insert
-                    existing = existingResult && existingResult.length > 0 ? existingResult[0] : null;
-                }
+                // Determine insert vs update based on ID column
+                const recordId = record.id;
+                delete record.id; // Remove id from data to insert/update
+
+                // Set foreign key in child record to establish relationship with parent record
+                record[childConfig.parentKey] = parentId;
 
                 // Categorize records for bulk operations
-                if (existing) {
-                    recordsToUpdate.push({ id: existing.id, row: record, rowIndex: i });
-                } else {
+                if (!recordId || recordId === 0) {
+                    // INSERT: New record (id is 0, null, or empty)
                     recordsToInsert.push(record);
+                } else {
+                    // UPDATE: Existing record (id has a value)
+                    recordsToUpdate.push({ id: recordId, row: record, rowNumber: i + 2 });
                 }
 
             } catch (error) {
@@ -687,9 +682,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     });
                     results.updated++;
                 } catch (error) {
-                    logger.error(`Error updating row ${rowData[update.rowIndex]?.rowNumber || 'unknown'} in '${childConfig.sheetName}':`, error);
+                    logger.error(`Error updating row ${update.rowNumber} in '${childConfig.sheetName}':`, error);
                     results.errors.push({
-                        row: rowData[update.rowIndex]?.rowNumber || 'unknown',
+                        row: update.rowNumber,
                         sheet: childConfig.sheetName,
                         error: error.message,
                         data: update.row
