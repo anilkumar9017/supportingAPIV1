@@ -363,9 +363,9 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         if (!config) {
             throw new Error(`No hierarchical configuration found for menu code: ${menuCode}`);
         }
-        // Load workbook from file
+        // Load workbook from uploaded file buffer
         const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(file.buffer);
+        await workbook.xlsx.load(file.buffer);
         // Prepare dropdown metadata for mapping labels to values during import and for validation
         const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
         // Initialize results object to track inserted/updated records and errors for main and child sheets
