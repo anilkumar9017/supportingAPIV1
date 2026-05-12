@@ -394,6 +394,16 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
             results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction);
         }
 
+        const allErrors = [...results.main.errors];
+        Object.values(results.children).forEach(childResult => {
+            if (childResult?.errors?.length) {
+                allErrors.push(...childResult.errors);
+            }
+        });
+
+        results.errors = allErrors;
+        results.success = allErrors.length === 0;
+
         await transaction.commit();
         return results;
     } catch (error) {
@@ -406,14 +416,6 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         }
         logger.error(`Error importing hierarchical Excel for ${menuCode}:`, error);
         throw error;
-    } finally {
-        if (pool) {
-            try {
-                await pool.close();
-            } catch (closeError) {
-                logger.warn('Error closing hierarchical import database pool', closeError);
-            }
-        }
     }
 }
 
@@ -602,7 +604,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
         logger.error(`Error importing child sheet '${childConfig.sheetName}':`, error);
         throw new Error(`Error importing child sheet '${childConfig.sheetName}': ${error.message}`);
     }
-    
+
     return results;
 }
 

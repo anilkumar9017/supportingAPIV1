@@ -737,14 +737,6 @@ async function importExcel({menuCode, file, db, databaseName, useApi, userObj, b
         failedRecords: failedRecords.slice(0, 10) // Return first 10 failed records
       });
 
-    } finally {
-      if (pool) {
-        try {
-          await pool.close();
-        } catch (closeError) {
-          logger.warn('Error closing database pool', closeError);
-        }
-      }
     }
 
     logger.info(`Import completed: Created=${createdCount}, Updated=${updatedCount}, Total=${rows.length}`);
