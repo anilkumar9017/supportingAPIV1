@@ -36,33 +36,34 @@ const VALID_DROPDOWN_FIELDS = [
  */
 const validateColumn = (column, columnIndex) => {
     const errors = [];
+    const columnName = column.header || column.key || `Column ${columnIndex}`;
+    const columnLabel = `Column ${columnIndex} ('${columnName}')`;
     
     // Check required fields
     REQUIRED_COLUMN_FIELDS.forEach(field => {
         if (!(field in column)) {
-            errors.push(`Column ${columnIndex}: Missing required field '${field}'`);
+            errors.push(`${columnLabel}: Missing required field '${field}'`);
         }
     });
     
     // Validate column type
     if (column.type === 'child_array') {
-        const columnName = column.header || column.key || `Column ${columnIndex}`;
         errors.push(
-            `Column ${columnIndex} ('${columnName}'): type 'child_array' is only supported for hierarchical Excel configurations. ` +
+            `${columnLabel}: type 'child_array' is only supported for hierarchical Excel configurations. ` +
             `Use generateHierarchicalExcel/importHierarchicalExcel or remove child array definitions from standard import/export config.`
         );
     } else if (column.type && !VALID_COLUMN_TYPES.includes(column.type)) {
-        errors.push(`Column ${columnIndex}: Invalid type '${column.type}'. Valid types: ${VALID_COLUMN_TYPES.join(', ')}`);
+        errors.push(`${columnLabel}: Invalid type '${column.type}'. Valid types: ${VALID_COLUMN_TYPES.join(', ')}`);
     }
     
     // Dropdown validation
     if (column.type === 'dropdown') {
         if (!column.dropdown) {
-            errors.push(`Column ${columnIndex}: Dropdown type requires 'dropdown' configuration`);
+            errors.push(`${columnLabel}: Dropdown type requires 'dropdown' configuration`);
         } else {
             VALID_DROPDOWN_FIELDS.forEach(field => {
                 if (!(field in column.dropdown)) {
-                    errors.push(`Column ${columnIndex}: Dropdown missing required field '${field}'`);
+                    errors.push(`${columnLabel}: Dropdown missing required field '${field}'`);
                 }
             });
         }

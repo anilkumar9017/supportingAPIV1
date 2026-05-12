@@ -357,17 +357,28 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
  */
 async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi, userObj) {
+    let pool;
+    let transaction;
+
     try {
         // Extract config and child array definitions
         const config = extractHierarchicalConfig(menuCode);
         if (!config) {
             throw new Error(`No hierarchical configuration found for menu code: ${menuCode}`);
         }
+
         // Load workbook from uploaded file buffer
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(file.buffer);
+
         // Prepare dropdown metadata for mapping labels to values during import and for validation
         const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
+
+        // Start a shared transaction for hierarchical import
+        pool = await db.getConnection(databaseName, useApi);
+        transaction = new mssql.Transaction(pool);
+        await transaction.begin();
+
         // Initialize results object to track inserted/updated records and errors for main and child sheets
         const results = {
             main: { inserted: 0, updated: 0, errors: [] },
@@ -375,17 +386,33 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         };
 
         // Import main sheet
-        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings);
+        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction);
 
         // Import child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings);
+            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction);
         }
 
+        await transaction.commit();
         return results;
     } catch (error) {
+        if (transaction) {
+            try {
+                await transaction.rollback();
+            } catch (rollbackError) {
+                logger.error('Error rolling back hierarchical import transaction', rollbackError);
+            }
+        }
         logger.error(`Error importing hierarchical Excel for ${menuCode}:`, error);
         throw error;
+    } finally {
+        if (pool) {
+            try {
+                await pool.close();
+            } catch (closeError) {
+                logger.warn('Error closing hierarchical import database pool', closeError);
+            }
+        }
     }
 }
 
@@ -402,7 +429,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
 */
-async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}) {
+async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction) {
     const worksheet = workbook.getWorksheet(config.sheetName);
     if (!worksheet) {
         throw new Error(`Main sheet '${config.sheetName}' not found in Excel file`);
@@ -410,66 +437,57 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
     // Initialize results object to track inserted/updated records and errors for main sheet
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
-    // Start a transaction for the main sheet import process
-    const transaction = await db.createTransaction('mssql');
 
-    try {
-        // Process each row in the main sheet sequentially to maintain order and handle dependencies for child records
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            try {
-                const record = {};
-                // Parse columns and map dropdown labels to values
-                config.columns.forEach((col, colIndex) => {
-                    let cellValue = row.getCell(colIndex + 1).value; // ExcelJS columns are 1-based
-                    // If column is a dropdown, map the label back to the corresponding value using pre-fetched metadata
-                    if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
-                        // Map dropdown label to value for import
-                        cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
-                    }
-                    record[col.key] = parseCellValue(cellValue, col);
-                });
-
-                // Check if record exists
-                const existingQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @uniqueValue`;
-                const existing = await db.executeQuery(databaseName, existingQuery, { uniqueValue: record[config.uniqueKey] }, useApi);
-                // If record exists, perform update; otherwise, perform insert
-                if (existing && existing.length > 0) {
-                    // Update existing record
-                    await updateRecord({
-                        transaction,
-                        db,
-                        databaseName,
-                        tableName: config.tableName,
-                        row: record,
-                        id: existing[0][config.primaryKey]
-                    });
-                    results.updated++;
-                } else {
-                    // Insert new record
-                    await insertRecord({
-                        transaction,
-                        db,
-                        databaseName,
-                        tableName: config.tableName,
-                        row: record,
-                        useApi
-                    });
-                    results.inserted++;
+    // Process each row in the main sheet sequentially to maintain order and handle dependencies for child records
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        try {
+            const record = {};
+            // Parse columns and map dropdown labels to values
+            config.columns.forEach((col, colIndex) => {
+                let cellValue = row.getCell(colIndex + 1).value; // ExcelJS columns are 1-based
+                // If column is a dropdown, map the label back to the corresponding value using pre-fetched metadata
+                if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
+                    // Map dropdown label to value for import
+                    cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
                 }
-            } catch (error) {
-                results.errors.push({
-                    row: i + 2,
-                    error: error.message,
-                    data: row.values
-                });
-            }
-        }
+                record[col.key] = parseCellValue(cellValue, col);
+            });
 
-        await db.commitTransaction('mssql', transaction);
-    } catch (error) {
-        await db.rollbackTransaction('mssql', transaction);
-        throw error;
+            // Check if record exists
+            const existingQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @uniqueValue`;
+            const existing = await db.executeQuery(databaseName, existingQuery, { uniqueValue: record[config.uniqueKey] }, useApi);
+            // If record exists, perform update; otherwise, perform insert
+            if (existing && existing.length > 0) {
+                // Update existing record
+                await updateRecord({
+                    transaction,
+                    db,
+                    databaseName,
+                    tableName: config.tableName,
+                    row: record,
+                    id: existing[0][config.primaryKey]
+                });
+                results.updated++;
+            } else {
+                // Insert new record
+                await insertRecord({
+                    transaction,
+                    db,
+                    databaseName,
+                    tableName: config.tableName,
+                    row: record,
+                    useApi
+                });
+                results.inserted++;
+            }
+        } catch (error) {
+            results.errors.push({
+                row: i + 2,
+                error: error.message,
+                data: row.values
+            });
+        }
     }
 
     return results;
@@ -488,7 +506,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
  */
-async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}) {
+async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction) {
     // Check if child sheet exists in the workbook
     const worksheet = workbook.getWorksheet(childConfig.sheetName);
     if (!worksheet) {
@@ -499,8 +517,6 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     // Initialize results object to track inserted/updated records and errors for this child sheet
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
-    // Start a transaction for the child sheet import process to ensure data integrity
-    const transaction = await db.createTransaction('mssql');
 
     try {
         // Process each row in the child sheet sequentially to maintain order and handle dependencies on parent records
@@ -581,13 +597,11 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 });
             }
         }
-
-        await db.commitTransaction('mssql', transaction);
     } catch (error) {
-        await db.rollbackTransaction('mssql', transaction);
-        throw error;
+        logger.error(`Error importing child sheet '${childConfig.sheetName}':`, error);
+        throw new Error(`Error importing child sheet '${childConfig.sheetName}': ${error.message}`);
     }
-
+    
     return results;
 }
 
