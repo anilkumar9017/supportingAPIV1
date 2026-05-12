@@ -59,7 +59,7 @@ async function importExcel(req, res) {
         if(result?.errors){
             return res.status(200).json({
                 success: false,
-                message: 'Import completed.',
+                message: 'Import faild.',
                 errors: result?.errors
             });
         }
@@ -110,9 +110,48 @@ async function exportHierarchicalExcel(req, res) {
     }
 }
 
+async function importHierarchicalExcel(req, res) {
+    try {
+        const { menuCode } = req.body;
+        const useApi = req.useApi || false;
+        const userObj = req?.user;
+        const databaseName = req.databaseName;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Excel file is required.'
+            });
+        }
+
+        const result = await generateHierarchicalExcel.importHierarchicalExcel(menuCode, file, db, databaseName, useApi, userObj);
+        if(result?.errors){
+            return res.status(200).json({
+                success: false,
+                message: 'Import failed.',
+                errors: result?.errors
+            });
+        }
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Import completed.',
+            data: result,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 
 module.exports = {
     exportExcel,
     importExcel,
-    exportHierarchicalExcel
+    exportHierarchicalExcel,
+    importHierarchicalExcel
 };

@@ -401,7 +401,7 @@ async function importHierarchicalExcel(menuCode, filePath, db, databaseName, use
  * - Data integrity: The function checks for the existence of parent records before inserting child records and uses the unique key from the main sheet to establish relationships. It also validates dropdown values against the pre-fetched metadata to ensure only valid data is imported.
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
- */
+*/
 async function importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings = {}) {
     const worksheet = workbook.getWorksheet(config.sheetName);
     if (!worksheet) {
