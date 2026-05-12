@@ -7,7 +7,7 @@ const ExcelJS = require('exceljs');
 const configs = require('../../master-config/index');
 const { createLogger, getColumnIndexMap, getSmartRowRange, applyDropdownValidation } = require('./excell-utils');
 const { getGlobalDropdownCache } = require('./excell-dropdown-cache');
-const { insertRecord, updateRecord } = require('./bulk.service');
+const { insertRecord, updateRecord, bulkInsertRecords, bulkUpdateRecords } = require('./bulk.service');
 const logger = createLogger('HierarchicalExcelService');
 const mssql = require('mssql');
 
@@ -525,7 +525,11 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     const parentIdCache = new Map();
 
     try {
-        // Process each row in the child sheet sequentially to maintain order and handle dependencies on parent records
+        // Phase 1: Collect and prepare all records
+        const recordsToInsert = [];
+        const recordsToUpdate = [];
+        const rowData = []; // Store row data for error reporting
+
         for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             try {
@@ -562,12 +566,21 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     record[col.key] = parseCellValue(cellValue, col);
                 });
 
+                // Store row data for error reporting
+                rowData.push({
+                    rowNumber: i + 2,
+                    sheet: childConfig.sheetName,
+                    data: record,
+                    rawRow: row.values
+                });
+
                 // Check if child record exists (using parent_id + unique field)
                 const uniqueField = childConfig.columns.find(col => col.required)?.key;
                 let existing = null;
                 // If a unique field is defined, check for existing record using parent ID and unique field value to determine if we should perform an update or insert
                 if (uniqueField) {
                     const existingQuery = `SELECT id FROM ${childConfig.tableName} WHERE ${childConfig.parentKey} = @parentId AND ${uniqueField} = @uniqueValue`;
+                    console.log(`Checking for existing child record with query: ${existingQuery} and params: parentId=${record[childConfig.parentKey]}, uniqueValue=${record[uniqueField]}`);
                     const existingResult = await db.executeQuery(databaseName, existingQuery, {
                         parentId: record[childConfig.parentKey],
                         uniqueValue: record[uniqueField]
@@ -575,33 +588,17 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     // If an existing record is found, we will perform an update; otherwise, we will perform an insert
                     existing = existingResult && existingResult.length > 0 ? existingResult[0] : null;
                 }
-                // If no unique field is defined, we will always perform an insert for child records since we cannot determine uniqueness
+
+                // Categorize records for bulk operations
                 if (existing) {
-                    // Update existing child record
-                    await updateRecord({
-                        transaction,
-                        db,
-                        databaseName,
-                        tableName: childConfig.tableName,
-                        row: record,
-                        id: existing.id
-                    });
-                    results.updated++;
+                    recordsToUpdate.push({ id: existing.id, row: record, rowIndex: i });
                 } else {
-                    // Insert new child record
-                    await insertRecord({
-                        transaction,
-                        db,
-                        databaseName,
-                        tableName: childConfig.tableName,
-                        row: record,
-                        useApi
-                    });
-                    results.inserted++;
+                    recordsToInsert.push(record);
                 }
+
             } catch (error) {
-                // Log detailed error information for debugging and add to results
-                logger.error(`Error processing row ${i + 2} in child sheet '${childConfig.sheetName}':`, error);
+                // Log error for this row and add to failed records
+                logger.error(`Error preparing row ${i + 2} in child sheet '${childConfig.sheetName}':`, error);
                 results.errors.push({
                     row: i + 2,
                     sheet: childConfig.sheetName,
@@ -610,6 +607,97 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 });
             }
         }
+
+        // Phase 2: Tier 1 - Attempt bulk operations
+        let bulkInsertSuccess = false;
+        let bulkUpdateSuccess = false;
+
+        try {
+            if (recordsToInsert.length > 0) {
+                await bulkInsertRecords({
+                    transaction,
+                    db,
+                    databaseName,
+                    tableName: childConfig.tableName,
+                    rows: recordsToInsert
+                });
+                results.inserted += recordsToInsert.length;
+                bulkInsertSuccess = true;
+                logger.info(`Bulk inserted ${recordsToInsert.length} records in '${childConfig.sheetName}'`);
+            }
+        } catch (bulkInsertError) {
+            logger.warn(`Bulk insert failed for '${childConfig.sheetName}', falling back to individual inserts:`, bulkInsertError.message);
+        }
+
+        try {
+            if (recordsToUpdate.length > 0) {
+                await bulkUpdateRecords({
+                    transaction,
+                    db,
+                    databaseName,
+                    tableName: childConfig.tableName,
+                    updates: recordsToUpdate
+                });
+                results.updated += recordsToUpdate.length;
+                bulkUpdateSuccess = true;
+                logger.info(`Bulk updated ${recordsToUpdate.length} records in '${childConfig.sheetName}'`);
+            }
+        } catch (bulkUpdateError) {
+            logger.warn(`Bulk update failed for '${childConfig.sheetName}', falling back to individual updates:`, bulkUpdateError.message);
+        }
+
+        // Phase 3: Tier 2 - Individual processing for failed bulk operations
+        if (!bulkInsertSuccess && recordsToInsert.length > 0) {
+            logger.info(`Processing ${recordsToInsert.length} inserts individually for '${childConfig.sheetName}'`);
+            for (let i = 0; i < recordsToInsert.length; i++) {
+                try {
+                    await insertRecord({
+                        transaction,
+                        db,
+                        databaseName,
+                        tableName: childConfig.tableName,
+                        row: recordsToInsert[i],
+                        useApi
+                    });
+                    results.inserted++;
+                } catch (error) {
+                    logger.error(`Error inserting row ${rowData.find(r => r.data === recordsToInsert[i])?.rowNumber || 'unknown'} in '${childConfig.sheetName}':`, error);
+                    results.errors.push({
+                        row: rowData.find(r => r.data === recordsToInsert[i])?.rowNumber || 'unknown',
+                        sheet: childConfig.sheetName,
+                        error: error.message,
+                        data: recordsToInsert[i]
+                    });
+                }
+            }
+        }
+
+        if (!bulkUpdateSuccess && recordsToUpdate.length > 0) {
+            logger.info(`Processing ${recordsToUpdate.length} updates individually for '${childConfig.sheetName}'`);
+            for (let i = 0; i < recordsToUpdate.length; i++) {
+                const update = recordsToUpdate[i];
+                try {
+                    await updateRecord({
+                        transaction,
+                        db,
+                        databaseName,
+                        tableName: childConfig.tableName,
+                        row: update.row,
+                        id: update.id
+                    });
+                    results.updated++;
+                } catch (error) {
+                    logger.error(`Error updating row ${rowData[update.rowIndex]?.rowNumber || 'unknown'} in '${childConfig.sheetName}':`, error);
+                    results.errors.push({
+                        row: rowData[update.rowIndex]?.rowNumber || 'unknown',
+                        sheet: childConfig.sheetName,
+                        error: error.message,
+                        data: update.row
+                    });
+                }
+            }
+        }
+
     } catch (error) {
         logger.error(`Error importing child sheet '${childConfig.sheetName}':`, error);
         throw new Error(`Error importing child sheet '${childConfig.sheetName}': ${error.message}`);
