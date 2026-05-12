@@ -35,7 +35,7 @@ router.post('/export-hierarchical', excellController.exportHierarchicalExcel);
 
 //import excell
 router.post('/import', upload.single('file'), excellController.importExcel);
-router.post('/import-HierarchicalExcel', upload.single('file'), excellController.importHierarchicalExcel);
+router.post('/import-hierarchical', upload.single('file'), excellController.importHierarchicalExcel);
 
 
 
