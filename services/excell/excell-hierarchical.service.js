@@ -521,6 +521,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
 
+    // Cache for parent IDs to avoid repeated queries for the same parent code
+    const parentIdCache = new Map();
+
     try {
         // Process each row in the child sheet sequentially to maintain order and handle dependencies on parent records
         for (let i = 0; i < rows.length; i++) {
@@ -530,15 +533,22 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 const parentCode = row.getCell(1).value; // Parent identifier
                 const record = {};
 
-                // Find parent ID
-                const parentQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @parentCode`;
-                const parentResult = await db.executeQuery(databaseName, parentQuery, { parentCode }, useApi);
-                // If parent record is not found, throw an error for this row and skip processing child record
-                if (!parentResult || parentResult.length === 0) {
-                    throw new Error(`Parent record not found for code: ${parentCode}`);
+                // Find parent ID (use cache if available)
+                let parentId;
+                if (parentIdCache.has(parentCode)) {
+                    parentId = parentIdCache.get(parentCode);
+                } else {
+                    const parentQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @parentCode`;
+                    const parentResult = await db.executeQuery(databaseName, parentQuery, { parentCode }, useApi);
+                    // If parent record is not found, throw an error for this row and skip processing child record
+                    if (!parentResult || parentResult.length === 0) {
+                        throw new Error(`Parent record not found for code: ${parentCode}`);
+                    }
+                    parentId = parentResult[0][config.primaryKey];
+                    parentIdCache.set(parentCode, parentId);
                 }
                 // Set foreign key in child record to establish relationship with parent record
-                record[childConfig.parentKey] = parentResult[0][config.primaryKey];
+                record[childConfig.parentKey] = parentId;
 
                 // Parse child columns
                 childConfig.columns.forEach((col, colIndex) => {
