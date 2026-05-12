@@ -356,7 +356,7 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
  */
-async function importHierarchicalExcel(menuCode, filePath, db, databaseName, useApi, userObj) {
+async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi, userObj) {
     try {
         // Extract config and child array definitions
         const config = extractHierarchicalConfig(menuCode);
@@ -365,7 +365,7 @@ async function importHierarchicalExcel(menuCode, filePath, db, databaseName, use
         }
         // Load workbook from file
         const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(filePath);
+        await workbook.xlsx.readFile(file.buffer);
         // Prepare dropdown metadata for mapping labels to values during import and for validation
         const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
         // Initialize results object to track inserted/updated records and errors for main and child sheets
