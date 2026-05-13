@@ -281,23 +281,37 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
 
     for (const col of allColumns) {
         if (col.type !== 'dropdown' || !col.dropdown) continue;
-        // Generate cache key and attempt to get dropdown data from cache
-        const cacheKey = `${databaseName}:${col.dropdown.query}:${col.dropdown.labelField}:${col.dropdown.valueField}`;
-        let dropdownResult = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
-        // If not in cache, execute query and store in cache
-        if (!dropdownResult) {
-            dropdownResult = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
-            cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, dropdownResult);
+        
+        let dropdownResult;
+        let sheetKey;
+        
+        // Check if dropdown uses static options array or database query
+        if (col.dropdown.options && Array.isArray(col.dropdown.options)) {
+            // Static dropdown options: use options array directly
+            dropdownResult = col.dropdown.options;
+            sheetKey = `${col.dropdown.sheetName}:static:${col.key}`;
+        } else {
+            // Query-based dropdown: fetch from database
+            sheetKey = `${col.dropdown.sheetName}:${col.dropdown.query}:${col.dropdown.labelField}:${col.dropdown.valueField}`;
+            dropdownResult = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
+            // If not in cache, execute query and store in cache
+            if (!dropdownResult) {
+                dropdownResult = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+                cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, dropdownResult);
+            }
         }
+        
         // Create value-to-label mapping for this dropdown column
         const valueMap = {};
         dropdownResult.forEach(item => {
-            valueMap[String(item[col.dropdown.valueField])] = item[col.dropdown.labelField];
+            const label = item[col.dropdown.labelField];
+            const value = item[col.dropdown.valueField];
+            valueMap[String(value)] = label;
         });
         // Store mapping and sheet info for validation setup
         dropdownValueMaps[col.key] = valueMap;
+        
         // Create hidden sheet for dropdown options if it doesn't already exist
-        const sheetKey = `${col.dropdown.sheetName}:${col.dropdown.query}:${col.dropdown.labelField}:${col.dropdown.valueField}`;
         let hiddenSheetName = createdSheets.get(sheetKey);
         // If sheet for this dropdown data hasn't been created yet, create it
         if (!hiddenSheetName) {
@@ -323,7 +337,8 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
             ];
             // Add dropdown options to hidden sheet
             dropdownResult.forEach(item => {
-                hiddenSheet.addRow({ value: item[col.dropdown.labelField] });
+                const label = item[col.dropdown.labelField];
+                hiddenSheet.addRow({ value: label });
             });
             // Track used sheet name and created sheet for this dropdown configuration
             usedSheetNames.add(hiddenSheetName);
@@ -886,26 +901,37 @@ async function prepareImportDropdownMappings(config, db, databaseName, useApi) {
         allColumns.push(...child.columns);
     });
 
-    // For each dropdown column, retrieve the dropdown data from the database (using cache if available) and construct a mapping of labels to values for use during import to convert Excel labels back to stored values in the database. This mapping is essential for ensuring that the imported data is correctly interpreted and stored in the database according to the defined dropdown options.
+    // For each dropdown column, retrieve the dropdown data and construct a mapping of labels to values for use during import
     for (const col of allColumns) {
         if (col.type !== 'dropdown' || !col.dropdown) continue;
 
-        let result = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
-        if (!result) {
-            // If dropdown data is not in cache, execute the query to retrieve it and store it in the cache for future use
-            result = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
-            cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, result);
+        let result;
+        
+        // Check if dropdown uses static options array or database query
+        if (col.dropdown.options && Array.isArray(col.dropdown.options)) {
+            // Static dropdown options: use options array directly
+            result = col.dropdown.options;
+        } else {
+            // Query-based dropdown: fetch from database with caching
+            result = cache.get(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField);
+            if (!result) {
+                // If dropdown data is not in cache, execute the query to retrieve it and store it in the cache for future use
+                result = await db.executeQuery(databaseName, col.dropdown.query, {}, useApi);
+                cache.set(databaseName, col.dropdown.query, col.dropdown.labelField, col.dropdown.valueField, result);
+            }
         }
 
-        // Construct a mapping of labels to values for this dropdown column to be used during import to convert Excel labels back to stored values in the database. This mapping is essential for ensuring that the imported data is correctly interpreted and stored in the database according to the defined dropdown options.
+        // Construct a mapping of labels to values for this dropdown column using labelField and valueField
         const map = {};
         result.forEach(item => {
-            map[String(item[col.dropdown.labelField])] = item[col.dropdown.valueField];
+            const label = item[col.dropdown.labelField];
+            const value = item[col.dropdown.valueField];
+            map[String(label)] = value;
         });
         // Store the mapping for this column key to be used during import processing
         dropdownMappings[col.key] = map;
     }
-    // Return the constructed dropdown mappings for use during import processing to convert Excel labels back to stored values in the database. This mapping is essential for ensuring that the imported data is correctly interpreted and stored in the database according to the defined dropdown options.
+    // Return the constructed dropdown mappings for use during import processing
     return dropdownMappings;
 }
 

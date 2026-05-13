@@ -17,7 +17,20 @@ module.exports = {
         {
             header: 'Expense Category',
             key: 'expense_category',
-            type: 'text'
+            type: 'dropdown',
+            dropdown: {
+                sheetName: 'ExpenseCategories',
+                labelField: 'name',
+                valueField: 'code',
+                options: [
+                    { name: 'Fuel', code: 'FUEL' },
+                    { name: 'Maintenance', code: 'MAINTENANCE' },
+                    { name: 'Tolls', code: 'TOLLS' },
+                    { name: 'Parking', code: 'PARKING' },
+                    { name: 'Driver Allowance', code: 'DRIVER_ALLOWANCE' },
+                    { name: 'Other', code: 'OTHER' }
+                ]
+            }
         },
 
         {
