@@ -37,7 +37,7 @@ module.exports = {
             header: 'User',
             key: 'user_id',
             type: 'dropdown',
-            data_type: 'numberr',
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Users',
                 query: `select id, first_name +' '+ last_name as name from m_user_master`,
