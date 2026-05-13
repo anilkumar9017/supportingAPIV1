@@ -30,7 +30,12 @@ module.exports = {
         }
       },
       { header: 'Form Builder ID', key: 'form_builder_id', type: 'number', width: 20 },
-      { header: 'Branch', key: 'branch', type: 'text', width: 20 },
+      { header: 'Branch', key: 'branch', type: 'dropdown', dataType: 'text', width: 30, dropdown: {
+        sheetName: 'Branch',
+        query: "select id, name from m_branch",
+        labelField: 'name',
+        valueField: 'id'
+      } },
       { header: 'Serial No', key: 'serialno', type: 'text', width: 20 },
       { header: 'Owner', key: 'owner_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
           sheetName: 'Owners',
@@ -53,11 +58,23 @@ module.exports = {
       { header: 'Odometer Actual', key: 'odo_actual', type: 'number', width: 20 },
       { header: 'Odometer UOM', key: 'odo_uom', type: 'text', width: 20 },
       { header: 'Buying Date', key: 'buying_date', type: 'date', width: 20 },
-      { header: 'Weight UOM', key: 'weight_uom', type: 'text', width: 20 },
+      { header: 'Weight UOM', key: 'weight_uom', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+            sheetName: 'Weight UOM',
+            query: 'select id, name from m_uom_weight',
+            labelField: 'name',
+            valueField: 'id'
+        }
+      },
       { header: 'Weight Empty', key: 'weight_empty', type: 'number', width: 20 },
       { header: 'Weight Capacity', key: 'weight_capacity', type: 'number', width: 20 },
       { header: 'Weight Max', key: 'weight_max', type: 'number', width: 20 },
-      { header: 'Volume UOM', key: 'volume_uom', type: 'text', width: 20 },
+      { header: 'Volume UOM', key: 'volume_uom', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Volume UOM',
+        query: 'select id, name from m_uom_lengthwidth',
+        labelField: 'name',
+        valueField: 'id'
+      }
+      },
       { header: 'Volume Empty', key: 'volume_empty', type: 'number', width: 20 },
       { header: 'Volume Capacity', key: 'volume_capacity', type: 'number', width: 20 },
       { header: 'Volume Max', key: 'volume_max', type: 'number', width: 20 },
@@ -82,8 +99,18 @@ module.exports = {
       { header: 'Reduction', key: 'reduction', type: 'number', width: 20 },
       { header: 'Condition', key: 'condition', type: 'number', width: 20 },
       { header: 'Trailer Type', key: 'trailer_type', type: 'number', width: 20 },
-      { header: 'Axle Config', key: 'axle_config', type: 'number', width: 20 },
-      { header: 'Tyre Axle Config', key: 'tyre_axle_config', type: 'number', width: 20 },
+      { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+        sheetName: 'Axle Config',
+        query: 'select id, name from m_axle_conf',
+        labelField: 'name',
+        valueField: 'id'
+      } },
+      { header: 'Tyre Axle Config', key: 'tyre_axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+        sheetName: 'Axle Config',
+        query: 'select id, name from m_axle_conf',
+        labelField: 'name',
+        valueField: 'id'
+      } },
       { header: 'Axle Weights', key: 'axle1_weight', type: 'number', width: 20 },
       { header: 'Axle2 Weight', key: 'axle2_weight', type: 'number', width: 20 },
       { header: 'Axle3 Weight', key: 'axle3_weight', type: 'number', width: 20 },
@@ -98,7 +125,7 @@ module.exports = {
       { header: 'Engine No', key: 'engineno', type: 'text', width: 20 },
       { header: 'Registration No', key: 'registration_no', type: 'text', width: 20 },
       { header: 'Registration Date', key: 'registration_date', type: 'date', width: 20 },
-      { header: 'Fuel Ratio', key: 'fuel_ratio', type: 'number', width: 20 },
+      { header: 'Fuel Ratio', key: 'fuel_ratio', type: 'number', width: 20},
       { header: 'Trip Type', key: 'triptype', type: 'text', width: 20 },
       { header: 'Self Owned', key: 'self_owned', type: 'checkbox', values: ['Y', 'N'], width: 20 },
   

@@ -35,11 +35,11 @@ module.exports = {
             header: 'Account Currency',
             key: 'account_currency',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
@@ -84,11 +84,11 @@ module.exports = {
             header: 'Father Account',
             key: 'father_accountid',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'ParentAccounts',
-                query: `select id, account_name from m_account`,
-                labelField: 'account_name',
+                query: `select id, account_code from m_chartofaccounts where is_postable='N'`,
+                labelField: 'account_code',
                 valueField: 'id'
             }
         },
@@ -207,7 +207,8 @@ module.exports = {
         {
             header: 'Default Tax Code',
             key: 'default_taxcode',
-            type: 'text'
+            type: 'text',
+            hideColumn: true,
         },
 
         {

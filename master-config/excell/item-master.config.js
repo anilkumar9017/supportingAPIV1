@@ -1,13 +1,8 @@
 module.exports = {
-
     menuCode: 'item-master',
-
     sheetName: 'Items',
-
     tableName: 'm_item',
-
     primaryKey: 'id',
-
     uniqueKey: 'item_code',
 
     columns: [
@@ -91,8 +86,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
@@ -107,11 +102,11 @@ module.exports = {
             header: 'Default Warehouse',
             key: 'default_warehouse_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Warehouses',
-                query: `select id, warehouse_name from m_warehouse`,
-                labelField: 'warehouse_name',
+                query: `select id, name from m_warehouse`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },
@@ -184,7 +179,7 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Manufacturers',
-                query: `select id, name from m_manufacturer`,
+                query: `select id, name from m_manufacture`,
                 labelField: 'name',
                 valueField: 'id'
             }
@@ -250,11 +245,11 @@ module.exports = {
             header: 'UOM Group',
             key: 'uom_group_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'UOMGroups',
-                query: `select id, group_name from m_uom_group`,
-                labelField: 'group_name',
+                query: `select id, code from m_uom_group`,
+                labelField: 'code',
                 valueField: 'id'
             }
         },
@@ -263,11 +258,11 @@ module.exports = {
             header: 'Inventory UOM',
             key: 'inventory_uom_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'InventoryUOM',
-                query: `select id, uom_name from m_uom`,
-                labelField: 'uom_name',
+                query: `select id, code from m_uom`,
+                labelField: 'code',
                 valueField: 'id'
             }
         },
@@ -276,11 +271,11 @@ module.exports = {
             header: 'Sales UOM',
             key: 'sales_uom_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'SalesUOM',
-                query: `select id, uom_name from m_uom`,
-                labelField: 'uom_name',
+                query: `select id, code from m_uom`,
+                labelField: 'code',
                 valueField: 'id'
             }
         },
@@ -289,11 +284,11 @@ module.exports = {
             header: 'Purchase UOM',
             key: 'purchase_uom_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'PurchaseUOM',
-                query: `select id, uom_name from m_uom`,
-                labelField: 'uom_name',
+                query: `select id, code from m_uom`,
+                labelField: 'code',
                 valueField: 'id'
             }
         },
@@ -308,11 +303,11 @@ module.exports = {
             header: 'Tax Group',
             key: 'tax_group_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'TaxGroups',
-                query: `select id, group_name from m_tax_group`,
-                labelField: 'group_name',
+                query: `select id, name from m_tax`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },

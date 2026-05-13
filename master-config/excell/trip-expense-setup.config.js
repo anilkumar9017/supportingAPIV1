@@ -1,13 +1,8 @@
 module.exports = {
-
     menuCode: 'trip-expense-setup',
-
     sheetName: 'Trip Expenses',
-
     tableName: 'm_trip_expense',
-
     primaryKey: 'id',
-
     uniqueKey: 'expense_name',
 
     columns: [
@@ -29,11 +24,11 @@ module.exports = {
             header: 'User',
             key: 'user_id',
             type: 'dropdown',
-
+            data_type: 'numberr',
             dropdown: {
                 sheetName: 'Users',
-                query: `select id, user_name from m_users`,
-                labelField: 'user_name',
+                query: `select id, first_name +' '+ last_name as name from m_user_master`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },
@@ -41,20 +36,34 @@ module.exports = {
         {
             header: 'Revenue Account',
             key: 'revenue_account',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
             header: 'Expense Account',
             key: 'expense_account',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
             header: 'Item',
             key: 'item_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Items',
                 query: `select id, item_code from m_item`,
@@ -67,10 +76,9 @@ module.exports = {
             header: 'BP',
             key: 'bp_id',
             type: 'dropdown',
-
             dropdown: {
                 sheetName: 'BusinessPartners',
-                query: `select id, card_code from m_business_partner`,
+                query: `select id, card_code from m_customer`,
                 labelField: 'card_code',
                 valueField: 'id'
             }
@@ -92,7 +100,14 @@ module.exports = {
         {
             header: 'Accrual Account',
             key: 'accrual_account',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
@@ -110,13 +125,27 @@ module.exports = {
         {
             header: 'Vehicle Class',
             key: 'vehicle_class',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'VehicleClass',
+                query: `select id, name from m_fm_vehicle_class`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
             header: 'Commodity',
             key: 'commodity',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'Commodity',
+                query: `select id, name from m_commodity_type`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
@@ -128,7 +157,14 @@ module.exports = {
         {
             header: 'Fund Account',
             key: 'fund_account',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
@@ -150,7 +186,7 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
+                query: `select id, code from m_currencies`,
                 labelField: 'code',
                 valueField: 'id'
             }
@@ -172,10 +208,9 @@ module.exports = {
             header: 'Card',
             key: 'card_id',
             type: 'dropdown',
-
             dropdown: {
                 sheetName: 'Cards',
-                query: `select id, card_code from m_card`,
+                query: `select id, card_code from m_customer`,
                 labelField: 'card_code',
                 valueField: 'id'
             }
@@ -200,8 +235,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Employees',
-                query: `select id, employee_name from m_employee`,
-                labelField: 'employee_name',
+                query: `select id, first_name +''+ last_name as name from m_employee`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },
@@ -215,13 +250,27 @@ module.exports = {
         {
             header: 'WIP Account LC',
             key: 'wipact_lc',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
             header: 'WIP Account SC',
             key: 'wipact_sc',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
@@ -239,7 +288,14 @@ module.exports = {
         {
             header: 'Cost Center',
             key: 'cost_center',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountMaster',
+                query: `select id, name from m_costcenters`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
@@ -253,11 +309,11 @@ module.exports = {
             header: 'IOU Account',
             key: 'iou_account_id',
             type: 'dropdown',
-
+            data_type: 'text',
             dropdown: {
-                sheetName: 'IOUAccounts',
-                query: `select id, account_name from m_account`,
-                labelField: 'account_name',
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
                 valueField: 'id'
             }
         }

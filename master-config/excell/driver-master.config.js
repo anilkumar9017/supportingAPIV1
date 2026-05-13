@@ -1,13 +1,8 @@
 module.exports = {
-
     menuCode: 'driver-master',
-
     sheetName: 'Drivers',
-
     tableName: 'm_driver',
-
     primaryKey: 'id',
-
     uniqueKey: 'driverid',
 
     columns: [
@@ -29,7 +24,6 @@ module.exports = {
             header: 'Default Vehicle',
             key: 'default_vehicle',
             type: 'dropdown',
-
             dropdown: {
                 sheetName: 'Vehicles',
                 query: `select id, code from m_vehicle`,
@@ -213,7 +207,12 @@ module.exports = {
                 {
                     header: 'License Type',
                     key: 'license_type',
-                    type: 'text'
+                    type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+                        sheetName: 'License Types',
+                        query: 'select id, name from m_license_type',
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {

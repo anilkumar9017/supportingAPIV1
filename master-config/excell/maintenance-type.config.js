@@ -4,7 +4,7 @@ module.exports = {
 
     sheetName: 'Maintenance Type',
 
-    tableName: 'm_maintenance',
+    tableName: 'm_maintenance_type',
 
     primaryKey: 'id',
 

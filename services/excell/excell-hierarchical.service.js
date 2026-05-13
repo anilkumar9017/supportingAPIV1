@@ -364,7 +364,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
     try {
         // Determine transaction mode based on environment variable
         // Default: ALL-OR-NOTHING (rollback on any error) unless EXCEL_PARTIAL_IMPORT is explicitly set to 'true'
-        const partialImportAllowed = process.env.EXCEL_PARTIAL_IMPORT === 'true';
+        const partialImportAllowed = process.env.EXCEL_PARTIAL_IMPORT == 'true';
         logger.info(`Excel import mode: ${partialImportAllowed ? 'PARTIAL IMPORT' : 'ALL-OR-NOTHING (default)'}`);
 
         // Extract config and child array definitions

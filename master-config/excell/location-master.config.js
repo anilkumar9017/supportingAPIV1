@@ -243,7 +243,7 @@ module.exports = {
 
                     dropdown: {
                         sheetName: 'UserGroups',
-                        query: `select id, code from m_user_group`,
+                        query: `select id, code from m_user_groups`,
                         labelField: 'code',
                         valueField: 'id'
                     }

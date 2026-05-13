@@ -26,7 +26,7 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Parts',
-                query: `select id, name from m_part`,
+                query: `select id, name from m_part_type`,
                 labelField: 'name',
                 valueField: 'id'
             }
@@ -39,7 +39,7 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Maintenances',
-                query: `select id, name from m_maintenance`,
+                query: `select id, name from m_maintenance_type`,
                 labelField: 'name',
                 valueField: 'id'
             }
@@ -79,11 +79,11 @@ module.exports = {
             values: ['Y', 'N']
         },
 
-        {
+        /* {
             header: 'Job Time Required',
             key: 'job_time_required',
             type: 'time'
-        }
+        } */
 
     ]
 

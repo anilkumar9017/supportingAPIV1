@@ -1,15 +1,10 @@
 module.exports = {
 
     menuCode: 'business-partner-master',
-
     sheetName: 'Business Partners',
-
     tableName: 'm_customer',
-
     primaryKey: 'id',
-
     uniqueKey: 'card_code',
-
     columns: [
 
         {
@@ -41,11 +36,11 @@ module.exports = {
             header: 'BP Currency',
             key: 'bp_currency_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
@@ -121,7 +116,14 @@ module.exports = {
         {
             header: 'Account Payable',
             key: 'account_payable',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'AccountPayment',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
@@ -137,8 +139,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'SalesEmployees',
-                query: `select id, employee_name from m_employee`,
-                labelField: 'employee_name',
+                query: `select id, first_name +''+ last_name as name from m_employee`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },
@@ -335,7 +337,14 @@ module.exports = {
         {
             header: 'Down Payment Account',
             key: 'down_pymnt_acct',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'AccountPayment',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
+                valueField: 'id'
+            }
         },
 
         {
@@ -543,7 +552,14 @@ module.exports = {
                 {
                     header: 'Department',
                     key: 'department',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'ParentADepartmentcounts',
+                        query: `select id, name from m_department`,
+                        labelField: 'account_code',
+                        valueField: 'id'
+                    }
                 },
 
                 {
