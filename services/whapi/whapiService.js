@@ -1,18 +1,48 @@
 
 const { handleMessage } = require("./messageHandler");
-
+const db = require('../../config/database');
 /**
  * Process incoming Whapi.Cloud webhook payload
  * Whapi sends batches of messages/events
  */
-async function processWebhook(payload) {
+async function processWebhook(payload, context) {
+  const { whapi, databaseName, tenant } = context;
+
+  // =====================================
+  // MESSAGES
+  // =====================================
   if (payload.messages && Array.isArray(payload.messages)) {
     for (const message of payload.messages) {
       try {
         if (message.from_me || message.source === "api") {
           continue;
         }
-        const allowedNumbers = process.env.ADMIN_NUMBERS
+        const chatId = message.chat_id;
+        // Ignore groups
+        if (chatId.endsWith("@g.us")) {
+          continue;
+        }
+
+        message.whapi_token = tenant?.whapiToken;
+        message.databaseName = databaseName;
+        message.tenant = tenant;
+        
+        //Connect to Db to check message from driver or AGENT
+        const query =`select * FROM m_driver where driver_phone1='${message.from}' OR driver_phone2='${message.from}'`;
+       
+        const result = await db.executeQuery(databaseName, query, {  }, true);
+        if(result[0]){
+            message.userRole = "DRIVER";
+        }else{
+          const strQueryAgent =`select * FROM m_employee where mobile_no='${message.from}'`;
+          message.userRole ="AGENT";
+          
+          const result = await db.executeQuery(databaseName, strQueryAgent, {  }, true);
+        
+        }
+        return await handleMessage(message);
+
+        const allowedNumbers = (tenant.adminNumbers || "")
           .split(",")
           .map((num) => num.trim());
 
@@ -20,46 +50,34 @@ async function processWebhook(payload) {
 
         const isAgent = allowedNumbers.includes(incoming);
 
-        const chatId = message.chat_id;
+        
 
-        // ignore groups
-        if (chatId.endsWith("@g.us")) continue;
+        
+       
+        // =====================================
+        // INJECT CONTEXT
+        // =====================================
+        // message.userRole = isAgent ? "AGENT" : "DRIVER";
 
-        console.log(`User: ${incoming} → ${isAgent ? "AGENT" : "DRIVER"}`);
+        // message.whapi_token = tenant?.whapiToken;
 
-        // 👇 Inject role into message
-        message.userRole = isAgent ? "AGENT" : "DRIVER";
+        // message.databaseName = databaseName;
 
-        if (message.userRole == "DRIVER") {
-          console.log("Other message: ");
-          return;
-        }
+        // message.tenant = tenant;
 
-        await handleMessage(message);
+        // await handleMessage(message);
       } catch (err) {
-        logger.error(`Error processing message: ${err.message}`);
+        console.error(`Message Error: ${err.message}`);
       }
     }
   }
 
-  // statuses
+  // =====================================
+  // STATUS EVENTS
+  // =====================================
   if (payload.statuses && Array.isArray(payload.statuses)) {
     for (const status of payload.statuses) {
-      handleStatus(status);
-    }
-  }
-
-  // contacts
-  if (payload.contacts && Array.isArray(payload.contacts)) {
-    for (const contact of payload.contacts) {
-      logger.info(`Contact update: ${contact.id} — ${contact.name}`);
-    }
-  }
-
-  // groups
-  if (payload.groups && Array.isArray(payload.groups)) {
-    for (const group of payload.groups) {
-      logger.info(`Group event: ${group.id}`);
+      console.info(`Status: ${status.status}`);
     }
   }
 }
@@ -67,7 +85,7 @@ async function processWebhook(payload) {
 
 function handleStatus(status) {
   const { id, status: st, chat_id } = status;
-  logger.info(`Message ${id} in ${chat_id}: ${st}`);
+  console.info(`Message ${id} in ${chat_id}: ${st}`);
 }
 
 module.exports = { processWebhook };

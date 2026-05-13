@@ -1,6 +1,8 @@
 const db = require('../config/database');
 const axios = require('axios');
 
+const poerBiService = require('../services/powerbi/powerbi.service')
+
 
 
 /* 
@@ -171,7 +173,7 @@ async function generateReportEmbedToken(req, res) {
       return res.status(500).json({
         success: false,
         message: error.message,
-    });
+     });
     }
   }
 
@@ -344,10 +346,62 @@ async function generateReportEmbedToken(req, res) {
   }
   
 
+  /* other databse */
+  async function generateReportToken(req, res){
+    try {
+      const result = await poerBiService.generateReportEmbedToken(req, res);
+      return res.status(200).json({
+          success: true,
+          message: 'Success',
+          data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || error
+    });
+    }
+  }
+
+  async function refreshDatasetCustom(req, res){
+    try {
+      const result = await poerBiService.refreshDataset(req, res);
+      return res.status(200).json({
+          success: true,
+          message: 'Success',
+          data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || error
+    });
+    }
+  }
+
+  async function refreshStatusCustom(req, res){
+    try {
+      const result = await poerBiService.refreshStatus(req, res);
+      return res.status(200).json({
+          success: true,
+          message: 'Success',
+          data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || error
+    });
+    }
+  }
 
 module.exports = {
     generateReportEmbedToken,
     generateDashboardEmbedToken,
     refreshDataset,
-    refreshStatus
+    refreshStatus,
+
+    generateReportToken,
+    refreshDatasetCustom,
+    refreshStatusCustom
 }

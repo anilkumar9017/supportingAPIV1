@@ -2,43 +2,36 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 
-const whapiToken = process.env.WHAPI_TOKEN;
-const whapiURL = process.env.WHAPI_API_URL || "https://gate.whapi.cloud";
-
 class WhapiService {
-  constructor() {
+  constructor(token) {
+   
     this.client = axios.create({
-      baseURL: whapiURL,
+      baseURL: "https://gate.whapi.cloud",
+
       headers: {
-        Authorization: `Bearer ${whapiToken}`,
+        Authorization: `Bearer ${token}`,
+
         "Content-Type": "application/json",
       },
+
       timeout: 30000,
     });
-
-    // Response interceptor for logging
-    this.client.interceptors.response.use(
-      (res) => res,
-      (err) => {
-       
-        throw err;
-      },
-    );
   }
-
+  
   // ─── Sending Messages ────────────────────────────────────────────────
 
   async sendText(to, text, options = {}) {
+   
     const res = await this.client.post("/messages/text", {
       to,
       body: text,
       ...options,
     });
-    
+   
     return res.data;
   }
   async sendInteractive(data) {
-    console.log("Sending interactive message with payload:", data);
+    //console.log("Sending interactive message with payload:", data);
     const res = await this.client.post("/messages/interactive", data);
     return res.data;
   }
@@ -58,7 +51,7 @@ class WhapiService {
       media: imageUrlOrPath,
       caption,
     });
-    
+    console.info(`Image sent to ${to}`);
     return res.data;
   }
 
@@ -69,7 +62,7 @@ class WhapiService {
       filename,
       caption,
     });
-   
+    console.info(`Document sent to ${to}`);
     return res.data;
   }
 
@@ -98,7 +91,7 @@ class WhapiService {
       name,
       address,
     });
-   
+    console.info(`Location sent to ${to}`);
     return res.data;
   }
 
@@ -112,39 +105,7 @@ class WhapiService {
     return res.data;
   }
 
-  // ─── Interactive Messages ────────────────────────────────────────────
-
-  // async sendButtons(to, body, buttons, header = "", footer = "") {
-  //   const res = await this.client.post("/messages/interactive/buttons", {
-  //     to,
-  //     header: header ? { type: "text", text: header } : undefined,
-  //     body: { text: body },
-  //     footer: footer ? { text: footer } : undefined,
-  //     action: {
-  //       buttons: buttons.map((btn, i) => ({
-  //         type: "reply",
-  //         reply: { id: btn.id || `btn_${i}`, title: btn.title },
-  //       })),
-  //     },
-  //   });
-  //   logger.info(`Buttons sent to ${to}`);
-  //   return res.data;
-  // }
-
-  // async sendList(to, body, buttonText, sections, header = "", footer = "") {
-  //   const res = await this.client.post("/messages/interactive/list", {
-  //     to,
-  //     header: header ? { type: "text", text: header } : undefined,
-  //     body: { text: body },
-  //     footer: footer ? { text: footer } : undefined,
-  //     action: {
-  //       button: buttonText,
-  //       sections,
-  //     },
-  //   });
-  //   logger.info(`List sent to ${to}`);
-  //   return res.data;
-  // }
+ 
 
   async sendInteractive(payload) {
     const res = await this.client.post("/messages/interactive", payload);
@@ -289,6 +250,7 @@ class WhapiService {
       url,
       events,
     });
+    console.info(`Webhook set to: ${url}`);
     return res.data;
   }
 
@@ -321,4 +283,5 @@ class WhapiService {
   }
 }
 
-module.exports = new WhapiService();
+// module.exports = new WhapiService();
+module.exports = WhapiService;

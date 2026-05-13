@@ -1,0 +1,354 @@
+🚀 Server running on port \\.\pipe\31fa5e5c-ca8d-4111-855b-b80e7f8d1c0f
+📡 Public APIs: http://localhost:\\.\pipe\31fa5e5c-ca8d-4111-855b-b80e7f8d1c0f/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\31fa5e5c-ca8d-4111-855b-b80e7f8d1c0f/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\31fa5e5c-ca8d-4111-855b-b80e7f8d1c0f/health
+✅ Redis Connected
+2026-05-13T06:07:13.621Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+✅ MSSQL connection pool created for DCCBusinessSuite_mowara_test
+Message Data {
+  id: 'pTrH3PavA.qCrlqm0qr1iQ-heJG_S0AgOY',
+  from_me: false,
+  type: 'text',
+  chat_id: '917669158896@s.whatsapp.net',
+  timestamp: 1778652430,
+  source: 'mobile',
+  starred: false,
+  text: { body: 'Cg' },
+  from: '917669158896',
+  from_name: 'Shreyansh Tripathi',
+  whapi_token: '7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2',
+  databaseName: 'DCCBusinessSuite_mowara_test',
+  tenant: {
+    whapiToken: '7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2',
+    databaseName: 'DCCBusinessSuite_mowara_test'
+  },
+  userRole: 'DRIVER'
+}
+State 7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2 917669158896@s.whatsapp.net null
+To 917669158896@s.whatsapp.net
+2026-05-13T06:14:51.711Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:14:52.390Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+Status: sent
+2026-05-13T06:14:52.733Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+Status: delivered
+2026-05-13T06:15:42.515Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+Status: read
+2026-05-13T06:15:45.181Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+State 7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2 916387848896@s.whatsapp.net null
+To 916387848896@s.whatsapp.net
+Response {
+  status: 200,
+  statusText: 'OK',
+  headers: Object [AxiosHeaders] {
+    date: 'Wed, 13 May 2026 06:15:45 GMT',
+    'content-type': 'application/json; charset=utf-8',
+    'transfer-encoding': 'chunked',
+    connection: 'keep-alive',
+    server: 'cloudflare',
+    nel: '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}',
+    'x-powered-by': 'Whapi v1.0.0',
+    'access-control-allow-origin': '*',
+    etag: 'W/"130-yEPVUsE6zRPDorUaHl7UHNMv6rY"',
+    'x-api-origin': '157.180.57.***',
+    'x-api-request-id': '274a3ad5-584c-4458-ba2e-bae796690c33',
+    'cf-cache-status': 'DYNAMIC',
+    'report-to': '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=8d%2BtWEYctp4KxOTOnatYlyInslrsfnVmxYe9Av4LWS47T2chJYWbGRheogf8zsMRGBLA%2BC10K19SOsVtrTM%2F8ZHhA18PW3BJujx34fOqppuMXQLr%2FouDhLufrF5wUGoXDT4M"}]}',
+    'cf-ray': '9faf87ccea57d34d-FRA',
+    'alt-svc': 'h3=":443"; ma=86400'
+  },
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 30000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer 7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2',
+      'User-Agent': 'axios/1.13.2',
+      'Content-Length': '93',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    baseURL: 'https://gate.whapi.cloud',
+    method: 'post',
+    url: '/messages/text',
+    data: '{"to":"916387848896@s.whatsapp.net","body":"📸 Please send an image to start the process."}',
+    allowAbsoluteUrls: true
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: false,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: true,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 93,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'POST /messages/text HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Bearer 7dEQS06uXRm1SQudBpF1pBEQVL8lPNp2\r\n' +
+      'User-Agent: axios/1.13.2\r\n' +
+      'Content-Length: 93\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: gate.whapi.cloud\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 2,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'POST',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/messages/text',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 200,
+      statusMessage: 'OK',
+      client: [TLSSocket],
+      _consuming: true,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://gate.whapi.cloud/messages/text',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 32,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: false,
+    host: 'gate.whapi.cloud',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 93,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://gate.whapi.cloud/messages/text',
+      _timeout: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'gate.whapi.cloud',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'gate.whapi.cloud',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      autoSelectFamilyAttemptedAddresses: [Array],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [Timeout],
+        _idleStart: 513959,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 777,
+        [Symbol(triggerId)]: 775,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'content-length': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 16384,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  data: {
+    sent: true,
+    message: {
+      id: 'PsoYTcprjtOdBdA-wAnVXPjiwA',
+      from_me: true,
+      type: 'text',
+      chat_id: '916387848896@s.whatsapp.net',
+      timestamp: 1778652945,
+      source: 'api',
+      device_id: 32,
+      starred: false,
+      status: 'pending',
+      text: [Object],
+      from: '919017467730'
+    }
+  }
+}
+2026-05-13T06:15:46.154Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:15:47.048Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+Status: read
+2026-05-13T06:19:54.779Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:28:46.790Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:28:50.496Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:28:52.324Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:30:44.542Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:32:40.760Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-13T06:33:07.074Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D

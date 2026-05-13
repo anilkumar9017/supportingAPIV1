@@ -22,7 +22,7 @@ const publicRoutes = require('./routes/public');
 const authenticatedRoutes = require('./routes/authenticated');
 const emailRoutes = require('./routes/email');
 const importExportRoutes = require('./routes/importExportExcell.routes');
-const { processWebhook } = require('./services/whapi/whapiService');
+const sagaRoutes = require('./routes/sanaga.routes');
 
 // Public routes (no authentication required)
 app.use('/api/public', publicRoutes);
@@ -36,6 +36,9 @@ app.use('/api/email', emailRoutes);
 //import export excell routes
 app.use('/api/ie', importExportRoutes);
 
+//sananga routes
+app.use('/api/saga', sagaRoutes)
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -47,14 +50,48 @@ app.get('/health', (req, res) => {
 /**
  * Main webhook endpoint — Whapi.Cloud sends all events here
  */
+
+const { processWebhook } = require('./services/whapi/whapiService');
+const { resolveTenant } = require('./services/whapi/resolveTenant');
+const WhapiService = require('./services/whapi/apiConfig');
+
 app.post("/whapi/webhook", async (req, res) => {
-  // Acknowledge immediately to prevent timeouts
   res.sendStatus(200);
-  // console.log("Received webhook payload:", req.body, config.number);
+
   try {
-    await processWebhook(req.body);
+    // =====================================
+    // RECEIVER NUMBER
+    // =====================================
+    const receiver = req.body?.channel_id || req.body?.to;
+
+    if (!receiver) {
+      return console.error("Receiver number missing");
+    }
+
+    // =====================================
+    // LOAD TENANT CONFIG
+    // =====================================
+    const tenant = await resolveTenant(receiver);
+   
+    if (!tenant) {
+      return console.error("Tenant not found");
+    }
+    
+    // =====================================
+    // CREATE DYNAMIC WHAPI
+    // =====================================
+    const whapi = new WhapiService(tenant.whapiToken);
+    
+    // =====================================
+    // PROCESS WEBHOOK
+    // =====================================
+    await processWebhook(req.body, {
+      tenant,
+      whapi,
+      databaseName: tenant.databaseName,
+    });
   } catch (err) {
-    logger.error(`Webhook processing error: ${err.message}`);
+    console.error(`Webhook processing error: ${err.message}`);
   }
 });
 
