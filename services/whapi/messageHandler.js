@@ -2,7 +2,10 @@ const WhapiService = require("./apiConfig");
 const session = require("./sessionStore");
 const {checkMediaBlur } = require("./blurCheck");
 const db = require('../../config/database');
-//const { use } = require("react");
+const uploadFileToNG = require("./backblaze");
+const fs = require("fs");
+const mimeTypes = require("mime-types");
+const path = require("path");
 
 // ============================================================
 // ENTRY POINT
@@ -72,15 +75,35 @@ async function handleImage(message, whapi) {
   }
 
   const mime = media.mime_type || "";
-  const fileName = media.file_name || "file";
+  const fileName = media.file_name || `image_${Date.now()}.${extension}`;
+  const mimeType = media.mime_type || "image/jpeg";
 
-  
-  const mediaUrl = await whapi.downloadMedia(media.id);
-  
-  if (!mediaUrl) {
+  const extension = mimeTypes.extension(mimeType) || "jpg";
+
+  // ============================================================
+  // DOWNLOAD MEDIA BUFFER
+  // ============================================================
+  const mediaBuffer = await whapi.downloadMedia(media.id);
+
+  if (!mediaBuffer) {
     await whapi.sendText(chat_id, "❌ Failed to fetch file.");
     return;
   }
+  // ============================================================
+  // CREATE src/uploads DIRECTORY
+  // ============================================================
+  const uploadsDir = path.join(process.cwd(), "src", "uploads");
+
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // ============================================================
+  // SAVE FILE
+  // ============================================================
+  const tempPath = path.join(uploadsDir, fileName);
+
+  fs.writeFileSync(tempPath, mediaBuffer);
 
   // ============================================================
   // 🖼️ IMAGE (blur check)
@@ -95,22 +118,14 @@ async function handleImage(message, whapi) {
       return;
     }
 
-    // const isBlurry = await checkMediaBlur(mediaUrl, mime);
-    const result = await checkMediaBlur(mediaUrl, mime);
+    // const isBlurry = await checkMediaBlur(mediaBuffer, mime);
+    const result = await checkMediaBlur(mediaBuffer, mime);
     
 
     if (result.isBlurry) {
       await whapi.sendText(chat_id, getMessage(result.lang, "blurry"));
       return;
     }
-
-    // if (isBlurry) {
-    //   await whapi.sendText(
-    //     chat_id,
-    //     "❌ The image is blurry. Please upload a clear one.",
-    //   );
-    //   return;
-    // }
 
     return handleDocumentFlow(
       chat_id,
@@ -126,7 +141,7 @@ async function handleImage(message, whapi) {
   // 📄 PDF (blur check)
   // ============================================================
   if (mime === "application/pdf") {
-    const isBlurry = await checkMediaBlur(mediaUrl, mime);
+    const isBlurry = await checkMediaBlur(mediaBuffer, mime);
 
     if (isBlurry) {
       await whapi.sendText(
@@ -136,13 +151,37 @@ async function handleImage(message, whapi) {
       return;
     }
 
+    // ============================================================
+    // UPLOAD TO NG API
+    // ============================================================
+    const uploadRes = await uploadFileToNG({
+      filePath: tempPath,
+      fileName,
+      mimeType: mime,
+      docType: type,
+    });
+    // ============================================================
+    // GET PUBLIC URL
+    // ============================================================
+    const publicUrl = uploadRes?.data?.public_url || uploadRes?.public_url;
+
+    // ============================================================
+    // DELETE LOCAL FILE AFTER UPLOAD
+    // ============================================================
+    if (fs.existsSync(tempPath)) {
+      fs.unlinkSync(tempPath);
+      console.log("Local file deleted :", tempPath);
+    }
+
     return handleDocumentFlow(
       chat_id,
       userId,
       userRole,
-      (lang = result.lang),
+      lang = result.lang,
       whapi,
-      message
+      message,
+      publicUrl,
+      docPath = tempPath
     );
   }
 
@@ -172,13 +211,16 @@ async function handleImage(message, whapi) {
       `This file type is not supported for blur validation.`,
   );
 }
+
 async function handleDocumentFlow(
   chatId,
   userId,
   userRole,
   lang = "english",
   whapi,
-  message
+  message,
+  publicUrl,
+  docPath
 ) {
   const msg = messages[lang] || messages.english;
   const titles = buttonTitles[lang] || buttonTitles.english;
@@ -187,15 +229,16 @@ async function handleDocumentFlow(
   // 🧑‍💼 AGENT FLOW
   // ============================
   if (userRole === "AGENT") {
-    session.setState(userId, "AGENT_TRANSACTION", { lang,agent_id:message.agent_id });
+    session.setState(userId, "AGENT_TRANSACTION", { lang, agent_id:message.agent_id, docUrl: publicUrl, docPath});
 
     return whapi.sendText(chatId, msg.enterTransaction);
   }
 
+
   // ============================
   // 🚚 DRIVER FLOW
   // ============================
-  session.setState(userId, "DRIVER_DOC_TYPE", { lang,driver_id:message.driver_id });
+  session.setState(userId, "DRIVER_DOC_TYPE", { lang,driver_id:message.driver_id, docUrl: publicUrl, docPath });
 
   return whapi.sendButtons(chatId, msg.selectDoc, [
     { id: "doc_pod", title: titles.pod },
