@@ -19,7 +19,14 @@ module.exports = {
         {
             header: 'Cost Center',
             key: 'costcenter',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'CostCenter',
+                query: `select id, name from m_costcenters`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
         {
             header: 'Is Active',
@@ -31,14 +38,26 @@ module.exports = {
         {
             header: 'Trip Type',
             key: 'triptype',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'TripType',
+                labelField: 'name',
+                valueField: 'code',
+                options: [
+                    {code: 'T', name: 'Transit' },
+                    {code: 'L', name: 'Local' },
+                    {code: 'U', name: 'UpCountry' },
+                    {code: 'A', name: 'All' },
+                ]
+            } 
         },
 
         {
             header: 'Origin',
             key: 'origin_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Origins',
                 query: `select id, name from m_fm_location`,
@@ -51,9 +70,9 @@ module.exports = {
             header: 'Destination',
             key: 'destination_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
-                sheetName: 'Destinations',
+                sheetName: 'Origins',
                 query: `select id, name from m_fm_location`,
                 labelField: 'name',
                 valueField: 'id'
@@ -64,13 +83,18 @@ module.exports = {
             header: 'Item',
             key: 'item_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Items',
-                query: `select id, itemcode from m_item`,
-                labelField: 'itemcode',
+                query: `select id, item_code from m_item`,
+                labelField: 'item_code',
                 valueField: 'id'
             }
+        },
+        {
+            header: 'Item Code',
+            key: 'itemcode',
+            type: 'text',
         },
 
         {
@@ -83,32 +107,30 @@ module.exports = {
             header: 'Currency',
             key: 'currency',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
-
-        {
-            header: 'Revenue Account',
-            key: 'revenue_account',
-            type: 'text'
-        },
-
         {
             header: 'Account',
             key: 'account_id',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
-                sheetName: 'Accounts',
-                query: `select id, account_name from m_account`,
-                labelField: 'account_name',
+                sheetName: 'AccountMaster',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
                 valueField: 'id'
             }
+        },
+        {
+            header: 'Revenue Account',
+            key: 'revenue_account',
+            type: 'text'
         },
 
         {
@@ -144,7 +166,14 @@ module.exports = {
         {
             header: 'Via',
             key: 'via',
-            type: 'number'
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'Origins',
+                query: `select id, name from m_fm_location`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
@@ -162,7 +191,14 @@ module.exports = {
         {
             header: 'Exit Point',
             key: 'exit_point',
-            type: 'number'
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'Origins',
+                query: `select id, name from m_fm_location`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
@@ -194,15 +230,10 @@ module.exports = {
     childSheets: [
 
         {
-
             sheetName: 'Route Expenses',
-
             tableName: 'm_route_expenses',
-
             parentKey: 'parent_id',
-
             referenceColumn: 'Route Code',
-
             columns: [
 
                 {
@@ -210,48 +241,87 @@ module.exports = {
                     key: 'parent_code',
                     type: 'reference'
                 },
-
+                { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'Vehicle Type',
                     key: 'vehicle_type',
-                    type: 'number'
+                    type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+                        sheetName: 'Vehicle Types',
+                        query: 'select id, name from m_vehicle_type',
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {
                     header: 'Commodity',
                     key: 'commodity',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'Commodity',
+                        query: `select id, name from m_commodity_type`,
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {
                     header: 'Border',
                     key: 'border',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'Origins',
+                        query: `select id, name from m_fm_location`,
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {
                     header: 'Expense',
                     key: 'expense_id',
                     type: 'dropdown',
-
+                    data_type: 'number',
                     dropdown: {
                         sheetName: 'Expenses',
-                        query: `select id, expense_name from m_expense`,
+                        query: `select id, expense_name from m_trip_expenses`,
                         labelField: 'expense_name',
                         valueField: 'id'
                     }
                 },
 
                 {
+                    header: 'Expense Details',
+                    key: 'expense_name',
+                    type: 'text',
+                },
+
+                {
                     header: 'Fund Account',
                     key: 'fund_account',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'TripFundAccount',
+                        query: `select id, name from m_fm_trip_fund_account`,
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {
                     header: 'Doc Type',
                     key: 'doctype',
-                    type: 'text'
+                    type: 'dropdown',
+                    data_type: 'text',
+                    dropdown: {
+                        sheetName: 'TargetDocument',
+                        labelField: 'name',
+                        valueField: 'id',
+                        options: [{"id": "17", "name": "Sales Order"},{"id": "22", "name": "Purchase Order"},{"id": "20", "name": "Goods Receipt PO"},{"id": "18", "name": "A/P Invoice"},{"id": "46", "name": "Outgoing Payment"},{"id": "24", "name": "Incoming Payment"},{"id": "60", "name": "Goods Issue"},{"id": "59", "name": "Goods Receipt"},{"id": "19", "name": "A/P Credit Memo"},{"id": "30", "name": "Journal Entry"},{"id": "1200", "name": "Fuel Log Book"}]
+                    }
                 },
 
                 {
@@ -270,11 +340,11 @@ module.exports = {
                     header: 'Currency',
                     key: 'currency',
                     type: 'dropdown',
-
+                    data_type: 'number',
                     dropdown: {
-                        sheetName: 'ExpenseCurrencies',
-                        query: `select id, code from m_currency`,
-                        labelField: 'code',
+                        sheetName: 'Currencies',
+                        query: `select id, cur_code from m_currencies`,
+                        labelField: 'cur_code',
                         valueField: 'id'
                     }
                 },
@@ -290,22 +360,35 @@ module.exports = {
                     key: 'remarks',
                     type: 'text'
                 },
-
-                {
-                    header: 'Card Code',
-                    key: 'cardcode',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Card Name',
-                    key: 'cardname',
-                    type: 'text'
-                },
-
                 {
                     header: 'Account Type',
                     key: 'account_type',
+                    type: 'dropdown',
+                    data_type: 'text',
+                    dropdown: {
+                        sheetName: 'AccountType',
+                        labelField: 'name',
+                        valueField: 'code',
+                        options: [
+                            { name: 'BP', code: '1' },
+                            { name: 'GL', code: '2' }
+                        ]
+                    }
+                },
+                {
+                    header: 'Supplier',
+                    key: 'cardcode',
+                    type: 'dropdown', dataType: 'text', width: 30, dropdown: {
+                        sheetName: 'Supplier',
+                        query: "select id, card_code from m_customer where card_type = 'S'",
+                        labelField: 'card_code',
+                        valueField: 'id'
+                    }
+                },
+
+                {
+                    header: 'Supplier Name',
+                    key: 'cardname',
                     type: 'text'
                 },
 
@@ -313,11 +396,10 @@ module.exports = {
                     header: 'Employee',
                     key: 'employee_id',
                     type: 'dropdown',
-
                     dropdown: {
                         sheetName: 'Employees',
-                        query: `select id, employee_name from m_employee`,
-                        labelField: 'employee_name',
+                        query: `SELECT e.id, e.first_name +' '+e.last_name as name FROM m_employee e JOIN m_emp_position p ON e.position = p.id WHERE p.is_driver = 'Y'`,
+                        labelField: 'name',
                         valueField: 'id'
                     }
                 }
@@ -337,33 +419,28 @@ module.exports = {
             referenceColumn: 'Route Code',
 
             columns: [
-
                 {
                     header: 'Route Code',
                     key: 'parent_code',
                     type: 'reference'
                 },
-
-                {
-                    header: 'Sequence No',
-                    key: 'sequence_no',
-                    type: 'number'
-                },
-
+                { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'Vehicle Class',
                     key: 'vehicle_class',
-                    type: 'number'
+                    type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+                        sheetName: 'VehicleClass',
+                        query: 'select id, name from m_fm_vehicle_class',
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
-
                 {
                     header: 'License',
                     key: 'license_id',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Licenses',
-                        query: `select id, name from m_license`,
+                    type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+                        sheetName: 'License Types',
+                        query: 'select id, name from m_license_type',
                         labelField: 'name',
                         valueField: 'id'
                     }
@@ -372,7 +449,14 @@ module.exports = {
                 {
                     header: 'Paid From Account',
                     key: 'paidfrom_account',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'TripFundAccount',
+                        query: `select id, name from m_fm_trip_fund_account`,
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {
@@ -397,11 +481,11 @@ module.exports = {
                     header: 'Currency',
                     key: 'currency',
                     type: 'dropdown',
-
+                    data_type: 'number',
                     dropdown: {
-                        sheetName: 'LicenseCurrencies',
-                        query: `select id, code from m_currency`,
-                        labelField: 'code',
+                        sheetName: 'Currencies',
+                        query: `select id, cur_code from m_currencies`,
+                        labelField: 'cur_code',
                         valueField: 'id'
                     }
                 },
@@ -433,7 +517,7 @@ module.exports = {
                     key: 'parent_code',
                     type: 'reference'
                 },
-
+                { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'Sequence No',
                     key: 'sequence_no',
@@ -444,9 +528,9 @@ module.exports = {
                     header: 'Location',
                     key: 'location_id',
                     type: 'dropdown',
-
+                    data_type: 'number',
                     dropdown: {
-                        sheetName: 'StopLocations',
+                        sheetName: 'Origins',
                         query: `select id, name from m_fm_location`,
                         labelField: 'name',
                         valueField: 'id'
@@ -456,7 +540,14 @@ module.exports = {
                 {
                     header: 'Stop Type',
                     key: 'stop_type_id',
-                    type: 'number'
+                    type: 'dropdown',
+                    data_type: 'number',
+                    dropdown: {
+                        sheetName: 'StopsType',
+                        query: `select id, name from m_fm_stoptypes`,
+                        labelField: 'name',
+                        valueField: 'id'
+                    }
                 },
 
                 {

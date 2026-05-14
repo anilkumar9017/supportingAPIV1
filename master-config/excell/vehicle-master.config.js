@@ -44,6 +44,14 @@ module.exports = {
           valueField: 'id'
         }
       },
+      { header: 'Driver', key: 'driverid', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
+          sheetName: 'Drivers',
+          query: "select id, driver_name from m_driver",
+          labelField: 'driver_name',
+          valueField: 'id'
+        }
+      },
+      { header: 'Driver Name', key: 'driver_name', type: 'text', width: 20 },
       { header: 'Manufacturer', key: 'manufacturer', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Manufacturers',
           query: 'select id, name from m_manufacture',
@@ -88,17 +96,70 @@ module.exports = {
       { header: 'Dimensions 4', key: 'dimension4', type: 'text', width: 20 },
       { header: 'Dimensions 5', key: 'dimension5', type: 'text', width: 20 },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-      //{ header: 'Class', key: '_class', type: 'number', width: 20 },
+      { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+            sheetName: 'VehicleClass',
+            query: 'select id, name from m_fm_vehicle_class',
+            labelField: 'name',
+            valueField: 'id'
+        }},
       { header: 'Model No', key: 'modelno', type: 'text', width: 20 },
       { header: 'Model Name', key: 'modelname', type: 'text', width: 20 },
       { header: 'Vehicle Series', key: 'vehicleseries', type: 'number', width: 20 },
       { header: 'Suspension Type', key: 'suspension_type', type: 'number', width: 20 },
-      { header: 'Gearbox Type', key: 'gearbox_type', type: 'text', width: 20 },
+      { header: 'Gearbox Type', key: 'gearbox_type', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'GearBox Type',
+        labelField: 'name',
+        valueField: 'value',
+        options: [
+          { "name": "Automatic", "value": "A"},
+          { "name": "Manual", "value": "M"}
+      ],
+      } },
       { header: 'Gearbox Speed', key: 'gearbox_speed', type: 'number', width: 20 },
-      { header: 'Gearbox Category', key: 'gearbox_category', type: 'number', width: 20 },
-      { header: 'Reduction', key: 'reduction', type: 'number', width: 20 },
-      { header: 'Condition', key: 'condition', type: 'number', width: 20 },
-      { header: 'Trailer Type', key: 'trailer_type', type: 'number', width: 20 },
+      { header: 'Gearbox Category', key: 'gearbox_category', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+        sheetName: 'Gearbox Category',
+        query: 'select id, name from m_fm_vehicle_category',
+        labelField: 'name',
+        valueField: 'id'
+     } },
+      { header: 'Reduction', key: 'reduction', 
+      type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Reduction',
+          labelField: 'name',
+          valueField: 'id',
+          options: [
+            {"id": 1, "name": "NR"},
+            {"id": 2, "name": "HR"},
+            {"id": 3, "name": "NA"}
+        ]
+      }},
+      { header: 'Condition', key: 'condition', type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Condition',
+          labelField: 'name',
+          valueField: 'id',
+          options: [
+            {"id": 1,"name": "New"
+            },
+            {"id": 2,"name": "Used"
+            },
+            {"id": 3,"name": "Recon"
+            },
+            {"id": 4,"name": "Other"
+            }
+        ]
+      }},
+      { header: 'Trailer Type', key: 'trailer_type',  type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Trailer Type',
+          labelField: 'name',
+          valueField: 'id',
+          options: [{id: 1, name: "Normal"}, {id: 2, name: "Tanker"}]
+      }},
       { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
         sheetName: 'Axle Config',
         query: 'select id, name from m_axle_conf',
@@ -126,7 +187,19 @@ module.exports = {
       { header: 'Registration No', key: 'registration_no', type: 'text', width: 20 },
       { header: 'Registration Date', key: 'registration_date', type: 'date', width: 20 },
       { header: 'Fuel Ratio', key: 'fuel_ratio', type: 'number', width: 20},
-      { header: 'Trip Type', key: 'triptype', type: 'text', width: 20 },
+      { header: 'Trip Type', key: 'triptype', type: 'dropdown',
+        data_type: 'text',
+        dropdown: {
+            sheetName: 'TripType',
+            labelField: 'name',
+            valueField: 'code',
+            options: [
+              {code: 'T', name: 'Transit' },
+              {code: 'L', name: 'Local' },
+              {code: 'U', name: 'UpCountry' },
+              {code: 'A', name: 'All' },
+            ]
+        } },
       { header: 'Self Owned', key: 'self_owned', type: 'checkbox', values: ['Y', 'N'], width: 20 },
   
       // Child Arrays - Hierarchical Data

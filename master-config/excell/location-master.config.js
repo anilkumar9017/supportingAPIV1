@@ -163,7 +163,14 @@ module.exports = {
                 {
                     header: 'Title',
                     key: 'title',
-                    type: 'text'
+                    type: 'dropdown',
+                    data_type: 'text',
+                    dropdown: {
+                        sheetName: 'Title',
+                        labelField: 'name',
+                        valueField: 'id',
+                        options: [{id: 'Mr', name: 'Mr'}, {id: 'Mrs', name: 'Mrs'}, {id: 'Ms', name: 'Ms'}, {id: 'Mx', name: 'Mx'}],
+                    } 
                 },
 
                 {
