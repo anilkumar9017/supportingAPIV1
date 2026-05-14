@@ -1,6 +1,7 @@
 
 const { handleMessage } = require("./messageHandler");
 const db = require('../../config/database');
+const WhapiService = require("./apiConfig");
 /**
  * Process incoming Whapi.Cloud webhook payload
  * Whapi sends batches of messages/events
@@ -33,11 +34,23 @@ async function processWebhook(payload, context) {
         const result = await db.executeQuery(databaseName, query, {  }, true);
         if(result[0]){
             message.userRole = "DRIVER";
+            message.driver_id = result[0].id;
         }else{
-          const strQueryAgent =`select * FROM m_employee where mobile_no='${message.from}'`;
-          message.userRole ="AGENT";
+          const strQueryAgent =`select * FROM m_user_master where phoneno='${message.from}'`;
+           const result = await db.executeQuery(databaseName, strQueryAgent, {  }, true);
+           if(result[0]){
+            message.userRole ="AGENT";
+            message.agent_id =result[0].id;
+           }else{
+            const whapi = new WhapiService(message.whapi_token);
+            return whapi.sendText(
+              chatId,
+              "Your mobile number not registered with us.",
+            );
+           }
           
-          const result = await db.executeQuery(databaseName, strQueryAgent, {  }, true);
+          
+         
         
         }
         return await handleMessage(message);

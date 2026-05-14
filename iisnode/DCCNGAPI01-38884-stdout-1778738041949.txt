@@ -1,0 +1,315 @@
+🚀 Server running on port \\.\pipe\4bde0d07-6938-46fe-8d9a-1b42519af103
+📡 Public APIs: http://localhost:\\.\pipe\4bde0d07-6938-46fe-8d9a-1b42519af103/api/public
+🔐 Authenticated APIs: http://localhost:\\.\pipe\4bde0d07-6938-46fe-8d9a-1b42519af103/api/auth
+❤️  Health Check: http://localhost:\\.\pipe\4bde0d07-6938-46fe-8d9a-1b42519af103/health
+✅ Redis Connected
+2026-05-14T05:54:03.699Z - GET /api/auth/bi-reports
+2026-05-14T05:54:19.097Z - POST /api/auth/bi-reports
+✅ MSSQL connection pool created for DCCBusinessSuite_mowara_test
+🔐 [Auth] Database from token: DCCBusinessSuite_mowara_test
+report_id  8a03dd03-f4c3-4eb9-934c-64022684beaf
+generateEmbedToken  {
+  status: 200,
+  statusText: 'OK',
+  headers: Object [AxiosHeaders] {
+    'cache-control': 'no-store, must-revalidate, no-cache',
+    pragma: 'no-cache',
+    'content-length': '1639',
+    'content-type': 'application/json; odata.metadata=minimal',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains',
+    'x-frame-options': 'deny',
+    'x-content-type-options': 'nosniff',
+    requestid: '61bfba96-1ab5-49ea-89d6-2b5831aa97b8',
+    'odata-version': '4.0',
+    'access-control-expose-headers': 'RequestId',
+    'request-redirected': 'true',
+    'home-cluster-uri': 'https://wabi-europe-north-b-redirect.analysis.windows.net/',
+    date: 'Thu, 14 May 2026 05:54:19 GMT'
+  },
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function: transformRequest] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function [FormData]], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ilh0LW83aERicHVwQXotWlBtNkh4Q0ZXUzNjSSIsImtpZCI6Ilh0LW83aERicHVwQXotWlBtNkh4Q0ZXUzNjSSJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzllOWM5MTktNTFlNS00NTJlLWE5MGItOWNhZDhhODg4OTg2LyIsImlhdCI6MTc3ODczNzc1OSwibmJmIjoxNzc4NzM3NzU5LCJleHAiOjE3Nzg3NDE2NTksImFpbyI6ImsyRmdZS2hzeXEzWThWVnplWWFRK3IwRDMzaCsrVEhmRXk5WXRxcWNiYjdVbGszZS9Da0EiLCJhcHBpZCI6IjUyOWJmZWEzLWYzMDgtNGMyYS1iNTg5LTZkODE3NTUwMDhiOCIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0Lzc5ZTljOTE5LTUxZTUtNDUyZS1hOTBiLTljYWQ4YTg4ODk4Ni8iLCJpZHR5cCI6ImFwcCIsIm9pZCI6IjEzZTg0ZjJmLTk0MDMtNDk3Ni04ZTYzLWQ2MTE0MDY0YTRlZCIsInJoIjoiMS5BUkVBR2NucGVlVlJMa1dwQzV5dGlvaUpoZ2tBQUFBQUFBQUF3QUFBQUFBQUFBQUFBQUFSQUEuIiwic3ViIjoiMTNlODRmMmYtOTQwMy00OTc2LThlNjMtZDYxMTQwNjRhNGVkIiwidGlkIjoiNzllOWM5MTktNTFlNS00NTJlLWE5MGItOWNhZDhhODg4OTg2IiwidXRpIjoiclQ4RE9tRnB1azI2NHFkQjRmdEZBQSIsInZlciI6IjEuMCIsInhtc19hY3RfZmN0IjoiMyA5IiwieG1zX2Z0ZCI6IklOazZkUWxEempDNERpUGlZUjFoN0JhSVJGNXN1alNIVXl6NDBfaWN6ZUFCYzNkbFpHVnVZeTFrYzIxeiIsInhtc19pZHJlbCI6IjcgNiIsInhtc19yZCI6IjAuNDJMbFlCSmlGQlFTNFdBWEVrZ19lRUlrT3JqUXQ0M3R4dVI3eTJaZEV4TGg0QlFTYUppNjdFekFOVzZfZmJjMzItU0lzSjBYRXVIZ0VCTGdaSUNBQTFCYVNJU0RXMGpBdjI1NjE2N1NJdV9faDk3TWVqalJJeHdBIiwieG1zX3N1Yl9mY3QiOiIzIDkifQ.Xb1l50sGnk8tC1RZWC59xrj_jJmRbi_QxIDpg4n1uCHr5b__MSF-DAFR_Yxy5BqUuffAT1gAgNuDCMclLjz4vtHSxenwN9SAcOBlrvVxsyxL_yahcY_Tr7owacIS6vPwPWgk7JQMswhHgtusElb2MONQLdGKw4QVZYwuK0MLcWO6gv6X0dQoXeS7ZluizhgnJhJF947z69dKuFvcRCZ8K8NtRV0W5m5qqGjpt-gJvaLOD5YGOIqfuUTODqowpLp_9xeCKFI4dtlwPjFtZwwfTmOH0RzQw7sKo4ReHD5U9f53zQPvQ_nWGyTG30WvfTmc1Kb2mSsUmr1leQVpwP6OIQ',
+      'User-Agent': 'axios/1.13.2',
+      'Content-Length': '42',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'post',
+    url: 'https://api.powerbi.com/v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/reports/8a03dd03-f4c3-4eb9-934c-64022684beaf/GenerateToken',
+    data: '{"accessLevel":"View","allowSaveAs":false}',
+    allowAbsoluteUrls: true
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: false,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: true,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: 42,
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    _header: 'POST /v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/reports/8a03dd03-f4c3-4eb9-934c-64022684beaf/GenerateToken HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ilh0LW83aERicHVwQXotWlBtNkh4Q0ZXUzNjSSIsImtpZCI6Ilh0LW83aERicHVwQXotWlBtNkh4Q0ZXUzNjSSJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzllOWM5MTktNTFlNS00NTJlLWE5MGItOWNhZDhhODg4OTg2LyIsImlhdCI6MTc3ODczNzc1OSwibmJmIjoxNzc4NzM3NzU5LCJleHAiOjE3Nzg3NDE2NTksImFpbyI6ImsyRmdZS2hzeXEzWThWVnplWWFRK3IwRDMzaCsrVEhmRXk5WXRxcWNiYjdVbGszZS9Da0EiLCJhcHBpZCI6IjUyOWJmZWEzLWYzMDgtNGMyYS1iNTg5LTZkODE3NTUwMDhiOCIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0Lzc5ZTljOTE5LTUxZTUtNDUyZS1hOTBiLTljYWQ4YTg4ODk4Ni8iLCJpZHR5cCI6ImFwcCIsIm9pZCI6IjEzZTg0ZjJmLTk0MDMtNDk3Ni04ZTYzLWQ2MTE0MDY0YTRlZCIsInJoIjoiMS5BUkVBR2NucGVlVlJMa1dwQzV5dGlvaUpoZ2tBQUFBQUFBQUF3QUFBQUFBQUFBQUFBQUFSQUEuIiwic3ViIjoiMTNlODRmMmYtOTQwMy00OTc2LThlNjMtZDYxMTQwNjRhNGVkIiwidGlkIjoiNzllOWM5MTktNTFlNS00NTJlLWE5MGItOWNhZDhhODg4OTg2IiwidXRpIjoiclQ4RE9tRnB1azI2NHFkQjRmdEZBQSIsInZlciI6IjEuMCIsInhtc19hY3RfZmN0IjoiMyA5IiwieG1zX2Z0ZCI6IklOazZkUWxEempDNERpUGlZUjFoN0JhSVJGNXN1alNIVXl6NDBfaWN6ZUFCYzNkbFpHVnVZeTFrYzIxeiIsInhtc19pZHJlbCI6IjcgNiIsInhtc19yZCI6IjAuNDJMbFlCSmlGQlFTNFdBWEVrZ19lRUlrT3JqUXQ0M3R4dVI3eTJaZEV4TGg0QlFTYUppNjdFekFOVzZfZmJjMzItU0lzSjBYRXVIZ0VCTGdaSUNBQTFCYVNJU0RXMGpBdjI1NjE2N1NJdV9faDk3TWVqalJJeHdBIiwieG1zX3N1Yl9mY3QiOiIzIDkifQ.Xb1l50sGnk8tC1RZWC59xrj_jJmRbi_QxIDpg4n1uCHr5b__MSF-DAFR_Yxy5BqUuffAT1gAgNuDCMclLjz4vtHSxenwN9SAcOBlrvVxsyxL_yahcY_Tr7owacIS6vPwPWgk7JQMswhHgtusElb2MONQLdGKw4QVZYwuK0MLcWO6gv6X0dQoXeS7ZluizhgnJhJF947z69dKuFvcRCZ8K8NtRV0W5m5qqGjpt-gJvaLOD5YGOIqfuUTODqowpLp_9xeCKFI4dtlwPjFtZwwfTmOH0RzQw7sKo4ReHD5U9f53zQPvQ_nWGyTG30WvfTmc1Kb2mSsUmr1leQVpwP6OIQ\r\n' +
+      'User-Agent: axios/1.13.2\r\n' +
+      'Content-Length: 42\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: api.powerbi.com\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype] {},
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 2,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(shapeMode)]: false,
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'POST',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/reports/8a03dd03-f4c3-4eb9-934c-64022684beaf/GenerateToken',
+    _ended: true,
+    res: IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 200,
+      statusMessage: 'OK',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      _eventsCount: 4,
+      responseUrl: 'https://api.powerbi.com/v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/reports/8a03dd03-f4c3-4eb9-934c-64022684beaf/GenerateToken',
+      redirects: [],
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 28,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: false,
+    host: 'api.powerbi.com',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _events: [Object],
+      _writableState: [WritableState],
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 42,
+      _requestBodyBuffers: [],
+      _eventsCount: 3,
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://api.powerbi.com/v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/reports/8a03dd03-f4c3-4eb9-934c-64022684beaf/GenerateToken',
+      _timeout: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kChunkedBuffer)]: [],
+    [Symbol(kChunkedLength)]: 0,
+    [Symbol(kSocket)]: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'api.powerbi.com',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 9,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'api.powerbi.com',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _maxListeners: undefined,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 5000,
+      parser: null,
+      _httpMessage: null,
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: -1,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 0,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 5000,
+        _idlePrev: [TimersList],
+        _idleNext: [Timeout],
+        _idleStart: 17996,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 438,
+        [Symbol(triggerId)]: 436,
+        [Symbol(kAsyncContextFrame)]: undefined
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(shapeMode)]: true,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 1,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      authorization: [Array],
+      'user-agent': [Array],
+      'content-length': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 16384,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  data: {
+    '@odata.context': 'https://wabi-europe-north-b-redirect.analysis.windows.net/v1.0/myorg/groups/f7f27648-38db-4365-b91c-2ba3552f6bb4/$metadata#Microsoft.PowerBI.ServiceContracts.Api.V1.GenerateTokenResponse',
+    token: 'H4sIAAAAAAAEAB2Ux66rVgAA_-VuiXRsOpHegmaKTe_s6BzTe4ny77nKflaj0fzzYyZXOyT5z98_KXM11EizGxyL4kRopWliBFwW-fJhphByxbyXZN78ZtquB1UsEuWxPebE2GQ0oFbsXssj1XNY4SS400ME9nIixbuE8IRPnVPrqov4XE5ebneU-ZUZy_Ix2fFdV5yurQ9yRT9qHqbKTdAavx6EIH0Ld7QCr0JkVeNTz87isuIvmwBLk2gQ02nAzlaTvXBsl6XKCVO0UEKXsB2-SEER6KCHBKq2ngXwN42ojWu1C3NHGl5lHMJzbekSVjbYgfN5Of0Itacr3-RBOUB5IogE3oE5Z6uPV2n_PTiP4sTE-4yl2wgtr4ZaL9P3Yo7CAwE6RmPD1K_zHHGq-rUBWKbtZfdYE8_MxhVi387UkMm-9kzNq5fJLRnUdLVuAmugFnTQkowPhytBwOKOD83B7UvoU7c57FlPMyUxV8c5qXU_kR8vfb26V2ySJEIF7mMyoyASsfwTWI9w6g2DTMOlTjr7S9TFkxGAmKBVZAthYX-5JaMGHZ_ZRvusvj1UEfXkkqEa1f0gybzek5liax0yqLPyDaMZKV6haFK1zw5tZSvlJj16pmRsz9W0ahfW9qndiCXP900XGjgXd4L78KsJP0UohLKl0SYaxpjVnlijH5tJWCMvG7ih5xqyI99QQz6Pu_VhXHXEcDISrYMMk0LcUolNdVITEbqJyyoy4-ZVSAdQNcNhLqMbA_I9AQElligeWi2MMGiavMtS1bxXbJ7YJHqgMV0UnNrRy2cTw7HGDPXtQbSEtsYU0Z-fv374-RrX4V1cv-kbSshtbOyN4hWMdoYxwOdb48SFuI4F1munNaChbrZ3CDl-l2vJEjYpO7Cd1S4R16slDiOplNQwodTveSFWWalUfQQJgI_xinrG5IxN2vGHtGycnpUw6WRlG5xlxBLOC2yNPzWjuVBfb0HURbQnJvIBY4pPIkq6H7fwLSMHfOKTnFvWmvPCgdJtUejbz4ry4ZaZnIVOZ7bO0BMXoa6-MFvDhYHaRb8WxzhSFj8s95hA6Ah3fKY1LOrP5jZsLol2bm5HRF68_-IRgPvK-AwreAuipms1j3kiMGyjZcCVEzQleQ6Kzz3Cins2EHTH989-aHRRCYVvaK8BmFgzVTPD2tSt-vO_5musi1nxfy1fsb0eVNR9rlKFwwG1EwkW63_KgVWfrNtc_GLaWVj79Ogb2LWThIRm_PLBmGfZldNieyRRa19WQC7L45j9B3xjz8KMJh-9eeZ15m41lT4CGZ2bmQNS2R119z6Qcwdq21WvAYJcfxF04ICJmePE2eS7vGXxaytj4DgbSgYj27If_7iwrwo25dl8Mx_MGh5131kKsFlwZW4BeuBkOHynujLp3BMny5g1O3kvQGGJxFYv8-su6S5Dwlw37VoZvnvX9nw0TVVMgday5esDkgdGLfr5qhZA1XWJ9Lw9Tb-jkIslYM4ZBRHW1voe8uibZ-M6PUO0aMD9e-Tmsp86uY6c2bPNZGC4V4L3271f56vv96ur1ovc-pJ2zacqdpTEV8ev5n__A6zJQZzuBQAA.eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLUVVUk9QRS1OT1JUSC1CLXJlZGlyZWN0LmFuYWx5c2lzLndpbmRvd3MubmV0IiwiZXhwIjoxNzc4NzQxNjU5LCJhbGxvd0FjY2Vzc092ZXJQdWJsaWNJbnRlcm5ldCI6dHJ1ZX0=',
+    tokenId: 'd0fa5474-6d60-40f1-91f3-98bc82facc06',
+    expiration: '2026-05-14T06:54:19Z',
+    embedUrl: 'https://app.powerbi.com/reportEmbed?reportId=8a03dd03-f4c3-4eb9-934c-64022684beaf',
+    datasetId: '75a1584f-f8cc-432b-90f0-158ca3b71ee0'
+  }
+}
+2026-05-14T05:55:43.948Z - POST /api/saga/bi-reports-out
+Report ID: 979fd3b5-9ea0-4692-b455-2b89c3cc5415
+Generate Embed Token Response: {
+  embedUrl: 'https://app.powerbi.com/reportEmbed?reportId=979fd3b5-9ea0-4692-b455-2b89c3cc5415',
+  datasetId: '6a4e1380-65c4-42ea-aef5-6fdb778e3ee7'
+}
+2026-05-14T05:56:05.424Z - POST /api/saga/bi-refresh-out
+2026-05-14T05:56:11.351Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:16.048Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:21.450Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:22.698Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-14T05:56:26.047Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:31.345Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:36.050Z - POST /api/saga/refresh-status-out
+2026-05-14T05:56:41.346Z - POST /api/saga/refresh-status-out
+2026-05-14T05:58:28.349Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-14T05:58:51.511Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-14T05:58:52.357Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-14T05:58:53.149Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+2026-05-14T06:00:43.725Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D

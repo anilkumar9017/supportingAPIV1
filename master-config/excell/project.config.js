@@ -2,6 +2,8 @@ module.exports = {
     menuCode: 'project',
     sheetName: 'Projects',
     tableName: 'm_projects',
+    primaryKey: 'id',
+    uniqueKey: 'code',
 
     columns: [
         {
@@ -49,7 +51,8 @@ module.exports = {
             dropdown: {
                 sheetName: 'File',
                 query: `select id, doc_num from d_cf_filemaster`,
-                valueField: 'file_number'
+                labelField: 'doc_num',
+                valueField: 'id'
             }
         },
 
@@ -61,7 +64,8 @@ module.exports = {
             dropdown: {
                 sheetName: 'Shipment',
                 query: `select id, doc_num from d_fm_shipmentorder`,
-                valueField: 'file_number'
+                labelField: 'doc_num',
+                valueField: 'id'
             }
         },
 
@@ -70,11 +74,11 @@ module.exports = {
             key: 'vehicle_id',
             type: 'dropdown',
             width: 30,
-
             dropdown: {
                 sheetName: 'Vehicles',
                 query: `select id, code from m_vehicle`,
-                valueField: 'code'
+                labelField: 'code',
+                valueField: 'id'
             }
         }
     ]

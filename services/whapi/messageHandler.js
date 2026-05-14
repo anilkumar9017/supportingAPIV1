@@ -1,6 +1,8 @@
 const WhapiService = require("./apiConfig");
 const session = require("./sessionStore");
 const {checkMediaBlur } = require("./blurCheck");
+const db = require('../../config/database');
+//const { use } = require("react");
 
 // ============================================================
 // ENTRY POINT
@@ -116,6 +118,7 @@ async function handleImage(message, whapi) {
       userRole,
       (lang = result.lang),
       whapi,
+      message
     );
   }
 
@@ -139,6 +142,7 @@ async function handleImage(message, whapi) {
       userRole,
       (lang = result.lang),
       whapi,
+      message
     );
   }
 
@@ -174,6 +178,7 @@ async function handleDocumentFlow(
   userRole,
   lang = "english",
   whapi,
+  message
 ) {
   const msg = messages[lang] || messages.english;
   const titles = buttonTitles[lang] || buttonTitles.english;
@@ -182,7 +187,7 @@ async function handleDocumentFlow(
   // 🧑‍💼 AGENT FLOW
   // ============================
   if (userRole === "AGENT") {
-    session.setState(userId, "AGENT_TRANSACTION", { lang });
+    session.setState(userId, "AGENT_TRANSACTION", { lang,agent_id:message.agent_id });
 
     return whapi.sendText(chatId, msg.enterTransaction);
   }
@@ -190,7 +195,7 @@ async function handleDocumentFlow(
   // ============================
   // 🚚 DRIVER FLOW
   // ============================
-  session.setState(userId, "DRIVER_DOC_TYPE", { lang });
+  session.setState(userId, "DRIVER_DOC_TYPE", { lang,driver_id:message.driver_id });
 
   return whapi.sendButtons(chatId, msg.selectDoc, [
     { id: "doc_pod", title: titles.pod },
@@ -350,7 +355,35 @@ async function handleReply(message, whapi) {
       "ButtonsV3:doc_pod": "POD",
       "ButtonsV3:doc_receipt": "Receipt",
     };
+    if(btnId=="ButtonsV3:doc_pod"){
+      const userData = await session.get(userId);
+      //Connect to Db to check message from driver or AGENT
+      const docUrl= userData.docUrl;
+      const docName = userData.docName;
+      const driver_id = userData.driver_id;
+
+      const strQuery =`select top 1 T0.driver_name,T1.tripno,T0.parent_id FROM 
+      d_fm_shipmentorder_vehicledetails 
+      T0 JOIN d_fm_shipmentorder T1 ON  T0.parent_id=T1.id
+      where T0.driver_id=${driver_id} AND T1.order_status='O'
+      ORDER by T0.parent_id DESC`;
+      const result = await db.executeQuery(message.databaseName, strQuery, {  }, true);
+      if(!result[0]){
+         await session.delete(userId);
+        return await whapi.sendText(chat_id,"We can not find any open trip for you.",);
+      }
+      //Code to upload POD
+      const ship_id= result[0].parent_id;
+      const pod_date = new Date();
+      // Format as YYYY-MM-DD
+      const formattedDate = pod_date.toISOString().split('T')[0];
+      const strUpdateQuery= `UPDATE d_fm_shipmentorder_cargodetails SET pod_date='${formattedDate}',pod_attchment='${docName}',cdn_url='${docUrl}' WHERE parent_id=${ship_id}`;
+      await db.executeQuery(message.databaseName, strUpdateQuery, {  }, true);
+
+      console.log("UserData",userData);
+    }
     if (typeMap[btnId]) {
+      
       await session.delete(userId);
       return whapi.sendText(chat_id, msg.successDoc(typeMap[btnId]));
     } else {
