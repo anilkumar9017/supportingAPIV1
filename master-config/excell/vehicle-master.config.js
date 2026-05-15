@@ -96,12 +96,12 @@ module.exports = {
       { header: 'Dimensions 4', key: 'dimension4', type: 'text', width: 20 },
       { header: 'Dimensions 5', key: 'dimension5', type: 'text', width: 20 },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-      { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+      /* { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
             sheetName: 'VehicleClass',
             query: 'select id, name from m_fm_vehicle_class',
             labelField: 'name',
             valueField: 'id'
-        }},
+        }}, */
       { header: 'Model No', key: 'modelno', type: 'text', width: 20 },
       { header: 'Model Name', key: 'modelname', type: 'text', width: 20 },
       { header: 'Vehicle Series', key: 'vehicleseries', type: 'number', width: 20 },
@@ -161,10 +161,10 @@ module.exports = {
           options: [{id: 1, name: "Normal"}, {id: 2, name: "Tanker"}]
       }},
       { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
-        sheetName: 'Axle Config',
-        query: 'select id, name from m_axle_conf',
-        labelField: 'name',
-        valueField: 'id'
+          sheetName: 'Axle Config',
+          query: 'select id, name from m_axle_conf',
+          labelField: 'name',
+          valueField: 'id'
       } },
       { header: 'Tyre Axle Config', key: 'tyre_axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
         sheetName: 'Axle Config',

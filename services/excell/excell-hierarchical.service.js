@@ -536,6 +536,9 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
             // If record exists, perform update; otherwise, perform insert
             if (existing && existing.length > 0) {
                 // Update existing record
+                record.updatedate = new Date(),
+                record.updatedby = Number(userObj?.userid) || 0;
+                console.log("update record ", record);
                 await updateRecord({
                     transaction,
                     db,
@@ -547,6 +550,11 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 results.updated++;
             } else {
                 // Insert new record
+                record.createdate = new Date(),
+                record.createdby = Number(userObj?.userid) || 0,
+                record.updatedate = null,
+                record.updatedby = null
+                console.log("insert record ", record);
                 await insertRecord({
                     transaction,
                     db,

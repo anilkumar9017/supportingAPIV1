@@ -159,7 +159,7 @@ module.exports = {
                     key: 'parent_code',
                     type: 'reference'
                 },
-
+                { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'Title',
                     key: 'title',
@@ -242,7 +242,7 @@ module.exports = {
                     key: 'parent_code',
                     type: 'reference'
                 },
-
+                { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'User Group',
                     key: 'user_group_id',
