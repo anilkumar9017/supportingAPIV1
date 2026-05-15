@@ -538,7 +538,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 // Update existing record
                 record.updatedate = new Date(),
                 record.updatedby = Number(userObj?.userid) || 0;
-                console.log("update record ", record);
+                //console.log("update record ", record);
                 await updateRecord({
                     transaction,
                     db,
@@ -554,7 +554,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 record.createdby = Number(userObj?.userid) || 0,
                 record.updatedate = null,
                 record.updatedby = null
-                console.log("insert record ", record);
+                //console.log("insert record ", record);
                 await insertRecord({
                     transaction,
                     db,
@@ -589,6 +589,8 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
  * Import child sheet data
  * - Maps dropdown labels back to values using pre-fetched metadata
  * - Checks for existing records using parent identifier and unique field, performs insert or update accordingly
+ * - Validates existence of parent record before inserting child record to maintain referential integrity
+ * - bulk inserts/updates child records for better performance while processing rows sequentially to maintain correct order of operations
  * - Returns: { inserted, updated, errors }
  * - Note: This function processes child sheets after the main sheet has been processed to ensure parent records are created before processing child records that reference them. It uses transactions to ensure data integrity and rolls back if any errors occur during the import process.
  * - Dropdown value mapping: During import, if a column is of type 'dropdown', the function maps the label from the Excel file back to the corresponding value using the pre-fetched dropdown metadata. If a label doesn't have a corresponding value, it throws an error for that row.
@@ -700,6 +702,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
         try {
             if (recordsToInsert.length > 0) {
                 const insertRows = recordsToInsert.map(r => r.row);
+                //console.log("bulk insert records ", insertRows);
                 await bulkInsertRecords({
                     transaction,
                     db,
