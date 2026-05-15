@@ -136,29 +136,16 @@ module.exports = {
             key: 'is_whs',
             type: 'checkbox',
             values: ['Y', 'N']
-        }
-
-    ],
-
-    childSheets: [
+        },
 
         {
-
+            header: 'Location Contacts',
+            key: 'location_contacts',
+            type: 'child_array',
             sheetName: 'Location Contacts',
-
             tableName: 'm_fm_location_contacts',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Location Code',
-
             columns: [
-
-                {
-                    header: 'Location Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'Title',
@@ -169,85 +156,38 @@ module.exports = {
                         sheetName: 'Title',
                         labelField: 'name',
                         valueField: 'id',
-                        options: [{id: 'Mr', name: 'Mr'}, {id: 'Mrs', name: 'Mrs'}, {id: 'Ms', name: 'Ms'}, {id: 'Mx', name: 'Mx'}],
-                    } 
+                        options: [
+                            { id: 'Mr', name: 'Mr' },
+                            { id: 'Mrs', name: 'Mrs' },
+                            { id: 'Ms', name: 'Ms' },
+                            { id: 'Mx', name: 'Mx' }
+                        ]
+                    }
                 },
-
-                {
-                    header: 'Name',
-                    key: 'name',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Position',
-                    key: 'position',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Tel1',
-                    key: 'tel1',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Tel2',
-                    key: 'tel2',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Mobile',
-                    key: 'mobile',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Fax',
-                    key: 'fax',
-                    type: 'text'
-                },
-
-                {
-                    header: 'E Mail',
-                    key: 'e_mail',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Remarks',
-                    key: 'remarks',
-                    type: 'text'
-                }
-
+                { header: 'Name', key: 'name', type: 'text' },
+                { header: 'Position', key: 'position', type: 'text' },
+                { header: 'Tel1', key: 'tel1', type: 'text' },
+                { header: 'Tel2', key: 'tel2', type: 'text' },
+                { header: 'Mobile', key: 'mobile', type: 'text' },
+                { header: 'Fax', key: 'fax', type: 'text' },
+                { header: 'E Mail', key: 'e_mail', type: 'text' },
+                { header: 'Remarks', key: 'remarks', type: 'text' }
             ]
-
         },
 
         {
-
+            header: 'Location User Groups',
+            key: 'location_user_groups',
+            type: 'child_array',
             sheetName: 'Location User Groups',
-
             tableName: 'm_fm_location_user_group',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Location Code',
-
             columns: [
-
-                {
-                    header: 'Location Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
                 {
                     header: 'User Group',
                     key: 'user_group_id',
                     type: 'dropdown',
-
                     dropdown: {
                         sheetName: 'UserGroups',
                         query: `select id, code from m_user_groups`,
@@ -255,9 +195,7 @@ module.exports = {
                         valueField: 'id'
                     }
                 }
-
             ]
-
         }
 
     ]

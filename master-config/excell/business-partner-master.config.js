@@ -369,291 +369,71 @@ module.exports = {
             header: 'VRN No',
             key: 'vrn_no',
             type: 'text'
-        }
-
-    ],
-
-    childSheets: [
+        },
 
         {
-
+            header: 'Customer Addresses',
+            key: 'customer_addresses',
+            type: 'child_array',
             sheetName: 'Customer Addresses',
-
             tableName: 'm_customer_address',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Card Code',
-
             columns: [
-
-                {
-                    header: 'Card Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Address Type',
-                    key: 'address_type',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Is Default',
-                    key: 'is_default',
-                    type: 'checkbox',
-                    values: ['Y', 'N']
-                },
-
-                {
-                    header: 'Address Name',
-                    key: 'address_name',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Street',
-                    key: 'street',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Block',
-                    key: 'block',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Zip Code',
-                    key: 'zip_code',
-                    type: 'text'
-                },
-
-                {
-                    header: 'City',
-                    key: 'city',
-                    type: 'text'
-                },
-
-                {
-                    header: 'State',
-                    key: 'state',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Country',
-                    key: 'country',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'AddressCountries',
-                        query: `select id, code from m_country`,
-                        labelField: 'code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Landmark',
-                    key: 'landmark',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Latitude',
-                    key: 'latitude',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Longitude',
-                    key: 'longitude',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Email',
-                    key: 'email',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Phone',
-                    key: 'phone',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Contact Person',
-                    key: 'contact_person',
-                    type: 'text'
-                },
-
-                {
-                    header: 'GSTIN',
-                    key: 'gstin',
-                    type: 'text'
-                }
-
+                { header: 'Address Type', key: 'address_type', type: 'text' },
+                { header: 'Is Default', key: 'is_default', type: 'checkbox', values: ['Y', 'N'] },
+                { header: 'Address Name', key: 'address_name', type: 'text' },
+                { header: 'Street', key: 'street', type: 'text' },
+                { header: 'Block', key: 'block', type: 'text' },
+                { header: 'Zip Code', key: 'zip_code', type: 'text' },
+                { header: 'City', key: 'city', type: 'text' },
+                { header: 'State', key: 'state', type: 'text' },
+                { header: 'Country', key: 'country', type: 'dropdown', dropdown: { sheetName: 'AddressCountries', query: `select id, code from m_country`, labelField: 'code', valueField: 'id' } },
+                { header: 'Landmark', key: 'landmark', type: 'text' },
+                { header: 'Latitude', key: 'latitude', type: 'number' },
+                { header: 'Longitude', key: 'longitude', type: 'number' },
+                { header: 'Email', key: 'email', type: 'text' },
+                { header: 'Phone', key: 'phone', type: 'text' },
+                { header: 'Contact Person', key: 'contact_person', type: 'text' },
+                { header: 'GSTIN', key: 'gstin', type: 'text' }
             ]
-
         },
 
         {
-
+            header: 'Customer Contact Persons',
+            key: 'customer_contact_persons',
+            type: 'child_array',
             sheetName: 'Customer Contact Persons',
-
             tableName: 'm_customer_contact_person',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Card Code',
-
             columns: [
-
-                {
-                    header: 'Card Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Contact Name',
-                    key: 'contact_name',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Designation',
-                    key: 'designation',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Phone',
-                    key: 'phone',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Mobile',
-                    key: 'mobile',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Email',
-                    key: 'email',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Department',
-                    key: 'department',
-                    type: 'dropdown',
-                    data_type: 'number',
-                    dropdown: {
-                        sheetName: 'ParentADepartmentcounts',
-                        query: `select id, name from m_department`,
-                        labelField: 'account_code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Is Primary',
-                    key: 'is_primary',
-                    type: 'checkbox',
-                    values: ['Y', 'N']
-                }
-
+                { header: 'Contact Name', key: 'contact_name', type: 'text' },
+                { header: 'Designation', key: 'designation', type: 'text' },
+                { header: 'Phone', key: 'phone', type: 'text' },
+                { header: 'Mobile', key: 'mobile', type: 'text' },
+                { header: 'Email', key: 'email', type: 'text' },
+                { header: 'Department', key: 'department', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'ParentADepartmentcounts', query: `select id, name from m_department`, labelField: 'account_code', valueField: 'id' } },
+                { header: 'Is Primary', key: 'is_primary', type: 'checkbox', values: ['Y', 'N'] }
             ]
-
         },
 
         {
-
+            header: 'Customer Attachments',
+            key: 'customer_attachments',
+            type: 'child_array',
             sheetName: 'Customer Attachments',
-
             tableName: 'm_customer_attachment',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Card Code',
-
             columns: [
-
-                {
-                    header: 'Card Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Document Name',
-                    key: 'doc_name',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Document Type',
-                    key: 'doc_type',
-                    type: 'text'
-                },
-
-                {
-                    header: 'File Path',
-                    key: 'file_path',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Expiry Date',
-                    key: 'expiry_date',
-                    type: 'date'
-                },
-
-                {
-                    header: 'Remarks',
-                    key: 'remarks',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Uploaded By',
-                    key: 'uploaded_by',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Users',
-                        query: `select id, user_name from m_users`,
-                        labelField: 'user_name',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Uploaded On',
-                    key: 'uploaded_on',
-                    type: 'date'
-                },
-
-                {
-                    header: 'CDN URL',
-                    key: 'cdn_url',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Mime Type',
-                    key: 'mime_type',
-                    type: 'text'
-                }
-
+                { header: 'Document Name', key: 'doc_name', type: 'text' },
+                { header: 'Document Type', key: 'doc_type', type: 'text' },
+                { header: 'File Path', key: 'file_path', type: 'text' },
+                { header: 'Expiry Date', key: 'expiry_date', type: 'date' },
+                { header: 'Remarks', key: 'remarks', type: 'text' },
+                { header: 'Uploaded By', key: 'uploaded_by', type: 'dropdown', dropdown: { sheetName: 'Users', query: `select id, user_name from m_users`, labelField: 'user_name', valueField: 'id' } },
+                { header: 'Uploaded On', key: 'uploaded_on', type: 'date' },
+                { header: 'CDN URL', key: 'cdn_url', type: 'text' },
+                { header: 'Mime Type', key: 'mime_type', type: 'text' }
             ]
-
         }
 
     ]
