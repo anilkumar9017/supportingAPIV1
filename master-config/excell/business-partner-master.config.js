@@ -429,7 +429,7 @@ module.exports = {
                 { header: 'File Path', key: 'file_path', type: 'text' },
                 { header: 'Expiry Date', key: 'expiry_date', type: 'date' },
                 { header: 'Remarks', key: 'remarks', type: 'text' },
-                { header: 'Uploaded By', key: 'uploaded_by', type: 'dropdown', dropdown: { sheetName: 'Users', query: `select id, user_name from m_users`, labelField: 'user_name', valueField: 'id' } },
+                { header: 'Uploaded By', key: 'uploaded_by', type: 'dropdown', dropdown: { sheetName: 'Users', query: `select id, username from m_user_master`, labelField: 'username', valueField: 'id' } },
                 { header: 'Uploaded On', key: 'uploaded_on', type: 'date' },
                 { header: 'CDN URL', key: 'cdn_url', type: 'text' },
                 { header: 'Mime Type', key: 'mime_type', type: 'text' }
