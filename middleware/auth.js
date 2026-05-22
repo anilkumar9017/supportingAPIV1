@@ -25,7 +25,6 @@ async function authenticateToken(req, res, next) {
     const response = await db.executeQuery(decoded?.dbname, verify, {
         token,
     }, false);
-    
     if(response?.length == 0){
         return res.status(401).json({
             success: false,

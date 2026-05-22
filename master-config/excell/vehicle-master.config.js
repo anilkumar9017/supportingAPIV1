@@ -255,37 +255,43 @@ module.exports = {
         sheetName: 'Service History',
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+          /* { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'Maintenance Types',
               query: 'select id, name from m_maintenance_type',
               labelField: 'name',
               valueField: 'id'
             }
+          }, */
+          { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+            sheetName: 'Service Types',
+            query: 'select id, name from m_routine_service_type',
+            labelField: 'name',
+            valueField: 'id'
+           }
           },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
           { header: 'Effective From', key: 'effective_from', type: 'date', width: 15 },
           { header: 'Valid Upto', key: 'valid_upto', type: 'date', width: 15 },
-          { header: 'Service Type', key: 'servicetype', type: 'number', width: 15},
-          /* { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
-              sheetName: 'Service Types',
+          { header: 'Odometer', key: 'odometer', type: 'number', width: 15 },
+          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 20 },
+          { header: 'Next Odometer', key: 'next_odometer', type: 'number', width: 15 },
+          { header: 'Next Service Date', key: 'next_servicedate', type: 'date', width: 18 },
+          { header: 'JobCard Id', key: 'jobcard_lineid', type: 'number', width: 15 },
+          { header: 'Service Interval', key: 'service_interval', type: 'text', width: 15},
+          /* { header: 'Service Interval', key: 'service_interval', type: 'text', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
+              sheetName: 'Service Interval',
               query: 'select id, name from m_routine_service_type',
               labelField: 'name',
               valueField: 'id'
             }
           }, */
-          { header: 'Odometer', key: 'odometer', type: 'number', width: 15 },
-          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 20 },
-          { header: 'Next Odometer', key: 'next_odometer', type: 'number', width: 15 },
-          { header: 'Next Service Date', key: 'next_servicedate', type: 'date', width: 18 },
-          { header: 'Jobcard Line ID', key: 'jobcard_lineid', type: 'number', width: 15 },
-          { header: 'Service Interval', key: 'service_interval', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
-            sheetName: 'Service Interval',
-            query: 'select id, name from m_routine_service_type',
+          { header: 'UOM', key: 'uom', type: 'text', type: 'dropdown', dataType: 'text', width: 15, dropdown:{
+            sheetName: 'UOMService',
             labelField: 'name',
-            valueField: 'id'
+            valueField: 'id',
+            options: [{id : "K",name: "Kms"},{id : "D",name: "Days"},{id : "M",name: "Months"},{id : "H",name: "Hours"}]
           }
-        },
-          { header: 'UOM', key: 'uom', type: 'text', width: 10 },
+          }, 
           { header: 'KM', key: 'km', type: 'number', width: 10 }
         ]
       },
