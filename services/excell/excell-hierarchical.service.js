@@ -443,7 +443,9 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         };
 
         // Import main sheet
-        results.main = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
+        const mainResult = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
+        const parentIdMap = mainResult.parentIdMap || new Map();
+        results.main = mainResult;
 
         // Check if we should continue with child sheets based on mode
         const mainHasErrors = results.main.errors.length > 0;
@@ -453,7 +455,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
 
         // Import child sheets
         for (const [childKey, childConfig] of Object.entries(config.children)) {
-            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
+            results.children[childKey] = await importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed, parentIdMap);
             
             const childHasErrors = results.children[childKey]?.errors?.length > 0;
             if (!partialImportAllowed && childHasErrors) {
@@ -663,7 +665,9 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
         }
     }
 
-    return results;
+    // Return parent ID map for child sheets to use (avoids transaction visibility issues)
+    // Note: existingRecordMap contains IDs for both existing and newly inserted records
+    return { ...results, parentIdMap: existingRecordMap };
 }
 
 /**
@@ -681,7 +685,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
  * - Scalability: For large Excel files, consider implementing batch processing and optimizing database queries (e.g. using bulk insert operations) to improve performance. Additionally, consider implementing a more robust error handling and reporting mechanism to provide detailed feedback on import results.
  * - Future enhancements: Implementing a more flexible mapping mechanism for parent-child relationships (e.g. allowing for different unique keys or multiple levels of hierarchy) and improving the handling of dropdown values (e.g. supporting multiple languages or dynamic dropdown options) could further enhance the functionality of this import process.
  */
-async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction, partialImportAllowed = true) {
+async function importChildSheet(workbook, config, childConfig, childKey, db, databaseName, useApi, userObj, dropdownMappings = {}, transaction, partialImportAllowed = true, parentIdMap = null) {
     // Check if child sheet exists in the workbook
     const worksheet = workbook.getWorksheet(childConfig.sheetName);
     if (!worksheet) {
@@ -693,8 +697,8 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
 
-    // Cache for parent IDs to avoid repeated queries for the same parent code
-    const parentIdCache = new Map();
+    // Use parent ID map passed from main sheet import (avoids transaction visibility issues)
+    let parentIdCache = new Map(parentIdMap || []);
 
     // Prefetch parent IDs for all referenced parent codes in this child sheet
     if (rows.length > 0) {
@@ -706,7 +710,12 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
             .filter(value => value !== undefined && value !== null && value !== '');
         const distinctParentCodes = [...new Set(parentCodes)];
 
-        if (distinctParentCodes.length > 0) {
+        // Only prefetch parent codes not already in the cache (from main sheet)
+        const uncachedCodes = distinctParentCodes.filter(code => 
+            !parentIdCache.has(String(code).trim().toUpperCase())
+        );
+
+        if (uncachedCodes.length > 0) {
             try {
                 const parentResults = await fetchExistingRowsByUniqueValues(
                     db,
@@ -715,7 +724,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     config.tableName,
                     config.primaryKey,
                     config.uniqueKey,
-                    distinctParentCodes,
+                    uncachedCodes,
                     1000
                 );
                 parentResults.forEach(parentRow => {
