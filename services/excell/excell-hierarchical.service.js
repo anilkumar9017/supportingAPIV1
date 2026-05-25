@@ -640,6 +640,32 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     // Cache for parent IDs to avoid repeated queries for the same parent code
     const parentIdCache = new Map();
 
+    // Prefetch parent IDs for all referenced parent codes in this child sheet
+    if (rows.length > 0) {
+        const parentCodes = rows
+            .map(row => row.getCell(1).value)
+            .filter(value => value !== undefined && value !== null && value !== '');
+        const distinctParentCodes = [...new Set(parentCodes.map(value => String(value)))];
+
+        if (distinctParentCodes.length > 0) {
+            const paramNames = distinctParentCodes.map((_, index) => `@parentCode${index}`);
+            const parentQuery = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE ${config.uniqueKey} IN (${paramNames.join(', ')})`;
+            const parentParams = {};
+            distinctParentCodes.forEach((value, index) => {
+                parentParams[`parentCode${index}`] = value;
+            });
+
+            try {
+                const parentResults = await db.executeQuery(databaseName, parentQuery, parentParams, useApi);
+                parentResults.forEach(parentRow => {
+                    parentIdCache.set(String(parentRow[config.uniqueKey]), parentRow[config.primaryKey]);
+                });
+            } catch (error) {
+                logger.warn(`Unable to prefetch parent IDs for ${config.tableName}: ${error.message}`);
+            }
+        }
+    }
+
     try {
         // Phase 1: Collect and prepare all records
         const recordsToInsert = [];
@@ -654,19 +680,11 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 const record = {};
 
                 // Find parent ID (use cache if available)
-                let parentId;
-                if (parentIdCache.has(parentCode)) {
-                    parentId = parentIdCache.get(parentCode);
-                } else {
-                    const parentQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @parentCode`;
-                    const parentResult = await db.executeQuery(databaseName, parentQuery, { parentCode }, useApi);
-                    // If parent record is not found, throw an error for this row and skip processing child record
-                    if (!parentResult || parentResult.length === 0) {
-                        throw new Error(`Parent record not found for code: ${parentCode}`);
-                    }
-                    parentId = parentResult[0][config.primaryKey];
-                    parentIdCache.set(parentCode, parentId);
+                const parentId = parentIdCache.get(String(parentCode));
+                if (!parentId) {
+                    throw new Error(`Parent record not found for code: ${parentCode}`);
                 }
+
                 // Set foreign key in child record to establish relationship with parent record
                 record[childConfig.parentKey] = parentId;
 
