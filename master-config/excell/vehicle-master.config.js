@@ -264,7 +264,7 @@ module.exports = {
           }, */
           { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
             sheetName: 'Service Types',
-            query: 'select id, name from m_routine_service_type',
+            query: 'select id, name from m_routine_service',
             labelField: 'name',
             valueField: 'id'
            }
