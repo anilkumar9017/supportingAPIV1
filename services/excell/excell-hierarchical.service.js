@@ -520,9 +520,12 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
 
     if (uniqueKeyColumnIndex >= 0 && rows.length > 0) {
         const uniqueValues = rows
-            .map(row => row.getCell(uniqueKeyColumnIndex + 1).value)
+            .map(row => {
+                const value = row.getCell(uniqueKeyColumnIndex + 1).value;
+                return value === undefined || value === null ? value : String(value).trim();
+            })
             .filter(value => value !== undefined && value !== null && value !== '');
-        const distinctValues = [...new Set(uniqueValues.map(value => String(value)))];
+        const distinctValues = [...new Set(uniqueValues)];
 
         if (distinctValues.length > 0) {
             const paramNames = distinctValues.map((_, index) => `@uniqueValue${index}`);
@@ -535,7 +538,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
             try {
                 const existingRows = await db.executeQuery(databaseName, query, params, useApi);
                 existingRows.forEach(existingRow => {
-                    existingRecordMap.set(String(existingRow[config.uniqueKey]), existingRow[config.primaryKey]);
+                    existingRecordMap.set(String(existingRow[config.uniqueKey]).trim(), existingRow[config.primaryKey]);
                 });
             } catch (error) {
                 logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
@@ -560,7 +563,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
             });
 
             // Check if record exists using prefetched unique-key map
-            const existingId = existingRecordMap.get(String(record[config.uniqueKey]));
+            const existingId = existingRecordMap.get(String(record[config.uniqueKey] || '').trim());
             if (existingId) {
                 // Update existing record
                 record.updatedate = new Date();
@@ -643,9 +646,12 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
     // Prefetch parent IDs for all referenced parent codes in this child sheet
     if (rows.length > 0) {
         const parentCodes = rows
-            .map(row => row.getCell(1).value)
+            .map(row => {
+                const value = row.getCell(1).value;
+                return value === undefined || value === null ? value : String(value).trim();
+            })
             .filter(value => value !== undefined && value !== null && value !== '');
-        const distinctParentCodes = [...new Set(parentCodes.map(value => String(value)))];
+        const distinctParentCodes = [...new Set(parentCodes)];
 
         if (distinctParentCodes.length > 0) {
             const paramNames = distinctParentCodes.map((_, index) => `@parentCode${index}`);
@@ -658,7 +664,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
             try {
                 const parentResults = await db.executeQuery(databaseName, parentQuery, parentParams, useApi);
                 parentResults.forEach(parentRow => {
-                    parentIdCache.set(String(parentRow[config.uniqueKey]), parentRow[config.primaryKey]);
+                    parentIdCache.set(String(parentRow[config.uniqueKey]).trim(), parentRow[config.primaryKey]);
                 });
             } catch (error) {
                 logger.warn(`Unable to prefetch parent IDs for ${config.tableName}: ${error.message}`);
@@ -680,7 +686,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 const record = {};
 
                 // Find parent ID (use cache if available)
-                const parentId = parentIdCache.get(String(parentCode));
+                const parentId = parentIdCache.get(String(parentCode).trim());
                 if (!parentId) {
                     throw new Error(`Parent record not found for code: ${parentCode}`);
                 }
