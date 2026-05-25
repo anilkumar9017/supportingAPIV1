@@ -80,8 +80,8 @@ async function createMSSQLPool(config) {
       min: 0,
       idleTimeoutMillis: 30000
     },
-    connectionTimeout: parseInt(process.env.DEFAULT_DB_CONNECTION_TIMEOUT_MS, 10) || 30000,
-    requestTimeout: parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 300000
+    connectionTimeout: parseInt(process.env.DEFAULT_DB_CONNECTION_TIMEOUT_MS, 10) || 60000,
+    requestTimeout: parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 900000
   };
   // Connect to the database and cache the connection pool for future use
   const pool = new mssql.ConnectionPool(poolConfig);
@@ -202,7 +202,7 @@ async function executeQuery(dbName, query, params = {}, useApi = false) {
       case 'mssql':
       case 'sqlserver': {
         const request = pool.request();
-        request.timeout = parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 300000;
+        request.timeout = parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 900000;
         // Add parameters
         Object.keys(params).forEach(key => {
           request.input(key, params[key]);
@@ -250,7 +250,7 @@ async function executeTransactionQuery(dbType='mssql', transaction, query, param
             // For MSSQL, create a new request from the transaction and add input parameters
             const request = new mssql.Request(transaction);
             // Increase per-request timeout when importing large Excel payloads
-            request.timeout = parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 300000;
+            request.timeout = parseInt(process.env.DEFAULT_DB_REQUEST_TIMEOUT_MS, 10) || 900000;
             //ADD PARAMETERS
             Object.keys(params).forEach(key => {
                 request.input(

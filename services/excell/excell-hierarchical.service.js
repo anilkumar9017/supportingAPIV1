@@ -514,6 +514,35 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
 
+    // Prefetch existing records by unique key to avoid row-by-row SELECTs
+    const existingRecordMap = new Map();
+    const uniqueKeyColumnIndex = config.columns.findIndex(col => col.key === config.uniqueKey);
+
+    if (uniqueKeyColumnIndex >= 0 && rows.length > 0) {
+        const uniqueValues = rows
+            .map(row => row.getCell(uniqueKeyColumnIndex + 1).value)
+            .filter(value => value !== undefined && value !== null && value !== '');
+        const distinctValues = [...new Set(uniqueValues.map(value => String(value)))];
+
+        if (distinctValues.length > 0) {
+            const paramNames = distinctValues.map((_, index) => `@uniqueValue${index}`);
+            const query = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE ${config.uniqueKey} IN (${paramNames.join(', ')})`;
+            const params = {};
+            distinctValues.forEach((value, index) => {
+                params[`uniqueValue${index}`] = value;
+            });
+
+            try {
+                const existingRows = await db.executeQuery(databaseName, query, params, useApi);
+                existingRows.forEach(existingRow => {
+                    existingRecordMap.set(String(existingRow[config.uniqueKey]), existingRow[config.primaryKey]);
+                });
+            } catch (error) {
+                logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+            }
+        }
+    }
+
     // Process each row in the main sheet sequentially to maintain order and handle dependencies for child records
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
@@ -530,31 +559,27 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 record[col.key] = parseCellValue(cellValue, col);
             });
 
-            // Check if record exists
-            const existingQuery = `SELECT ${config.primaryKey} FROM ${config.tableName} WHERE ${config.uniqueKey} = @uniqueValue`;
-            const existing = await db.executeQuery(databaseName, existingQuery, { uniqueValue: record[config.uniqueKey] }, useApi);
-            // If record exists, perform update; otherwise, perform insert
-            if (existing && existing.length > 0) {
+            // Check if record exists using prefetched unique-key map
+            const existingId = existingRecordMap.get(String(record[config.uniqueKey]));
+            if (existingId) {
                 // Update existing record
-                record.updatedate = new Date(),
+                record.updatedate = new Date();
                 record.updatedby = Number(userObj?.userid) || 0;
-                //console.log("update record ", record);
                 await updateRecord({
                     transaction,
                     db,
                     databaseName,
                     tableName: config.tableName,
                     row: record,
-                    id: existing[0][config.primaryKey]
+                    id: existingId
                 });
                 results.updated++;
             } else {
                 // Insert new record
-                record.createdate = new Date(),
-                record.createdby = Number(userObj?.userid) || 0,
-                record.updatedate = null,
-                record.updatedby = null
-                //console.log("insert record ", record);
+                record.createdate = new Date();
+                record.createdby = Number(userObj?.userid) || 0;
+                record.updatedate = null;
+                record.updatedby = null;
                 await insertRecord({
                     transaction,
                     db,
