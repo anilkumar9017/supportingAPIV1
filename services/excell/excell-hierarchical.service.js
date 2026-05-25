@@ -409,13 +409,20 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
 async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi, userObj) {
     let pool;
     let transaction;
+    // Determine transaction mode based on environment variable
+    // Default: ALL-OR-NOTHING (rollback on any error) unless EXCEL_PARTIAL_IMPORT is explicitly set to 'true'
+    const partialImportAllowed = process.env.EXCEL_PARTIAL_IMPORT == 'true';
+    logger.info(`Excel import mode: ${partialImportAllowed ? 'PARTIAL IMPORT' : 'ALL-OR-NOTHING (default)'}`);
+    
+    // Initialize results object to track inserted/updated records and errors for main and child sheets
+    const results = {
+        main: { inserted: 0, updated: 0, errors: [] },
+        children: {},
+        partialImportMode: partialImportAllowed,
+        modeDescription: partialImportAllowed ? 'Partial import allowed - successful records saved' : 'All-or-nothing mode - any error causes full rollback'
+    };
 
     try {
-        // Determine transaction mode based on environment variable
-        // Default: ALL-OR-NOTHING (rollback on any error) unless EXCEL_PARTIAL_IMPORT is explicitly set to 'true'
-        const partialImportAllowed = process.env.EXCEL_PARTIAL_IMPORT == 'true';
-        logger.info(`Excel import mode: ${partialImportAllowed ? 'PARTIAL IMPORT' : 'ALL-OR-NOTHING (default)'}`);
-
         // Extract config and child array definitions
         const config = extractHierarchicalConfig(menuCode);
         if (!config) {
@@ -434,13 +441,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
         transaction = new mssql.Transaction(pool);
         await transaction.begin();
 
-        // Initialize results object to track inserted/updated records and errors for main and child sheets
-        const results = {
-            main: { inserted: 0, updated: 0, errors: [] },
-            children: {},
-            partialImportMode: partialImportAllowed,
-            modeDescription: partialImportAllowed ? 'Partial import allowed - successful records saved' : 'All-or-nothing mode - any error causes full rollback'
-        };
+        
 
         // Import main sheet
         const mainResult = await importMainSheet(workbook, config, db, databaseName, useApi, userObj, dropdownMappings, transaction, partialImportAllowed);
@@ -524,7 +525,7 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
             }
         }
         logger.error(`Error importing hierarchical Excel for ${menuCode}:`, error);
-        throw error;
+        return results;
     }
 }
 
@@ -549,110 +550,67 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
     // Initialize results object to track inserted/updated records and errors for main sheet
     const results = { inserted: 0, updated: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
-
     // Prefetch existing records by unique key to avoid row-by-row SELECTs
     const existingRecordMap = new Map();
-    const uniqueKeyColumnIndex = config.columns.findIndex(col => col.key === config.uniqueKey);
 
-    let prefetchFailed = false;
-    if (uniqueKeyColumnIndex >= 0 && rows.length > 0) {
-        const uniqueValues = rows
-            .map(row => {
-                const value = row.getCell(uniqueKeyColumnIndex + 1).value;
-                return value === undefined || value === null ? value : String(value).trim();
-            })
-            .filter(value => value !== undefined && value !== null && value !== '');
-        const distinctValues = [...new Set(uniqueValues)];
+    try {
+        const uniqueKeyColumnIndex = config.columns.findIndex(col => col.key === config.uniqueKey);
 
-        if (distinctValues.length > 0) {
-            try {
-                const existingRows = await fetchExistingRowsByUniqueValues(
-                    db,
-                    databaseName,
-                    useApi,
-                    config.tableName,
-                    config.primaryKey,
-                    config.uniqueKey,
-                    distinctValues,
-                    1000
-                );
-                existingRows.forEach(existingRow => {
-                    existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
-                });
-            } catch (error) {
-                logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
-                if (!partialImportAllowed) {
-                    throw new Error(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+        let prefetchFailed = false;
+        if (uniqueKeyColumnIndex >= 0 && rows.length > 0) {
+            const uniqueValues = rows
+                .map(row => {
+                    const value = row.getCell(uniqueKeyColumnIndex + 1).value;
+                    return value === undefined || value === null ? value : String(value).trim();
+                })
+                .filter(value => value !== undefined && value !== null && value !== '');
+            const distinctValues = [...new Set(uniqueValues)];
+
+            if (distinctValues.length > 0) {
+                try {
+                    const existingRows = await fetchExistingRowsByUniqueValues(
+                        db,
+                        databaseName,
+                        useApi,
+                        config.tableName,
+                        config.primaryKey,
+                        config.uniqueKey,
+                        distinctValues,
+                        1000
+                    );
+                    existingRows.forEach(existingRow => {
+                        existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
+                    });
+                } catch (error) {
+                    logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+                    if (!partialImportAllowed) {
+                        throw new Error(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+                    }
+                    prefetchFailed = true;
                 }
-                prefetchFailed = true;
             }
         }
-    }
 
-    // Process each row in the main sheet sequentially to maintain order and handle dependencies for child records
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        try {
-            const record = {};
-            // Parse columns and map dropdown labels to values
-            config.columns.forEach((col, colIndex) => {
-                let cellValue = row.getCell(colIndex + 1).value; // ExcelJS columns are 1-based
-                // If column is a dropdown, map the label back to the corresponding value using pre-fetched metadata
-                if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
-                    // Map dropdown label to value for import
-                    cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
-                }
-                record[col.key] = parseCellValue(cellValue, col);
-            });
-
-            const normalizedUniqueKey = String(record[config.uniqueKey] || '').trim().toUpperCase();
-            let existingId = existingRecordMap.get(normalizedUniqueKey);
-            if (!existingId && prefetchFailed && normalizedUniqueKey) {
-                existingId = await fetchExistingRowIdByUniqueValue(
-                    db,
-                    databaseName,
-                    useApi,
-                    config.tableName,
-                    config.primaryKey,
-                    config.uniqueKey,
-                    normalizedUniqueKey
-                );
-                if (existingId) {
-                    existingRecordMap.set(normalizedUniqueKey, existingId);
-                }
-            }
-
-            if (existingId) {
-                // Update existing record
-                record.updatedate = new Date();
-                record.updatedby = Number(userObj?.userid) || 0;
-                await updateRecord({
-                    transaction,
-                    db,
-                    databaseName,
-                    tableName: config.tableName,
-                    row: record,
-                    id: existingId
+        // Process each row in the main sheet sequentially to maintain order and handle dependencies for child records
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            try {
+                const record = {};
+                // Parse columns and map dropdown labels to values
+                config.columns.forEach((col, colIndex) => {
+                    let cellValue = row.getCell(colIndex + 1).value; // ExcelJS columns are 1-based
+                    // If column is a dropdown, map the label back to the corresponding value using pre-fetched metadata
+                    if (col.type === 'dropdown' && cellValue != null && cellValue !== '') {
+                        // Map dropdown label to value for import
+                        cellValue = mapImportDropdownValue(cellValue, col, dropdownMappings, i + 2);
+                    }
+                    record[col.key] = parseCellValue(cellValue, col);
                 });
-                results.updated++;
-            } else {
-                // Insert new record
-                record.createdate = new Date();
-                record.createdby = Number(userObj?.userid) || 0;
-                record.updatedate = null;
-                record.updatedby = null;
-                await insertRecord({
-                    transaction,
-                    db,
-                    databaseName,
-                    tableName: config.tableName,
-                    row: record,
-                    useApi
-                });
-                results.inserted++;
-                // After insert, attempt to resolve the new record's primary key and cache it
-                try {
-                    const newId = normalizedUniqueKey ? await fetchExistingRowIdByUniqueValue(
+
+                const normalizedUniqueKey = String(record[config.uniqueKey] || '').trim().toUpperCase();
+                let existingId = existingRecordMap.get(normalizedUniqueKey);
+                if (!existingId && prefetchFailed && normalizedUniqueKey) {
+                    existingId = await fetchExistingRowIdByUniqueValue(
                         db,
                         databaseName,
                         useApi,
@@ -660,37 +618,84 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                         config.primaryKey,
                         config.uniqueKey,
                         normalizedUniqueKey
-                    ) : null;
-                    if (newId) {
-                        existingRecordMap.set(normalizedUniqueKey, newId);
-                    }
-                } catch (err) {
-                    logger.warn(`Unable to resolve newly inserted record id for ${config.tableName} key=${normalizedUniqueKey}: ${err.message}`);
-                    if (!partialImportAllowed) {
-                        throw new Error(`Unable to resolve newly inserted record id for ${config.tableName}: ${err.message}`);
+                    );
+                    if (existingId) {
+                        existingRecordMap.set(normalizedUniqueKey, existingId);
                     }
                 }
-            }
-        } catch (error) {
-            const errorInfo = {
-                row: i + 2,
-                error: error.message,
-                data: row.values
-            };
-            results.errors.push(errorInfo);
-            
-            // If all-or-nothing mode, throw error immediately
-            if (!partialImportAllowed) {
-                throw new Error(`Main sheet import failed at row ${i + 2}: ${error.message}`);
-            }
-            // Otherwise continue with next row in partial mode
-            logger.warn(`[Partial Mode] Skipped row ${i + 2} in main sheet:`, error.message);
-        }
-    }
 
-    // Return parent ID map for child sheets to use (avoids transaction visibility issues)
-    // Note: existingRecordMap contains IDs for both existing and newly inserted records
-    return { ...results, parentIdMap: existingRecordMap };
+                if (existingId) {
+                    // Update existing record
+                    record.updatedate = new Date();
+                    record.updatedby = Number(userObj?.userid) || 0;
+                    await updateRecord({
+                        transaction,
+                        db,
+                        databaseName,
+                        tableName: config.tableName,
+                        row: record,
+                        id: existingId
+                    });
+                    results.updated++;
+                } else {
+                    // Insert new record
+                    record.createdate = new Date();
+                    record.createdby = Number(userObj?.userid) || 0;
+                    record.updatedate = null;
+                    record.updatedby = null;
+                    await insertRecord({
+                        transaction,
+                        db,
+                        databaseName,
+                        tableName: config.tableName,
+                        row: record,
+                        useApi
+                    });
+                    results.inserted++;
+                    // After insert, attempt to resolve the new record's primary key and cache it
+                    try {
+                        const newId = normalizedUniqueKey ? await fetchExistingRowIdByUniqueValue(
+                            db,
+                            databaseName,
+                            useApi,
+                            config.tableName,
+                            config.primaryKey,
+                            config.uniqueKey,
+                            normalizedUniqueKey
+                        ) : null;
+                        if (newId) {
+                            existingRecordMap.set(normalizedUniqueKey, newId);
+                        }
+                    } catch (err) {
+                        logger.warn(`Unable to resolve newly inserted record id for ${config.tableName} key=${normalizedUniqueKey}: ${err.message}`);
+                        if (!partialImportAllowed) {
+                            throw new Error(`Unable to resolve newly inserted record id for ${config.tableName}: ${err.message}`);
+                        }
+                    }
+                }
+            } catch (error) {
+                const errorInfo = {
+                    row: i + 2,
+                    error: error.message,
+                    data: row.values
+                };
+                results.errors.push(errorInfo);
+                
+                // If all-or-nothing mode, throw error immediately
+                if (!partialImportAllowed) {
+                    throw new Error(`Main sheet import failed at row ${i + 2}: ${error.message}`);
+                }
+                // Otherwise continue with next row in partial mode
+                logger.warn(`[Partial Mode] Skipped row ${i + 2} in main sheet:`, error.message);
+            }
+        }
+
+        // Return parent ID map for child sheets to use (avoids transaction visibility issues)
+        // Note: existingRecordMap contains IDs for both existing and newly inserted records
+        return { ...results, parentIdMap: existingRecordMap };
+    } catch (error) {
+        return { ...results, parentIdMap: existingRecordMap };
+    }
 }
 
 /**
