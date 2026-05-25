@@ -693,8 +693,8 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
         return { inserted: 0, updated: 0, errors: [] };
     }
 
-    // Initialize results object to track inserted/updated records and errors for this child sheet
-    const results = { inserted: 0, updated: 0, errors: [] };
+    // Initialize results object to track inserted/updated records, skipped rows, and errors for this child sheet
+    const results = { inserted: 0, updated: 0, skipped: 0, errors: [] };
     const rows = worksheet.getRows(2, worksheet.rowCount - 1) || []; // Skip header
 
     // Use parent ID map passed from main sheet import (avoids transaction visibility issues)
@@ -752,7 +752,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 // Find parent ID (use cache if available)
                 const parentId = parentIdCache.get(String(parentCode || '').trim().toUpperCase());
                 if (!parentId) {
-                    throw new Error(`Parent record not found for code: ${parentCode}`);
+                    results.skipped++;
+                    logger.warn(`[Child Import] Skipped row ${i + 2} in child sheet '${childConfig.sheetName}' because parent was not found for code: ${parentCode}`);
+                    continue;
                 }
 
                 // Set foreign key in child record to establish relationship with parent record
