@@ -528,17 +528,18 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
         const distinctValues = [...new Set(uniqueValues)];
 
         if (distinctValues.length > 0) {
+            // Use case-insensitive matching: compare upper(trim(col)) against upper(trim(params))
             const paramNames = distinctValues.map((_, index) => `@uniqueValue${index}`);
-            const query = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE ${config.uniqueKey} IN (${paramNames.join(', ')})`;
+            const query = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE UPPER(LTRIM(RTRIM(${config.uniqueKey}))) IN (${paramNames.join(', ')})`;
             const params = {};
             distinctValues.forEach((value, index) => {
-                params[`uniqueValue${index}`] = value;
+                params[`uniqueValue${index}`] = String(value).trim().toUpperCase();
             });
 
             try {
                 const existingRows = await db.executeQuery(databaseName, query, params, useApi);
                 existingRows.forEach(existingRow => {
-                    existingRecordMap.set(String(existingRow[config.uniqueKey]).trim(), existingRow[config.primaryKey]);
+                    existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
                 });
             } catch (error) {
                 logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
@@ -562,8 +563,8 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 record[col.key] = parseCellValue(cellValue, col);
             });
 
-            // Check if record exists using prefetched unique-key map
-            const existingId = existingRecordMap.get(String(record[config.uniqueKey] || '').trim());
+            // Check if record exists using prefetched unique-key map (normalized)
+            const existingId = existingRecordMap.get(String(record[config.uniqueKey] || '').trim().toUpperCase());
             if (existingId) {
                 // Update existing record
                 record.updatedate = new Date();
@@ -655,16 +656,16 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
 
         if (distinctParentCodes.length > 0) {
             const paramNames = distinctParentCodes.map((_, index) => `@parentCode${index}`);
-            const parentQuery = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE ${config.uniqueKey} IN (${paramNames.join(', ')})`;
+            const parentQuery = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE UPPER(LTRIM(RTRIM(${config.uniqueKey}))) IN (${paramNames.join(', ')})`;
             const parentParams = {};
             distinctParentCodes.forEach((value, index) => {
-                parentParams[`parentCode${index}`] = value;
+                parentParams[`parentCode${index}`] = String(value).trim().toUpperCase();
             });
 
             try {
                 const parentResults = await db.executeQuery(databaseName, parentQuery, parentParams, useApi);
                 parentResults.forEach(parentRow => {
-                    parentIdCache.set(String(parentRow[config.uniqueKey]).trim(), parentRow[config.primaryKey]);
+                    parentIdCache.set(String(parentRow[config.uniqueKey] || '').trim().toUpperCase(), parentRow[config.primaryKey]);
                 });
             } catch (error) {
                 logger.warn(`Unable to prefetch parent IDs for ${config.tableName}: ${error.message}`);
@@ -686,7 +687,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 const record = {};
 
                 // Find parent ID (use cache if available)
-                const parentId = parentIdCache.get(String(parentCode).trim());
+                const parentId = parentIdCache.get(String(parentCode || '').trim().toUpperCase());
                 if (!parentId) {
                     throw new Error(`Parent record not found for code: ${parentCode}`);
                 }
@@ -1009,19 +1010,30 @@ function mapImportDropdownValue(value, col, dropdownMappings, rowNumber) {
     if (value === null || value === undefined || value === '') {
         return value;
     }
-    // Look up the mapping for this column key to find the corresponding value for the given label from the Excel file. This mapping is essential for ensuring that the imported data is correctly interpreted and stored in the database according to the defined dropdown options. If the label does not have a corresponding value in the mapping, it indicates that there is an invalid dropdown value in the Excel file, which could lead to data integrity issues if not handled properly.
+
     const map = dropdownMappings[col.key] || {};
-    const stringValue = String(value).trim();
-    // First, try to find a direct match for the label in the mapping. If a match is found, return the corresponding value from the database.
-    if (Object.prototype.hasOwnProperty.call(map, stringValue)) {
-        return map[stringValue];
+    const raw = String(value);
+    const key = raw.trim();
+
+    // 1) exact match (trimmed)
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
+        return map[key];
     }
-    // If no direct match is found, check if the value can be interpreted as a number and if the mapping contains a matching numeric value (as a string). This allows for cases where the dropdown values are numeric but may be represented as strings in the Excel file.
-    const numericValue = Number(stringValue);
-    if (!Number.isNaN(numericValue) && String(numericValue) === stringValue) {
+
+    // 2) case-insensitive match
+    const upperKey = key.toUpperCase();
+    for (const k of Object.keys(map)) {
+        if (String(k).trim().toUpperCase() === upperKey) {
+            return map[k];
+        }
+    }
+
+    // 3) numeric fallback (if the cell contains a numeric string that represents the value)
+    const numericValue = Number(key);
+    if (!Number.isNaN(numericValue) && String(numericValue) === key) {
         return numericValue;
     }
-    // If no match is found in the mapping, throw an error indicating that there is an invalid dropdown value for this cell. This helps ensure data integrity during the import process by preventing invalid values from being imported into the database.
+
     throw new Error(`Invalid dropdown value '${value}' for ${col.header} on row ${rowNumber}`);
 }
 
