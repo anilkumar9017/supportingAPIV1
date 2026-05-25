@@ -580,8 +580,11 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
                 });
             } catch (error) {
-                prefetchFailed = true;
                 logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+                if (!partialImportAllowed) {
+                    throw new Error(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
+                }
+                prefetchFailed = true;
             }
         }
     }
@@ -647,6 +650,26 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     useApi
                 });
                 results.inserted++;
+                // After insert, attempt to resolve the new record's primary key and cache it
+                try {
+                    const newId = normalizedUniqueKey ? await fetchExistingRowIdByUniqueValue(
+                        db,
+                        databaseName,
+                        useApi,
+                        config.tableName,
+                        config.primaryKey,
+                        config.uniqueKey,
+                        normalizedUniqueKey
+                    ) : null;
+                    if (newId) {
+                        existingRecordMap.set(normalizedUniqueKey, newId);
+                    }
+                } catch (err) {
+                    logger.warn(`Unable to resolve newly inserted record id for ${config.tableName} key=${normalizedUniqueKey}: ${err.message}`);
+                    if (!partialImportAllowed) {
+                        throw new Error(`Unable to resolve newly inserted record id for ${config.tableName}: ${err.message}`);
+                    }
+                }
             }
         } catch (error) {
             const errorInfo = {
@@ -732,6 +755,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 });
             } catch (error) {
                 logger.warn(`Unable to prefetch parent IDs for ${config.tableName}: ${error.message}`);
+                if (!partialImportAllowed) {
+                    throw new Error(`Unable to prefetch parent IDs for ${config.tableName}: ${error.message}`);
+                }
             }
         }
     }
@@ -752,6 +778,10 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                 // Find parent ID (use cache if available)
                 const parentId = parentIdCache.get(String(parentCode || '').trim().toUpperCase());
                 if (!parentId) {
+                    const errorMsg = `Parent record not found for code: ${parentCode}`;
+                    if (!partialImportAllowed) {
+                        throw new Error(errorMsg);
+                    }
                     results.skipped++;
                     logger.warn(`[Child Import] Skipped row ${i + 2} in child sheet '${childConfig.sheetName}' because parent was not found for code: ${parentCode}`);
                     continue;
@@ -807,6 +837,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     error: error.message,
                     data: row.values
                 });
+                if (!partialImportAllowed) {
+                    throw new Error(`Child sheet '${childConfig.sheetName}' failed at row ${i + 2}: ${error.message}`);
+                }
             }
         }
 
