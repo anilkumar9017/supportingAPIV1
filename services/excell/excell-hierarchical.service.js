@@ -52,6 +52,40 @@ function extractHierarchicalConfig(menuCode) {
     };
 }
 
+async function fetchExistingRowsByUniqueValues(db, databaseName, useApi, tableName, primaryKey, uniqueKey, values, chunkSize = 1000) {
+    const normalizedValues = [...new Set(
+        values
+            .map(value => value === undefined || value === null ? '' : String(value).trim().toUpperCase())
+            .filter(value => value !== '')
+    )];
+    const rows = [];
+    for (let i = 0; i < normalizedValues.length; i += chunkSize) {
+        const chunk = normalizedValues.slice(i, i + chunkSize);
+        const paramNames = chunk.map((_, index) => `@value${index}`);
+        const query = `SELECT ${primaryKey}, ${uniqueKey} FROM ${tableName} WHERE UPPER(LTRIM(RTRIM(${uniqueKey}))) IN (${paramNames.join(', ')})`;
+        const params = {};
+        chunk.forEach((value, index) => {
+            params[`value${index}`] = value;
+        });
+        const chunkRows = await db.executeQuery(databaseName, query, params, useApi);
+        rows.push(...(chunkRows || []));
+    }
+    return rows;
+}
+
+async function fetchExistingRowIdByUniqueValue(db, databaseName, useApi, tableName, primaryKey, uniqueKey, value) {
+    const normalizedValue = String(value === undefined || value === null ? '' : String(value)).trim().toUpperCase();
+    if (!normalizedValue) {
+        return null;
+    }
+
+    const query = `SELECT ${primaryKey}, ${uniqueKey} FROM ${tableName} WHERE UPPER(LTRIM(RTRIM(${uniqueKey}))) = @value`;
+    const params = { value: normalizedValue };
+    const rows = await db.executeQuery(databaseName, query, params, useApi);
+    const row = Array.isArray(rows) ? rows[0] : null;
+    return row ? row[primaryKey] : null;
+}
+
 /**
  * Generate hierarchical Excel file with main sheet and child sheets
  */
@@ -518,6 +552,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
     const existingRecordMap = new Map();
     const uniqueKeyColumnIndex = config.columns.findIndex(col => col.key === config.uniqueKey);
 
+    let prefetchFailed = false;
     if (uniqueKeyColumnIndex >= 0 && rows.length > 0) {
         const uniqueValues = rows
             .map(row => {
@@ -528,20 +563,22 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
         const distinctValues = [...new Set(uniqueValues)];
 
         if (distinctValues.length > 0) {
-            // Use case-insensitive matching: compare upper(trim(col)) against upper(trim(params))
-            const paramNames = distinctValues.map((_, index) => `@uniqueValue${index}`);
-            const query = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE UPPER(LTRIM(RTRIM(${config.uniqueKey}))) IN (${paramNames.join(', ')})`;
-            const params = {};
-            distinctValues.forEach((value, index) => {
-                params[`uniqueValue${index}`] = String(value).trim().toUpperCase();
-            });
-
             try {
-                const existingRows = await db.executeQuery(databaseName, query, params, useApi);
+                const existingRows = await fetchExistingRowsByUniqueValues(
+                    db,
+                    databaseName,
+                    useApi,
+                    config.tableName,
+                    config.primaryKey,
+                    config.uniqueKey,
+                    distinctValues,
+                    1000
+                );
                 existingRows.forEach(existingRow => {
                     existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
                 });
             } catch (error) {
+                prefetchFailed = true;
                 logger.warn(`Unable to prefetch existing records for ${config.tableName}: ${error.message}`);
             }
         }
@@ -563,8 +600,23 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 record[col.key] = parseCellValue(cellValue, col);
             });
 
-            // Check if record exists using prefetched unique-key map (normalized)
-            const existingId = existingRecordMap.get(String(record[config.uniqueKey] || '').trim().toUpperCase());
+            const normalizedUniqueKey = String(record[config.uniqueKey] || '').trim().toUpperCase();
+            let existingId = existingRecordMap.get(normalizedUniqueKey);
+            if (!existingId && prefetchFailed && normalizedUniqueKey) {
+                existingId = await fetchExistingRowIdByUniqueValue(
+                    db,
+                    databaseName,
+                    useApi,
+                    config.tableName,
+                    config.primaryKey,
+                    config.uniqueKey,
+                    normalizedUniqueKey
+                );
+                if (existingId) {
+                    existingRecordMap.set(normalizedUniqueKey, existingId);
+                }
+            }
+
             if (existingId) {
                 // Update existing record
                 record.updatedate = new Date();
@@ -655,15 +707,17 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
         const distinctParentCodes = [...new Set(parentCodes)];
 
         if (distinctParentCodes.length > 0) {
-            const paramNames = distinctParentCodes.map((_, index) => `@parentCode${index}`);
-            const parentQuery = `SELECT ${config.primaryKey}, ${config.uniqueKey} FROM ${config.tableName} WHERE UPPER(LTRIM(RTRIM(${config.uniqueKey}))) IN (${paramNames.join(', ')})`;
-            const parentParams = {};
-            distinctParentCodes.forEach((value, index) => {
-                parentParams[`parentCode${index}`] = String(value).trim().toUpperCase();
-            });
-
             try {
-                const parentResults = await db.executeQuery(databaseName, parentQuery, parentParams, useApi);
+                const parentResults = await fetchExistingRowsByUniqueValues(
+                    db,
+                    databaseName,
+                    useApi,
+                    config.tableName,
+                    config.primaryKey,
+                    config.uniqueKey,
+                    distinctParentCodes,
+                    1000
+                );
                 parentResults.forEach(parentRow => {
                     parentIdCache.set(String(parentRow[config.uniqueKey] || '').trim().toUpperCase(), parentRow[config.primaryKey]);
                 });
