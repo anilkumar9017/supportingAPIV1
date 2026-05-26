@@ -626,8 +626,10 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
 
                 if (existingId) {
                     // Update existing record
-                    record.updatedate = new Date();
-                    record.updatedby = Number(userObj?.userid) || 0;
+                    if(config?.menuCode != 'service-vehicle'){
+                        record.updatedate = new Date();
+                        record.updatedby = Number(userObj?.userid) || 0;
+                    }
                     await updateRecord({
                         transaction,
                         db,
@@ -639,10 +641,12 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     results.updated++;
                 } else {
                     // Insert new record
-                    record.createdate = new Date();
-                    record.createdby = Number(userObj?.userid) || 0;
-                    record.updatedate = null;
-                    record.updatedby = null;
+                    if(config?.menuCode != 'service-vehicle'){
+                        record.createdate = new Date();
+                        record.createdby = Number(userObj?.userid) || 0;
+                        record.updatedate = null;
+                        record.updatedby = null;
+                    }
                     await insertRecord({
                         transaction,
                         db,

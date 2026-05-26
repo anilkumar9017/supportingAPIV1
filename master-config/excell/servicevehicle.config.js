@@ -1,5 +1,5 @@
 module.exports = {
-        menuCode: 'trip-expense-setup',
+        menuCode: 'service-vehicle',
         sheetName: 'Service History',
         tableName: 'm_vehicle_servicehistory',
         primaryKey: 'id',
@@ -7,6 +7,7 @@ module.exports = {
 
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
+          { header: 'Parent ID', key: 'parent_id', type: 'number', width: 10 },
           { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
             sheetName: 'Service Types',
             query: 'select id, name from m_routine_service_type',
