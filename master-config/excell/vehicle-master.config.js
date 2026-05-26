@@ -262,13 +262,14 @@ module.exports = {
               valueField: 'id'
             }
           }, */
-          { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+          { header: 'Service Type', key: 'servicetype', type: 'number', width: 15,},
+          /* { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
             sheetName: 'Service Types',
             query: 'select id, name from m_routine_service',
             labelField: 'name',
             valueField: 'id'
            }
-          },
+          }, */
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
           { header: 'Effective From', key: 'effective_from', type: 'date', width: 15 },
           { header: 'Valid Upto', key: 'valid_upto', type: 'date', width: 15 },

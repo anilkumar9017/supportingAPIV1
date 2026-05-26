@@ -791,9 +791,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     if (!partialImportAllowed) {
                         throw new Error(errorMsg);
                     }
-                    results.skipped++;
+                    /* results.skipped++;
                     logger.warn(`[Child Import] Skipped row ${i + 2} in child sheet '${childConfig.sheetName}' because parent was not found for code: ${parentCode}`);
-                    continue;
+                    continue; */
                 }
 
                 // Set foreign key in child record to establish relationship with parent record
