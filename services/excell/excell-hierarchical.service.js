@@ -914,7 +914,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     record.createdby = Number(userObj?.userid) || 0;
                     record.updatedate = null;
                     record.updatedby = null;
-                    await insertRecord({
+                    const newId = await insertRecord({
                         transaction,
                         db,
                         databaseName,
