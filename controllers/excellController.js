@@ -139,10 +139,11 @@ async function importHierarchicalExcel(req, res) {
         }
 
         if (mainErrors.length > 0 || childErrors.length > 0 || result?.success === false) {
+            const responseErrors = mainErrors.length > 0 ? mainErrors : childErrors.length > 0 ? childErrors : result.errors || [{ message: result.message || 'Import failed' }];
             return res.status(400).json({
                 success: false,
                 message: 'Import failed.',
-                errors: mainErrors.length > 0 ? mainErrors : childErrors,
+                errors: responseErrors,
             });
         }
         
