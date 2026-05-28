@@ -786,6 +786,19 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
             }
         }
         logger.error(`Error importing hierarchical Excel for ${menuCode}:`, error);
+        results.success = false;
+        results.committed = false;
+        results.totalErrors = results.totalErrors || 0;
+        if (!results.errors || !results.errors.length) {
+            results.errors = [{ message: error.message }];
+            results.totalErrors = 1;
+        }
+        if (!results.main || !Array.isArray(results.main.errors)) {
+            results.main = results.main || { inserted: 0, updated: 0, errors: [] };
+        }
+        if (!results.main.errors.length) {
+            results.main.errors = results.errors;
+        }
         return results;
     }
 }
@@ -886,11 +899,6 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 }
 
                 if (existingId) {
-                    // Update existing record
-                    if(config?.menuCode != 'service-vehicle'){
-                        record.updatedate = new Date();
-                        record.updatedby = Number(userObj?.userid) || 0;
-                    }
                     await updateRecord({
                         transaction,
                         db,
@@ -902,40 +910,22 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     results.updated++;
                 } else {
                     // Insert new record
-                    if(config?.menuCode != 'service-vehicle'){
-                        record.createdate = new Date();
-                        record.createdby = Number(userObj?.userid) || 0;
-                        record.updatedate = null;
-                        record.updatedby = null;
-                    }
+                    record.createdate = new Date();
+                    record.createdby = Number(userObj?.userid) || 0;
+                    record.updatedate = null;
+                    record.updatedby = null;
                     await insertRecord({
                         transaction,
                         db,
                         databaseName,
                         tableName: config.tableName,
                         row: record,
-                        useApi
+                        useApi,
+                        primaryKey: config.primaryKey || 'id'
                     });
                     results.inserted++;
-                    // After insert, attempt to resolve the new record's primary key and cache it
-                    try {
-                        const newId = normalizedUniqueKey ? await fetchExistingRowIdByUniqueValue(
-                            db,
-                            databaseName,
-                            useApi,
-                            config.tableName,
-                            config.primaryKey,
-                            config.uniqueKey,
-                            normalizedUniqueKey
-                        ) : null;
-                        if (newId) {
-                            existingRecordMap.set(normalizedUniqueKey, newId);
-                        }
-                    } catch (err) {
-                        logger.warn(`Unable to resolve newly inserted record id for ${config.tableName} key=${normalizedUniqueKey}: ${err.message}`);
-                        if (!partialImportAllowed) {
-                            throw new Error(`Unable to resolve newly inserted record id for ${config.tableName}: ${err.message}`);
-                        }
+                    if (newId) {
+                        existingRecordMap.set(normalizedUniqueKey, newId);
                     }
                 }
             } catch (error) {
@@ -1461,14 +1451,19 @@ module.exports = {
 };
 
 // Utility: validate an Excel file on disk against config (can be used for local debugging)
-async function validateExcelFile(menuCode, filePath, db, databaseName, useApi) {
+async function validateExcelFile(menuCode, filePath, db, databaseName, useApi, options = {}) {
+    const { skipDropdowns = false } = options;
     const config = extractHierarchicalConfig(menuCode);
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
-    const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
+
+    const dropdownMappings = skipDropdowns
+        ? {}
+        : await prepareImportDropdownMappings(config, db, databaseName, useApi);
+
     const fixes = autoFixWorkbook(workbook, config, dropdownMappings);
     const validation = validateWorkbookForImport(workbook, config, dropdownMappings);
-    return { ...validation, fixes };
+    return { ...validation, fixes, skipDropdowns };
 }
 
 module.exports.validateExcelFile = validateExcelFile;
