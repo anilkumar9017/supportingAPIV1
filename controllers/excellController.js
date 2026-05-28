@@ -126,11 +126,23 @@ async function importHierarchicalExcel(req, res) {
         }
 
         const result = await generateHierarchicalExcel.importHierarchicalExcel(menuCode, file, db, databaseName, useApi, userObj);
-        if (result?.main?.errors?.length > 0 || result?.child?.errors?.length > 0 || result?.success === false) {
+
+        // Aggregate main and children errors (children are returned in `result.children`)
+        const mainErrors = result?.main?.errors || [];
+        const childErrors = [];
+        if (result?.children && typeof result.children === 'object') {
+            Object.values(result.children).forEach(childRes => {
+                if (childRes && Array.isArray(childRes.errors) && childRes.errors.length > 0) {
+                    childErrors.push(...childRes.errors);
+                }
+            });
+        }
+
+        if (mainErrors.length > 0 || childErrors.length > 0 || result?.success === false) {
             return res.status(400).json({
                 success: false,
                 message: 'Import failed.',
-                errors: result?.main?.errors?.length > 0 ? result?.main?.errors || [] :  result?.child?.errors || [],
+                errors: mainErrors.length > 0 ? mainErrors : childErrors,
             });
         }
         

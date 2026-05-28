@@ -20,7 +20,7 @@ async function getDatabaseConfig(dbName = 'default', useApi = false) {
     port: parseInt(process.env.DEFAULT_DB_PORT) || 1433,
     database: dbName || 'your_database',
     user: process.env.DEFAULT_DB_USER || 'sa',
-    password: process.env.DEFAULT_DB_PASSWORD || '',
+    password: process.env.DEFAULT_DB_PASSWORD || 'SQL@2020',
     options: {
       encrypt: process.env.DEFAULT_DB_ENCRYPT === 'true',
       trustServerCertificate: process.env.DEFAULT_DB_TRUST_CERT === 'true'
