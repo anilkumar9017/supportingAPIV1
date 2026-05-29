@@ -11,6 +11,7 @@ const tripExpenseSetupConfig = require('./excell/trip-expense-setup.config');
 const routeMasterConfig = require('./excell/route-master.config');
 const maintenanceTypeConfig = require('./excell/maintenance-type.config');
 const employeeMasterConfig = require('./excell/employee-master.config');
+const costCenterConfig = require('./excell/cost-center-master.config');
 
 module.exports = {
     project: projectConfig,
@@ -26,4 +27,5 @@ module.exports = {
     routeMaster: routeMasterConfig,
     maintenanceType: maintenanceTypeConfig,
     employeeMaster: employeeMasterConfig,
+    costCenter: costCenterConfig,
 };
