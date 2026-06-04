@@ -1,0 +1,11 @@
+2026-06-04T10:18:28.905Z - POST /whapi/webhook
+whatsapp Number :  HULKBR-AZA4D
+========== UPLOADING TO NG API ==========
+File : image_1780568309077.jpg C:\inetpub\wwwroot\ng_supporting_api\test\src\uploads\image_1780568309077.jpg image/jpeg image
+UPLOAD RESPONSE : {
+  status: 200,
+  message: 'File uploaded successfully!',
+  file_name: 'mowara/POD/1780568311.jpg',
+  file_id: '4_zdb0d84befba50f1491bc0011_f10285d12db087a23_d20260604_m101832_c005_v0501001_t0054_u01780568312237',
+  public_url: 'https://f005.backblazeb2.com/file/DCC-NG/mowara%2FPOD%2F1780568311.jpg'
+}

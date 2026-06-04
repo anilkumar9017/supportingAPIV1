@@ -4,8 +4,6 @@
  */
 
 const ExcelJS = require('exceljs');
-const fs = require('fs');
-const path = require('path');
 const configs = require('../../master-config/index');
 const { createLogger, getColumnIndexMap, getSmartRowRange, applyDropdownValidation } = require('./excell-utils');
 const { getGlobalDropdownCache } = require('./excell-dropdown-cache');
@@ -394,228 +392,6 @@ async function prepareDropdownMetadata(workbook, config, db, databaseName, useAp
 }
 
 /**
- * Validate workbook structure against config before import
- * - Checks presence of main & child sheets
- * - Verifies headers (simple trimmed string compare)
- * - Detects merged header cells
- * - Ensures unique key values exist in main sheet
- * - Validates dropdown labels against pre-fetched mappings
- * Returns { valid: boolean, errors: [ { sheet, row, col, message, expected?, actual? } ] }
- */
-function normalizeCellValue(v) {
-    if (v === null || v === undefined) return '';
-    if (typeof v === 'object') {
-        if (v.text) return String(v.text).trim();
-        if (v.richText) return v.richText.map(rt => rt.text).join('').trim();
-        if (v.formula) return String(v.result || '').trim();
-        return String(v).trim();
-    }
-    return String(v).trim();
-}
-
-function normalizeHeaderValue(v) {
-    return normalizeCellValue(v).replace(/\s+/g, ' ').trim();
-}
-
-function buildDropdownLabelLookup(dropdownMappings) {
-    const lookup = {};
-    Object.entries(dropdownMappings).forEach(([columnKey, map]) => {
-        lookup[columnKey] = {};
-        Object.keys(map).forEach(label => {
-            const normalized = normalizeHeaderValue(label);
-            lookup[columnKey][normalized] = label;
-        });
-    });
-    return lookup;
-}
-
-function autoFixWorkbook(workbook, config, dropdownMappings = {}) {
-    const fixes = [];
-    const dropdownLookup = buildDropdownLabelLookup(dropdownMappings);
-
-    function applyHeaderFix(worksheet, expectedHeaders, sheetName) {
-        const headerRow = worksheet.getRow(1);
-        for (let i = 0; i < expectedHeaders.length; i++) {
-            const cell = headerRow.getCell(i + 1);
-            const actualRaw = normalizeCellValue(cell.value || '');
-            const actual = normalizeHeaderValue(actualRaw);
-            const expected = normalizeHeaderValue(expectedHeaders[i]);
-            if (cell && cell.isMerged) {
-                try {
-                    worksheet.unMergeCells(cell.address);
-                    fixes.push({ sheet: sheetName, row: 1, col: i + 1, message: 'Unmerged header cell' });
-                } catch (err) {
-                    fixes.push({ sheet: sheetName, row: 1, col: i + 1, message: `Failed to unmerge header cell: ${err.message}` });
-                }
-            }
-            if (actual !== expected) {
-                if (actual === expected || normalizeHeaderValue(actual) === expected) {
-                    headerRow.getCell(i + 1).value = expectedHeaders[i];
-                    fixes.push({ sheet: sheetName, row: 1, col: i + 1, message: `Trimmed/normalized header to '${expectedHeaders[i]}'`, actual: actualRaw, expected: expectedHeaders[i] });
-                }
-            }
-        }
-    }
-
-    // Fix headers on main sheet
-    const mainSheetName = config.sheetName;
-    const mainWs = workbook.getWorksheet(mainSheetName);
-    if (mainWs) {
-        const expectedMainHeaders = config.columns.map(c => String(c.header || '').trim());
-        applyHeaderFix(mainWs, expectedMainHeaders, mainSheetName);
-    }
-
-    // Fix headers and dropdown labels on child sheets
-    const parentHeader = config.columns.find(c => c.key === config.uniqueKey)?.header || 'Parent Code';
-    for (const [childKey, childConfig] of Object.entries(config.children)) {
-        const childSheetName = childConfig.sheetName;
-        const childWs = workbook.getWorksheet(childSheetName);
-        if (!childWs) continue;
-        const expectedChildHeaders = [parentHeader, ...childConfig.columns.map(c => String(c.header || '').trim())];
-        applyHeaderFix(childWs, expectedChildHeaders, childSheetName);
-    }
-
-    function normalizeDropdownCells(worksheet, columns, rowOffset) {
-        const rowCount = worksheet.rowCount;
-        for (let rn = 2; rn <= rowCount; rn++) {
-            const row = worksheet.getRow(rn);
-            const isEmpty = row.values.every(v => v === null || v === undefined || String(v).trim() === '');
-            if (isEmpty) continue;
-            for (let ci = 0; ci < columns.length; ci++) {
-                const col = columns[ci];
-                if (col.type !== 'dropdown') continue;
-                const cell = row.getCell(ci + rowOffset);
-                const rawValue = cell.value;
-                const labelValue = normalizeHeaderValue(rawValue || '');
-                if (!labelValue) continue;
-                const lookup = dropdownLookup[col.key] || {};
-                const match = lookup[labelValue];
-                if (match && normalizeHeaderValue(rawValue) !== normalizeHeaderValue(match)) {
-                    cell.value = match;
-                    fixes.push({ sheet: worksheet.name, row: rn, col: ci + rowOffset, message: `Normalized dropdown label for '${col.header}'`, actual: String(rawValue), expected: match });
-                }
-            }
-        }
-    }
-
-    if (mainWs) {
-        normalizeDropdownCells(mainWs, config.columns, 1);
-    }
-
-    for (const [childKey, childConfig] of Object.entries(config.children)) {
-        const childSheetName = childConfig.sheetName;
-        const childWs = workbook.getWorksheet(childSheetName);
-        if (!childWs) continue;
-        normalizeDropdownCells(childWs, childConfig.columns, 2);
-    }
-
-    return { fixes };
-}
-
-function validateWorkbookForImport(workbook, config, dropdownMappings = {}) {
-    const errors = [];
-
-    function normalize(v) {
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'object') {
-            if (v.text) return String(v.text).trim();
-            if (v.richText) return v.richText.map(rt => rt.text).join('').trim();
-            if (v.formula) return String(v.result || '').trim();
-            return String(v).trim();
-        }
-        return String(v).trim();
-    }
-
-    // Validate main sheet
-    const mainSheetName = config.sheetName;
-    const mainWs = workbook.getWorksheet(mainSheetName);
-    if (!mainWs) {
-        errors.push({ sheet: mainSheetName, message: `Main sheet '${mainSheetName}' not found` });
-        return { valid: errors.length === 0, errors };
-    }
-
-    const expectedMainHeaders = config.columns.map(c => String(c.header || '').trim());
-    const headerRow = mainWs.getRow(1);
-    for (let i = 0; i < expectedMainHeaders.length; i++) {
-        const cell = headerRow.getCell(i + 1);
-        const actual = normalize(cell.value || '');
-        if (cell && cell.isMerged) {
-            errors.push({ sheet: mainSheetName, row: 1, col: i + 1, message: 'Merged header cell detected; please unmerge headers' });
-        }
-        const expected = expectedMainHeaders[i];
-        if ((expected || '') !== (actual || '')) {
-            errors.push({ sheet: mainSheetName, row: 1, col: i + 1, message: 'Header mismatch', expected, actual });
-        }
-    }
-
-    // Check unique key presence in main rows
-    const uniqueKeyIndex = config.columns.findIndex(c => c.key === config.uniqueKey);
-    if (uniqueKeyIndex >= 0) {
-        const startRow = 2;
-        for (let rn = startRow; rn <= mainWs.rowCount; rn++) {
-            const row = mainWs.getRow(rn);
-            // If entire row is empty, skip
-            const isEmpty = row.values.every(v => v === null || v === undefined || String(v).trim() === '');
-            if (isEmpty) continue;
-            const cell = row.getCell(uniqueKeyIndex + 1);
-            const val = normalize(cell.value || '');
-            if (!val) {
-                errors.push({ sheet: mainSheetName, row: rn, col: uniqueKeyIndex + 1, message: `Missing unique key value for '${config.uniqueKey}'` });
-            }
-        }
-    }
-
-    // Validate child sheets
-    for (const [childKey, childConfig] of Object.entries(config.children)) {
-        const childSheetName = childConfig.sheetName;
-        const childWs = workbook.getWorksheet(childSheetName);
-        if (!childWs) {
-            errors.push({ sheet: childSheetName, message: `Child sheet '${childSheetName}' not found` });
-            continue;
-        }
-
-        // Expected headers: parent identifier + child headers
-        const parentHeader = config.columns.find(c => c.key === config.uniqueKey)?.header || 'Parent Code';
-        const expectedChildHeaders = [parentHeader, ...childConfig.columns.map(c => String(c.header || '').trim())];
-        const childHeaderRow = childWs.getRow(1);
-        for (let i = 0; i < expectedChildHeaders.length; i++) {
-            const cell = childHeaderRow.getCell(i + 1);
-            const actual = normalize(cell.value || '');
-            if (cell && cell.isMerged) {
-                errors.push({ sheet: childSheetName, row: 1, col: i + 1, message: 'Merged header cell detected; please unmerge headers' });
-            }
-            const expected = expectedChildHeaders[i];
-            if ((expected || '') !== (actual || '')) {
-                errors.push({ sheet: childSheetName, row: 1, col: i + 1, message: 'Header mismatch', expected, actual });
-            }
-        }
-
-        // Validate dropdown labels in child rows
-        for (let rn = 2; rn <= childWs.rowCount; rn++) {
-            const row = childWs.getRow(rn);
-            const isEmpty = row.values.every(v => v === null || v === undefined || String(v).trim() === '');
-            if (isEmpty) continue;
-            for (let ci = 0; ci < childConfig.columns.length; ci++) {
-                const col = childConfig.columns[ci];
-                if (col.type === 'dropdown') {
-                    const cell = row.getCell(ci + 2); // +1 parent column
-                    const label = normalize(cell.value || '');
-                    if (label) {
-                        const map = dropdownMappings[col.key] || {};
-                        const normalizedLabels = Object.keys(map).map(key => normalizeHeaderValue(key));
-                        if (!Object.values(map).includes(label) && !normalizedLabels.includes(normalizeHeaderValue(label))) {
-                            errors.push({ sheet: childSheetName, row: rn, col: ci + 2, message: `Invalid dropdown label '${label}' for column '${col.header}'` });
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return { valid: errors.length === 0, errors };
-}
-
-/**
  * Import hierarchical Excel file with main data and child data
  * - filePath: path to the uploaded Excel file
  * - menuCode: to identify which config to use for import
@@ -653,49 +429,12 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
             throw new Error(`No hierarchical configuration found for menu code: ${menuCode}`);
         }
 
-        // Load workbook from uploaded file (supports disk uploads) or buffer
+        // Load workbook from uploaded file buffer
         const workbook = new ExcelJS.Workbook();
-        if (file && file.path) {
-            // Read from disk (safer for large files)
-            await workbook.xlsx.readFile(file.path);
-            // Remove temp file after loading to free disk
-            try {
-                fs.unlink(file.path, err => {
-                    if (err) {
-                        logger.warn(`Failed to delete temp upload file ${file.path}: ${err.message}`);
-                    }
-                });
-            } catch (e) {
-                logger.warn(`Error removing temp file ${file.path}: ${e.message}`);
-            }
-        } else if (file && file.buffer) {
-            // Fallback for memoryStorage
-            await workbook.xlsx.load(file.buffer);
-        } else {
-            throw new Error('No uploaded file found for import');
-        }
+        await workbook.xlsx.load(file.buffer);
 
         // Prepare dropdown metadata for mapping labels to values during import and for validation
         const dropdownMappings = await prepareImportDropdownMappings(config, db, databaseName, useApi);
-
-        // Auto-fix simple workbook issues before validation
-        const fixResult = autoFixWorkbook(workbook, config, dropdownMappings);
-        if (fixResult.fixes.length > 0) {
-            logger.info(`Auto-fixed ${fixResult.fixes.length} workbook issue(s) for ${menuCode}`);
-            results.autoFixes = fixResult.fixes;
-        }
-
-        // Validate workbook structure and basic data before starting a DB transaction
-        const validation = validateWorkbookForImport(workbook, config, dropdownMappings);
-        if (!validation.valid) {
-            results.main.errors = validation.errors;
-            results.errors = validation.errors;
-            results.totalErrors = validation.errors.length;
-            results.success = false;
-            results.committed = false;
-            logger.warn(`Excel import validation failed for ${menuCode}: ${validation.errors.length} issue(s)`);
-            return results;
-        }
 
         // Start a shared transaction for hierarchical import
         pool = await db.getConnection(databaseName, useApi);
@@ -786,19 +525,6 @@ async function importHierarchicalExcel(menuCode, file, db, databaseName, useApi,
             }
         }
         logger.error(`Error importing hierarchical Excel for ${menuCode}:`, error);
-        results.success = false;
-        results.committed = false;
-        results.totalErrors = results.totalErrors || 0;
-        if (!results.errors || !results.errors.length) {
-            results.errors = [{ message: error.message }];
-            results.totalErrors = 1;
-        }
-        if (!results.main || !Array.isArray(results.main.errors)) {
-            results.main = results.main || { inserted: 0, updated: 0, errors: [] };
-        }
-        if (!results.main.errors.length) {
-            results.main.errors = results.errors;
-        }
         return results;
     }
 }
@@ -899,6 +625,9 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                 }
 
                 if (existingId) {
+                    // Update existing record
+                    record.updatedate = new Date();
+                    record.updatedby = Number(userObj?.userid) || 0;
                     await updateRecord({
                         transaction,
                         db,
@@ -914,18 +643,34 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                     record.createdby = Number(userObj?.userid) || 0;
                     record.updatedate = null;
                     record.updatedby = null;
-                    const newId = await insertRecord({
+                    await insertRecord({
                         transaction,
                         db,
                         databaseName,
                         tableName: config.tableName,
                         row: record,
-                        useApi,
-                        primaryKey: config.primaryKey || 'id'
+                        useApi
                     });
                     results.inserted++;
-                    if (newId) {
-                        existingRecordMap.set(normalizedUniqueKey, newId);
+                    // After insert, attempt to resolve the new record's primary key and cache it
+                    try {
+                        const newId = normalizedUniqueKey ? await fetchExistingRowIdByUniqueValue(
+                            db,
+                            databaseName,
+                            useApi,
+                            config.tableName,
+                            config.primaryKey,
+                            config.uniqueKey,
+                            normalizedUniqueKey
+                        ) : null;
+                        if (newId) {
+                            existingRecordMap.set(normalizedUniqueKey, newId);
+                        }
+                    } catch (err) {
+                        logger.warn(`Unable to resolve newly inserted record id for ${config.tableName} key=${normalizedUniqueKey}: ${err.message}`);
+                        if (!partialImportAllowed) {
+                            throw new Error(`Unable to resolve newly inserted record id for ${config.tableName}: ${err.message}`);
+                        }
                     }
                 }
             } catch (error) {
@@ -1042,9 +787,9 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     if (!partialImportAllowed) {
                         throw new Error(errorMsg);
                     }
-                    /* results.skipped++;
+                    results.skipped++;
                     logger.warn(`[Child Import] Skipped row ${i + 2} in child sheet '${childConfig.sheetName}' because parent was not found for code: ${parentCode}`);
-                    continue; */
+                    continue;
                 }
 
                 // Set foreign key in child record to establish relationship with parent record
@@ -1449,21 +1194,3 @@ module.exports = {
     importHierarchicalExcel,
     extractHierarchicalConfig
 };
-
-// Utility: validate an Excel file on disk against config (can be used for local debugging)
-async function validateExcelFile(menuCode, filePath, db, databaseName, useApi, options = {}) {
-    const { skipDropdowns = false } = options;
-    const config = extractHierarchicalConfig(menuCode);
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-
-    const dropdownMappings = skipDropdowns
-        ? {}
-        : await prepareImportDropdownMappings(config, db, databaseName, useApi);
-
-    const fixes = autoFixWorkbook(workbook, config, dropdownMappings);
-    const validation = validateWorkbookForImport(workbook, config, dropdownMappings);
-    return { ...validation, fixes, skipDropdowns };
-}
-
-module.exports.validateExcelFile = validateExcelFile;

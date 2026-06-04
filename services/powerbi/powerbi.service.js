@@ -27,7 +27,7 @@ async function getAzureADToken(tenatObj) {
       }
     }
   );
-   
+
   const token = response?.data?.access_token;
 
   tokenCache.set(key, {
@@ -57,7 +57,7 @@ async function powerBIRequest(fn, tenantObj) {
   
       throw err;
     }
-}
+  }
 
 /* 
     it is suing as without token
@@ -83,39 +83,33 @@ async function generateReportEmbedToken(req, res) {
   
       // Generate embed token
       const response = await powerBIRequest(async (token) => {
-        try {
-          return axios.post(
-            `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${report_id}/GenerateToken`,
-            {
-              accessLevel: 'View',
-              allowSaveAs: false
+        return axios.post(
+          `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${report_id}/GenerateToken`,
+          {
+            accessLevel: 'View',
+            allowSaveAs: false
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
             },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-            }
-          );
-        } catch (error) {
-          throw err;
-        }
+            timeout: 15000 // 15s timeout to prevent hanging
+          }
+        );
       }, tenantObj);
   
       // Get report datasetId
       const reportResponse = await powerBIRequest(async (token) => {
-        try {
-          return axios.get(
-            `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${report_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              },
-            }
-          );
-        } catch (error) {
-          throw err;
-        }
+        return axios.get(
+          `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/reports/${report_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            timeout: 15000
+          }
+        );
       }, tenantObj);
   
       // Add embedUrl and datasetId safely
@@ -137,7 +131,15 @@ async function generateReportEmbedToken(req, res) {
         status: error.response?.status,
         data: error.response?.data
       });
-      throw error;
+  
+      if (!res.headersSent) {
+        return {
+            success: false,
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data
+        }
+      }
     }
   }
 
