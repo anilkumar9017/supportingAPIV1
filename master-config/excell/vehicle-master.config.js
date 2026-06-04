@@ -44,6 +44,14 @@ module.exports = {
           valueField: 'id'
         }
       },
+      { header: 'Driver', key: 'driverid', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
+          sheetName: 'Drivers',
+          query: "select id, driver_name from m_driver",
+          labelField: 'driver_name',
+          valueField: 'id'
+        }
+      },
+      { header: 'Driver Name', key: 'driver_name', type: 'text', width: 20 },
       { header: 'Manufacturer', key: 'manufacturer', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Manufacturers',
           query: 'select id, name from m_manufacture',
@@ -88,22 +96,75 @@ module.exports = {
       { header: 'Dimensions 4', key: 'dimension4', type: 'text', width: 20 },
       { header: 'Dimensions 5', key: 'dimension5', type: 'text', width: 20 },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-      //{ header: 'Class', key: '_class', type: 'number', width: 20 },
+      /* { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+            sheetName: 'VehicleClass',
+            query: 'select id, name from m_fm_vehicle_class',
+            labelField: 'name',
+            valueField: 'id'
+        }}, */
       { header: 'Model No', key: 'modelno', type: 'text', width: 20 },
       { header: 'Model Name', key: 'modelname', type: 'text', width: 20 },
       { header: 'Vehicle Series', key: 'vehicleseries', type: 'number', width: 20 },
       { header: 'Suspension Type', key: 'suspension_type', type: 'number', width: 20 },
-      { header: 'Gearbox Type', key: 'gearbox_type', type: 'text', width: 20 },
+      { header: 'Gearbox Type', key: 'gearbox_type', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'GearBox Type',
+        labelField: 'name',
+        valueField: 'value',
+        options: [
+          { "name": "Automatic", "value": "A"},
+          { "name": "Manual", "value": "M"}
+      ],
+      } },
       { header: 'Gearbox Speed', key: 'gearbox_speed', type: 'number', width: 20 },
-      { header: 'Gearbox Category', key: 'gearbox_category', type: 'number', width: 20 },
-      { header: 'Reduction', key: 'reduction', type: 'number', width: 20 },
-      { header: 'Condition', key: 'condition', type: 'number', width: 20 },
-      { header: 'Trailer Type', key: 'trailer_type', type: 'number', width: 20 },
-      { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
-        sheetName: 'Axle Config',
-        query: 'select id, name from m_axle_conf',
+      { header: 'Gearbox Category', key: 'gearbox_category', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+        sheetName: 'Gearbox Category',
+        query: 'select id, name from m_fm_vehicle_category',
         labelField: 'name',
         valueField: 'id'
+     } },
+      { header: 'Reduction', key: 'reduction', 
+      type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Reduction',
+          labelField: 'name',
+          valueField: 'id',
+          options: [
+            {"id": 1, "name": "NR"},
+            {"id": 2, "name": "HR"},
+            {"id": 3, "name": "NA"}
+        ]
+      }},
+      { header: 'Condition', key: 'condition', type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Condition',
+          labelField: 'name',
+          valueField: 'id',
+          options: [
+            {"id": 1,"name": "New"
+            },
+            {"id": 2,"name": "Used"
+            },
+            {"id": 3,"name": "Recon"
+            },
+            {"id": 4,"name": "Other"
+            }
+        ]
+      }},
+      { header: 'Trailer Type', key: 'trailer_type',  type: 'dropdown',
+      data_type: 'number',
+      dropdown: {
+          sheetName: 'Trailer Type',
+          labelField: 'name',
+          valueField: 'id',
+          options: [{id: 1, name: "Normal"}, {id: 2, name: "Tanker"}]
+      }},
+      { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+          sheetName: 'Axle Config',
+          query: 'select id, name from m_axle_conf',
+          labelField: 'name',
+          valueField: 'id'
       } },
       { header: 'Tyre Axle Config', key: 'tyre_axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
         sheetName: 'Axle Config',
@@ -133,10 +194,10 @@ module.exports = {
             labelField: 'name',
             valueField: 'code',
             options: [
-                { name: 'T', code: 'Transit' },
-                { name: 'L', code: 'Local' },
-                { name: 'U', code: 'UpCountry' },
-                { name: 'A', code: 'All' },
+              {code: 'T', name: 'Transit' },
+              {code: 'L', name: 'Local' },
+              {code: 'U', name: 'UpCountry' },
+              {code: 'A', name: 'All' },
             ]
         } },
       { header: 'Self Owned', key: 'self_owned', type: 'checkbox', values: ['Y', 'N'], width: 20 },
@@ -194,37 +255,44 @@ module.exports = {
         sheetName: 'Service History',
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+          /* { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'Maintenance Types',
               query: 'select id, name from m_maintenance_type',
               labelField: 'name',
               valueField: 'id'
             }
-          },
+          }, */
+          { header: 'Service Type', key: 'servicetype', type: 'number', width: 15,},
+          /* { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+            sheetName: 'Service Types',
+            query: 'select id, name from m_routine_service',
+            labelField: 'name',
+            valueField: 'id'
+           }
+          }, */
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
           { header: 'Effective From', key: 'effective_from', type: 'date', width: 15 },
           { header: 'Valid Upto', key: 'valid_upto', type: 'date', width: 15 },
-          { header: 'Service Type', key: 'servicetype', type: 'number', width: 15},
-          /* { header: 'Service Type', key: 'servicetype', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
-              sheetName: 'Service Types',
+          { header: 'Odometer', key: 'odometer', type: 'number', width: 15 },
+          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 20 },
+          { header: 'Next Odometer', key: 'next_odometer', type: 'number', width: 15 },
+          { header: 'Next Service Date', key: 'next_servicedate', type: 'date', width: 18 },
+          { header: 'JobCard Id', key: 'jobcard_lineid', type: 'number', width: 15 },
+          { header: 'Service Interval', key: 'service_interval', type: 'text', width: 15},
+          /* { header: 'Service Interval', key: 'service_interval', type: 'text', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
+              sheetName: 'Service Interval',
               query: 'select id, name from m_routine_service_type',
               labelField: 'name',
               valueField: 'id'
             }
           }, */
-          { header: 'Odometer', key: 'odometer', type: 'number', width: 15 },
-          { header: 'Jobcard ID', key: 'jobcard_id', type: 'text', width: 20 },
-          { header: 'Next Odometer', key: 'next_odometer', type: 'number', width: 15 },
-          { header: 'Next Service Date', key: 'next_servicedate', type: 'date', width: 18 },
-          { header: 'Jobcard Line ID', key: 'jobcard_lineid', type: 'number', width: 15 },
-          { header: 'Service Interval', key: 'service_interval', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
-            sheetName: 'Service Interval',
-            query: 'select id, name from m_routine_service_type',
+          { header: 'UOM', key: 'uom', type: 'text', type: 'dropdown', dataType: 'text', width: 15, dropdown:{
+            sheetName: 'UOMService',
             labelField: 'name',
-            valueField: 'id'
+            valueField: 'id',
+            options: [{id : "K",name: "Kms"},{id : "D",name: "Days"},{id : "M",name: "Months"},{id : "H",name: "Hours"}]
           }
-        },
-          { header: 'UOM', key: 'uom', type: 'text', width: 10 },
+          }, 
           { header: 'KM', key: 'km', type: 'number', width: 10 }
         ]
       },

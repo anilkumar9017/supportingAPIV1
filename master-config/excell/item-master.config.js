@@ -29,7 +29,14 @@ module.exports = {
         {
             header: 'Item Type',
             key: 'item_type',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'ItemType',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id":'I',"name":'Item'},{"id":'L',"name":'labor'},{"id":'T',"name":'Travel'}],
+            } 
         },
 
         {
@@ -63,14 +70,27 @@ module.exports = {
         {
             header: 'Manage Batch',
             key: 'manage_batch',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'BatchType',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id":'B',"name":'Batch'},{"id":'N',"name":'None'}],
+            } 
         },
 
         {
             header: 'Manage Serial',
             key: 'manage_serial',
-            type: 'checkbox',
-            values: ['Y', 'N']
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'SerialType',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id":'S',"name":'Serial'},{"id":'N',"name":'None'}],
+            } 
         },
 
         {
@@ -83,7 +103,7 @@ module.exports = {
             header: 'Last Purchase Currency',
             key: 'last_purchase_currency',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Currencies',
                 query: `select id, cur_code from m_currencies`,
@@ -121,7 +141,7 @@ module.exports = {
             header: 'Group',
             key: 'group_id',
             type: 'dropdown',
-
+            dataType: 'number',
             dropdown: {
                 sheetName: 'ItemGroups',
                 query: `select id, group_name from m_item_group`,
@@ -163,20 +183,33 @@ module.exports = {
         {
             header: 'Tyre Status',
             key: 'tyre_status',
-            type: 'number'
+            type: 'dropdown',
+            dataType: 'number',
+            dropdown: {
+                sheetName: 'ItemGroups',
+                query: `select id, name from m_tyre_status`,
+                labelField: 'name',
+                valueField: 'id'
+            },
         },
 
         {
             header: 'Tyre Size',
             key: 'tyre_size',
-            type: 'number'
+            type: 'dropdown',
+            dataType: 'number',
+            dropdown: {
+                sheetName: 'ItemGroups',
+                query: `select id, name from m_tyre_size`,
+                labelField: 'name',
+                valueField: 'id'
+            }
         },
 
         {
             header: 'Manufacture By',
             key: 'manafacture_by',
             type: 'dropdown',
-
             dropdown: {
                 sheetName: 'Manufacturers',
                 query: `select id, name from m_manufacture`,
@@ -188,7 +221,14 @@ module.exports = {
         {
             header: 'GL Account By',
             key: 'gl_account_by',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountBy',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id": "W", "name": "Warehouse"},{"id": "I", "name": "Item Group"}],
+            } 
         },
 
         {
@@ -321,7 +361,14 @@ module.exports = {
         {
             header: 'List Price',
             key: 'list_price',
-            type: 'number'
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'TaxGroups',
+                query: `select id, list_name from m_price_list`,
+                labelField: 'list_name',
+                valueField: 'id'
+            }
         },
 
         {
@@ -363,7 +410,14 @@ module.exports = {
         {
             header: 'Method Code',
             key: 'method_code',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'MethodCode',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{'id' : 'A', 'name' : 'Moving Average'},{'id' : 'S', 'name' : 'Standard'},{'id' : 'F', 'name' : 'FIFO'},{'id' : 'B', 'name' : 'Batch'},{'id' : 'M', 'name' : 'Serial'}],
+            } 
         },
 
         {

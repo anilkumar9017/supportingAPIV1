@@ -10,10 +10,23 @@
     * - row: An object representing the data to be inserted, where keys are column names and values are the corresponding values for those columns.
     * - useApi: A boolean flag indicating whether to use API-based database access or direct database connection, which can affect how the query is executed and how the database connection is managed.
 */
-async function insertRecord({transaction, db, databaseName, tableName, row, useApi}) {
-  const query = db.buildInsertQuery("mssql", tableName, row);
+async function insertRecord({transaction, db, databaseName, tableName, row, useApi, primaryKey = 'id'}) {
+  const columns = Object.keys(row);
+  const columnNames = columns.join(',');
+  const parameterNames = columns.map(col => `@${col}`).join(',');
+  const outputClause = primaryKey ? `OUTPUT INSERTED.${primaryKey}` : '';
+  const query = `
+      INSERT INTO ${tableName}
+      (${columnNames})
+      ${outputClause}
+      VALUES (${parameterNames})
+  `;
 
-  await db.executeTransactionQuery("mssql", transaction, query, row);
+  const result = await db.executeTransactionQuery("mssql", transaction, query, row);
+  if (result && Array.isArray(result) && result.length > 0 && primaryKey) {
+    return result[0][primaryKey];
+  }
+  return null;
 }
 
 /* 

@@ -98,203 +98,57 @@ module.exports = {
             header: 'Default Vehicle Code',
             key: 'default_vehicle_code',
             type: 'text'
-        }
-
-    ],
-
-    childSheets: [
+        },
 
         {
-
+            header: 'Driver Attachments',
+            key: 'driver_attachments',
+            type: 'child_array',
             sheetName: 'Driver Attachments',
-
             tableName: 'm_driver_attachment',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Driver ID',
-
             columns: [
-
-                {
-                    header: 'Driver ID',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Template',
-                    key: 'template',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Template Base64',
-                    key: 'templatebase64',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Mime Type',
-                    key: 'mime_type',
-                    type: 'text'
-                },
-
-                {
-                    header: 'File Name',
-                    key: 'file_name',
-                    type: 'text'
-                },
-
-                {
-                    header: 'File Extension',
-                    key: 'file_extension',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Attachment Date',
-                    key: 'attachment_date',
-                    type: 'date'
-                },
-
-                {
-                    header: 'CDN URL',
-                    key: 'cdn_url',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Is Mobile',
-                    key: 'is_mobile',
-                    type: 'text'
-                },
-
-                {
-                    header: 'User Name',
-                    key: 'user_name',
-                    type: 'text'
-                }
-
+                { header: 'Template', key: 'template', type: 'text' },
+                { header: 'Template Base64', key: 'templatebase64', type: 'text' },
+                { header: 'Mime Type', key: 'mime_type', type: 'text' },
+                { header: 'File Name', key: 'file_name', type: 'text' },
+                { header: 'File Extension', key: 'file_extension', type: 'text' },
+                { header: 'Attachment Date', key: 'attachment_date', type: 'date' },
+                { header: 'CDN URL', key: 'cdn_url', type: 'text' },
+                { header: 'Is Mobile', key: 'is_mobile', type: 'text' },
+                { header: 'User Name', key: 'user_name', type: 'text' }
             ]
-
         },
 
         {
-
+            header: 'Driver Licenses',
+            key: 'driver_licenses',
+            type: 'child_array',
             sheetName: 'Driver Licenses',
-
             tableName: 'm_driver_license',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Driver ID',
-
             columns: [
-
-                {
-                    header: 'Driver ID',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'License Number',
-                    key: 'license_number',
-                    type: 'text'
-                },
-
-                {
-                    header: 'License Type',
-                    key: 'license_type',
-                    type: 'dropdown', dataType: 'text', width: 20, dropdown: {
-                        sheetName: 'License Types',
-                        query: 'select id, name from m_license_type',
-                        labelField: 'name',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Remark',
-                    key: 'remark',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Issuing Agency',
-                    key: 'issuing_agency',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Country',
-                    key: 'country',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Countries',
-                        query: `select id, code from m_country`,
-                        labelField: 'code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Effective Date',
-                    key: 'effective_date',
-                    type: 'date'
-                },
-
-                {
-                    header: 'Expired Date',
-                    key: 'expired_date',
-                    type: 'date'
-                }
-
+                { header: 'License Number', key: 'license_number', type: 'text' },
+                { header: 'License Type', key: 'license_type', type: 'dropdown', dataType: 'text', width: 20, dropdown: { sheetName: 'License Types', query: 'select id, name from m_license_type', labelField: 'name', valueField: 'id' } },
+                { header: 'Remark', key: 'remark', type: 'text' },
+                { header: 'Issuing Agency', key: 'issuing_agency', type: 'text' },
+                { header: 'Country', key: 'country', type: 'dropdown', dropdown: { sheetName: 'Countries', query: `select id, code from m_country`, labelField: 'code', valueField: 'id' } },
+                { header: 'Effective Date', key: 'effective_date', type: 'date' },
+                { header: 'Expired Date', key: 'expired_date', type: 'date' }
             ]
-
         },
 
         {
-
+            header: 'Driver Vehicles',
+            key: 'driver_vehicles',
+            type: 'child_array',
             sheetName: 'Driver Vehicles',
-
             tableName: 'm_driver_vehicle',
-
             parentKey: 'parent_id',
-
-            referenceColumn: 'Driver ID',
-
             columns: [
-
-                {
-                    header: 'Driver ID',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Vehicle',
-                    key: 'vehId',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'DriverVehicles',
-                        query: `select id, code from m_vehicle`,
-                        labelField: 'code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Vehicle Name',
-                    key: 'vehName',
-                    type: 'text'
-                }
-
+                { header: 'Vehicle', key: 'vehId', type: 'dropdown', dropdown: { sheetName: 'DriverVehicles', query: `select id, code from m_vehicle`, labelField: 'code', valueField: 'id' } },
+                { header: 'Vehicle Name', key: 'vehName', type: 'text' }
             ]
-
         }
 
     ]

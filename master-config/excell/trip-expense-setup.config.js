@@ -120,7 +120,14 @@ module.exports = {
         {
             header: 'Document Type',
             key: 'document_type',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'DocumentType',
+                labelField: 'name',
+                valueField: 'code',
+                options: [{"id" : "S", "name" : "Service"}, {"id" : "I", "name" : "Item"}],
+            }
         },
 
         {
@@ -129,14 +136,14 @@ module.exports = {
             type: 'dropdown',
             data_type: 'text',
             dropdown: {
-                sheetName: 'ExpenseCategories',
+                sheetName: 'TripType',
                 labelField: 'name',
                 valueField: 'code',
                 options: [
-                    { name: 'T', code: 'Transit' },
-                    { name: 'L', code: 'Local' },
-                    { name: 'U', code: 'UpCountry' },
-                    { name: 'A', code: 'All' },
+                    {code: 'T', name: 'Transit' },
+                    {code: 'L', name: 'Local' },
+                    {code: 'U', name: 'UpCountry' },
+                    {code: 'A', name: 'All' },
                 ]
             }
         },
@@ -179,9 +186,9 @@ module.exports = {
             type: 'dropdown',
             data_type: 'text',
             dropdown: {
-                sheetName: 'AccountMaster',
-                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
-                labelField: 'account_code',
+                sheetName: 'TripFundAccount',
+                query: `select id, name from m_fm_trip_fund_account`,
+                labelField: 'name',
                 valueField: 'id'
             }
         },
@@ -202,11 +209,11 @@ module.exports = {
             header: 'Currency',
             key: 'currency',
             type: 'dropdown',
-
+            data_type: 'number',
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currencies`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
@@ -220,7 +227,17 @@ module.exports = {
         {
             header: 'Account Type',
             key: 'account_type',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'AccountType',
+                labelField: 'name',
+                valueField: 'code',
+                options: [
+                    { name: 'BP', code: '1' },
+                    { name: 'GL', code: '2' }
+                ]
+            }
         },
 
         {
@@ -295,13 +312,28 @@ module.exports = {
         {
             header: 'Extra Link With',
             key: 'extralinkwith',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'ExtraLinkWith',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id" : "T", "name" : "Truck"}, {"id" : "D", "name" : "Driver"}, {"id" : "O", "name" : "Other"}],
+            }
         },
 
         {
             header: 'Target Document',
             key: 'target_document',
-            type: 'text'
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'TargetDocument',
+                labelField: 'name',
+                valueField: 'id',
+                options: [{"id": "17", "name": "Sales Order"},{"id": "22", "name": "Purchase Order"},{"id": "20", "name": "Goods Receipt PO"},{"id": "18", "name": "A/P Invoice"},{"id": "46", "name": "Outgoing Payment"},{"id": "24", "name": "Incoming Payment"},{"id": "60", "name": "Goods Issue"},{"id": "59", "name": "Goods Receipt"},{"id": "19", "name": "A/P Credit Memo"},{"id": "30", "name": "Journal Entry"},{"id": "1200", "name": "Fuel Log Book"}]
+            }
+            
         },
 
         {
