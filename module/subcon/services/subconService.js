@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const db = require('../../../config/database');
 
 const SUBCON_JWT_SECRET = process.env.SUBCON_JWT_SECRET || process.env.JWT_SECRET || 'super-secret-logistics-key';
@@ -29,7 +30,17 @@ async function loginSubconUser({ email, password, databaseName }) {
 
   const user = users[0];
 
-  if (password !== user.password_hash) {
+  let isPasswordValid = false;
+
+  if (user.password_hash) {
+    if (typeof user.password_hash === 'string' && user.password_hash.startsWith('$2')) {
+      isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    } else {
+      isPasswordValid = password === user.password_hash;
+    }
+  }
+
+  if (!isPasswordValid) {
     throw new Error('Invalid credentials');
   }
 
