@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const { specs, swaggerUi } = require('./config/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -48,6 +49,9 @@ app.use('/api/saga', sagaRoutes);
 
 // subcon routes
 app.use('/api/subcon', subconRoutes);
+
+// Swagger docs
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
