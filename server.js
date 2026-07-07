@@ -19,10 +19,16 @@ app.use((req, res, next) => {
 
 // Import routes
 const publicRoutes = require('./routes/public');
+// authenticated routes for ng
 const authenticatedRoutes = require('./routes/authenticated');
+// email routes ng
 const emailRoutes = require('./routes/email');
+// utility routes
 const excelRoutes = require('./routes/excel.routes');
-const sagaRoutes = require('./routes/sanaga.routes')
+// sagaroutes powerBi
+const sagaRoutes = require('./routes/sanaga.routes');
+// subcon routes
+const subconRoutes = require('./module/subcon/routes');
 
 
 // Public routes (no authentication required)
@@ -38,7 +44,10 @@ app.use('/api/email', emailRoutes);
 app.use('/api/ie', excelRoutes);
 
 //saga routes
-app.use('/api/saga', sagaRoutes)
+app.use('/api/saga', sagaRoutes);
+
+// subcon routes
+app.use('/api/subcon', subconRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
