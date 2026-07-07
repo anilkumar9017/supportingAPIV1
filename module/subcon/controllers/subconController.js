@@ -15,6 +15,65 @@ async function login(req, res) {
   }
 }
 
+async function listUsers(req, res) {
+  try {
+    const result = await subconService.getUsers(req.databaseName);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch users' });
+  }
+}
+
+async function getUserById(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await subconService.getUserById(req.databaseName, id);
+
+    if (!result) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch user' });
+  }
+}
+
+async function createUser(req, res) {
+  try {
+    const payload = req.body;
+    const result = await subconService.createUser(req.databaseName, {
+      ...payload,
+      createdby: req.user?.id || null,
+      updatedby: req.user?.id || null
+    });
+
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to create user' });
+  }
+}
+
+async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await subconService.updateUser(req.databaseName, id, req.body, req.user?.id || null);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to update user' });
+  }
+}
+
+async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await subconService.deleteUser(req.databaseName, id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to delete user' });
+  }
+}
+
 async function getAgreements(req, res) {
   try {
     const result = await subconService.getAgreements(req.databaseName, req.user.subcontractor_id);
@@ -98,6 +157,11 @@ async function uploadDocuments(req, res) {
 
 module.exports = {
   login,
+  listUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
   getAgreements,
   acceptAgreement,
   getShipments,

@@ -35,6 +35,100 @@ router.use(authenticateSubconToken);
 
 /**
  * @swagger
+ * /api/subcon/users:
+ *   get:
+ *     summary: Get all Subcon users
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *   post:
+ *     summary: Create a new Subcon user
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subcontractor_id:
+ *                 type: integer
+ *               role_name:
+ *                 type: string
+ *               full_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password_hash:
+ *                 type: string
+ *               is_active:
+ *                 type: integer
+ *               log_inst:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: User created
+ */
+router.get('/users', subconController.listUsers);
+router.post('/users', subconController.createUser);
+
+/**
+ * @swagger
+ * /api/subcon/users/{id}:
+ *   get:
+ *     summary: Get one Subcon user by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User details
+ *   put:
+ *     summary: Update a Subcon user
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User updated
+ *   delete:
+ *     summary: Delete a Subcon user
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User deleted
+ */
+router.get('/users/:id', subconController.getUserById);
+router.put('/users/:id', subconController.updateUser);
+router.delete('/users/:id', subconController.deleteUser);
+
+/**
+ * @swagger
  * /api/subcon/agreements:
  *   get:
  *     summary: Get pending agreements for the authenticated subcontractor

@@ -1,5 +1,12 @@
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+let swaggerJsdoc;
+let swaggerUi;
+
+try {
+  swaggerJsdoc = require('swagger-jsdoc');
+  swaggerUi = require('swagger-ui-express');
+} catch (error) {
+  console.warn('Swagger initialization skipped:', error.message);
+}
 
 const options = {
   definition: {
@@ -29,9 +36,16 @@ const options = {
   apis: ['./module/subcon/routes/*.js', './server.js']
 };
 
-const specs = swaggerJsdoc(options);
+const specs = swaggerJsdoc ? swaggerJsdoc(options) : {
+  openapi: '3.0.0',
+  info: {
+    title: 'DCC Logistics Suite APIs',
+    version: '1.0.0'
+  },
+  paths: {}
+};
 
 module.exports = {
   specs,
-  swaggerUi
+  swaggerUi: swaggerUi || null
 };
