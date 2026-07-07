@@ -252,3 +252,30 @@ router.get('/financials', subconController.getFinancials);
 router.post('/financials/upload', upload.fields([{ name: 'pod' }, { name: 'invoice' }]), subconController.uploadDocuments);
 
 module.exports = router;
+
+/* INSERT INTO [subcon].[users] (
+    subcontractor_id,
+    role_name,
+    full_name,
+    email,
+    password_hash,
+    is_active,
+    createdate,
+    updatedate,
+    createdby,
+    updatedby,
+    log_inst
+)
+VALUES (
+    1,
+    'admin',
+    'Subcon Admin',
+    'subconadmin@example.com',
+    '$2a$10$vdjs6EpI4doeZg3RxVuHzeQzM5/K/oEuCqlpkvAUGb1FMGrhPGqo.',
+    1,
+    GETUTCDATE(),
+    GETUTCDATE(),
+    1,
+    1,
+    1
+); */
