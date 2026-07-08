@@ -250,6 +250,80 @@ async function getFinancials(databaseName, subcontractorId) {
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
 }
 
+async function getActionCenter(databaseName, subcontractorId) {
+  const pendingAgreementsQuery = `
+    SELECT COUNT(1) AS count
+    FROM [subcon].[load_agreements]
+    WHERE subcontractor_id = @subId AND status = 'pending'
+  `;
+
+  const missingTrackingUpdatesQuery = `
+    SELECT COUNT(1) AS count
+    FROM [subcon].[shipment_orders]
+    WHERE subcontractor_id = @subId
+      AND status IN ('dispatched', 'in_transit', 'delayed')
+      AND (
+        dep_origin_time IS NULL
+        OR arr_border1_time IS NULL
+        OR arr_dest_time IS NULL
+        OR offloaded_time IS NULL
+      )
+  `;
+
+  const pendingAdvanceRequestsQuery = `
+    SELECT COUNT(1) AS count
+    FROM [subcon].[advance_requests]
+    WHERE subcontractor_id = @subId AND status = 'pending'
+  `;
+
+  const missingDocumentsQuery = `
+    SELECT COUNT(1) AS count
+    FROM [subcon].[shipment_orders]
+    WHERE subcontractor_id = @subId
+      AND (pod_document_url IS NULL OR final_invoice_url IS NULL)
+  `;
+
+  const [pendingAgreements] = await db.executeQuery(databaseName, pendingAgreementsQuery, { subId: subcontractorId }, false);
+  const [missingTrackingUpdates] = await db.executeQuery(databaseName, missingTrackingUpdatesQuery, { subId: subcontractorId }, false);
+  const [pendingAdvanceRequests] = await db.executeQuery(databaseName, pendingAdvanceRequestsQuery, { subId: subcontractorId }, false);
+  const [missingDocuments] = await db.executeQuery(databaseName, missingDocumentsQuery, { subId: subcontractorId }, false);
+
+  return {
+    actionCenter: {
+      widgets: [
+        {
+          key: 'pendingAgreements',
+          label: 'Pending Agreements',
+          count: pendingAgreements?.count || 0,
+          description: 'Accept agreements that require your review.',
+          route: '/agreements'
+        },
+        {
+          key: 'missingTrackingUpdates',
+          label: 'Missing Tracking Updates',
+          count: missingTrackingUpdates?.count || 0,
+          description: 'Update shipment milestones before the next checkpoint.',
+          route: '/shipments'
+        },
+        {
+          key: 'pendingAdvanceRequests',
+          label: 'Pending Advance Requests',
+          count: pendingAdvanceRequests?.count || 0,
+          description: 'Review advance requests that are awaiting approval.',
+          route: '/shipments/advance'
+        },
+        {
+          key: 'missingDocuments',
+          label: 'Missing POD / Invoice',
+          count: missingDocuments?.count || 0,
+          description: 'Upload missing Proof of Delivery or invoice documents.',
+          route: '/financials/upload'
+        }
+      ]
+    }
+  };
+}
+
 async function getDashboardOverview(databaseName, subcontractorId) {
   const activeShipmentsQuery = `
     SELECT TOP 20

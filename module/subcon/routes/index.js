@@ -236,6 +236,20 @@ router.get('/dashboard/overview', subconController.getDashboardOverview);
 
 /**
  * @swagger
+ * /api/subcon/action-center:
+ *   get:
+ *     summary: Get Subcon action center widgets
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Action center widget counts
+ */
+router.get('/action-center', subconController.getActionCenter);
+
+/**
+ * @swagger
  * /api/subcon/financials/upload:
  *   post:
  *     summary: Upload POD and invoice documents

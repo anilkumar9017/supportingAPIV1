@@ -140,6 +140,15 @@ async function getDashboardOverview(req, res) {
   }
 }
 
+async function getActionCenter(req, res) {
+  try {
+    const result = await subconService.getActionCenter(req.databaseName, req.user.subcontractor_id);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch action center data' });
+  }
+}
+
 async function uploadDocuments(req, res) {
   try {
     const { shipmentId, invoiceNumber } = req.body;
@@ -178,5 +187,6 @@ module.exports = {
   requestAdvance,
   getFinancials,
   getDashboardOverview,
+  getActionCenter,
   uploadDocuments
 };
