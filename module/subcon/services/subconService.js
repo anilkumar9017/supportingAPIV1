@@ -250,6 +250,85 @@ async function getFinancials(databaseName, subcontractorId) {
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
 }
 
+async function getDashboardOverview(databaseName, subcontractorId) {
+  const activeShipmentsQuery = `
+    SELECT TOP 20
+      id,
+      dcc_shipment_ref,
+      vehicle_reg_no,
+      origin_location,
+      destination_location,
+      dep_origin_time,
+      arr_dest_time,
+      offloaded_time,
+      status
+    FROM [subcon].[shipment_orders]
+    WHERE subcontractor_id = @subId
+    ORDER BY dep_origin_time DESC
+  `;
+
+  const pendingAgreementsQuery = `
+    SELECT TOP 20
+      id,
+      dcc_offer_ref,
+      origin_location,
+      destination_location,
+      cargo_description,
+      tonnage,
+      agreed_rate_lc,
+      status
+    FROM [subcon].[load_agreements]
+    WHERE subcontractor_id = @subId
+    ORDER BY id DESC
+  `;
+
+  const advanceRequestsQuery = `
+    SELECT TOP 20
+      id,
+      shipment_id,
+      advance_type,
+      amount_requested_lc,
+      amount_requested_sys,
+      status,
+      requested_at,
+      remarks
+    FROM [subcon].[advance_requests]
+    WHERE subcontractor_id = @subId
+    ORDER BY requested_at DESC
+  `;
+
+  const financialRowsQuery = `
+    SELECT TOP 20
+      shipment_id,
+      dcc_shipment_ref,
+      vehicle_reg_no,
+      origin_location,
+      destination_location,
+      gross_rate_lc,
+      total_advances_lc,
+      net_payable_lc,
+      offloaded_time,
+      status
+    FROM [subcon].[vw_shipment_financial_summary]
+    WHERE subcontractor_id = @subId
+    ORDER BY offloaded_time DESC
+  `;
+
+  const activeShipments = await db.executeQuery(databaseName, activeShipmentsQuery, { subId: subcontractorId }, false);
+  const pendingAgreements = await db.executeQuery(databaseName, pendingAgreementsQuery, { subId: subcontractorId }, false);
+  const advanceRequests = await db.executeQuery(databaseName, advanceRequestsQuery, { subId: subcontractorId }, false);
+  const financialRows = await db.executeQuery(databaseName, financialRowsQuery, { subId: subcontractorId }, false);
+
+  return {
+    tables: {
+      activeShipments,
+      pendingAgreements,
+      advanceRequests,
+      financialRows
+    }
+  };
+}
+
 async function uploadDocuments(databaseName, { shipmentId, podFile, invFile, invoiceNumber, userId }) {
   await db.executeQuery(
     databaseName,
@@ -287,5 +366,6 @@ module.exports = {
   updateMilestones,
   requestAdvance,
   getFinancials,
+  getDashboardOverview,
   uploadDocuments
 };

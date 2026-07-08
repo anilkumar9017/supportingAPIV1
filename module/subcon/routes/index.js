@@ -222,6 +222,20 @@ router.get('/financials', subconController.getFinancials);
 
 /**
  * @swagger
+ * /api/subcon/dashboard/overview:
+ *   get:
+ *     summary: Get Subcon dashboard overview
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard overview data
+ */
+router.get('/dashboard/overview', subconController.getDashboardOverview);
+
+/**
+ * @swagger
  * /api/subcon/financials/upload:
  *   post:
  *     summary: Upload POD and invoice documents

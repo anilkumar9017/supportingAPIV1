@@ -131,6 +131,15 @@ async function getFinancials(req, res) {
   }
 }
 
+async function getDashboardOverview(req, res) {
+  try {
+    const result = await subconService.getDashboardOverview(req.databaseName, req.user.subcontractor_id);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch dashboard overview' });
+  }
+}
+
 async function uploadDocuments(req, res) {
   try {
     const { shipmentId, invoiceNumber } = req.body;
@@ -168,5 +177,6 @@ module.exports = {
   updateMilestones,
   requestAdvance,
   getFinancials,
+  getDashboardOverview,
   uploadDocuments
 };
