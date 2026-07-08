@@ -329,7 +329,7 @@ async function getDashboardOverview(databaseName, subcontractorId) {
     SELECT TOP 20
       id,
       dcc_shipment_ref,
-      vehicle_reg_no,
+      vehicle_id,
       origin_location,
       destination_location,
       dep_origin_time,
