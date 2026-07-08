@@ -66,7 +66,8 @@ async function loginSubconUser({ email, password, databaseName }) {
   return {
     success: true,
     token,
-    company: user.company_name
+    company: user.company_name,
+    userId: user.id
   };
 }
 
