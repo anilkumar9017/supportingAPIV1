@@ -1,4 +1,17 @@
+const bcrypt = require('bcryptjs');
 const db = require('../../../config/database');
+
+async function ensurePasswordHash(password) {
+  if (!password) {
+    return null;
+  }
+
+  if (typeof password === 'string' && password.startsWith('$2')) {
+    return password;
+  }
+
+  return bcrypt.hash(password, 10);
+}
 
 async function getUsers(databaseName) {
   const query = `
@@ -30,6 +43,8 @@ async function createUser(databaseName, payload) {
     )
   `;
 
+  const passwordHash = await ensurePasswordHash(payload.password_hash);
+
   await db.executeQuery(
     databaseName,
     query,
@@ -38,7 +53,7 @@ async function createUser(databaseName, payload) {
       role_name: payload.role_name,
       full_name: payload.full_name,
       email: payload.email,
-      password_hash: payload.password_hash,
+      password_hash: passwordHash,
       is_active: payload.is_active !== undefined ? payload.is_active : 1,
       last_login_date: payload.last_login_date || null,
       createdby: payload.createdby || null,
@@ -56,12 +71,16 @@ async function updateUser(databaseName, userId, payload, updatedBy) {
   const updates = [];
   const params = { id: userId, updatedby: updatedBy };
 
-  allowedFields.forEach((field) => {
+  for (const field of allowedFields) {
     if (payload[field] !== undefined) {
+      if (field === 'password_hash') {
+        params[field] = await ensurePasswordHash(payload.password_hash);
+      } else {
+        params[field] = payload[field];
+      }
       updates.push(`${field} = @${field}`);
-      params[field] = payload[field];
     }
-  });
+  }
 
   if (updates.length === 0) {
     throw new Error('No valid fields to update');
