@@ -3,6 +3,18 @@ const router = express.Router();
 const upload = require('../../../middleware/upload');
 const { authenticateSubconToken } = require('../middleware/subconAuth');
 const subconController = require('../controllers/subconController');
+const subconUserController = require('../controllers/subconUserController');
+const subconVehicleController = require('../controllers/subconVehicleController');
+const subconIncidentController = require('../controllers/subconIncidentController');
+const subconSubcontractorController = require('../controllers/subconSubcontractorController');
+const {
+  validateVehicleCreate,
+  validateVehicleUpdate,
+  validateSubcontractorCreate,
+  validateSubcontractorUpdate,
+  validateIncidentCreate,
+  validateIncidentUpdate
+} = require('../middleware/subconValidation');
 
 /**
  * @swagger
@@ -74,8 +86,8 @@ router.use(authenticateSubconToken);
  *       201:
  *         description: User created
  */
-router.get('/users', subconController.listUsers);
-router.post('/users', subconController.createUser);
+router.get('/users', subconUserController.listUsers);
+router.post('/users', subconUserController.createUser);
 
 /**
  * @swagger
@@ -123,9 +135,9 @@ router.post('/users', subconController.createUser);
  *       200:
  *         description: User deleted
  */
-router.get('/users/:id', subconController.getUserById);
-router.put('/users/:id', subconController.updateUser);
-router.delete('/users/:id', subconController.deleteUser);
+router.get('/users/:id', subconUserController.getUserById);
+router.put('/users/:id', subconUserController.updateUser);
+router.delete('/users/:id', subconUserController.deleteUser);
 
 /**
  * @swagger
@@ -177,6 +189,331 @@ router.post('/agreements/accept', subconController.acceptAgreement);
  *         description: List of shipments
  */
 router.get('/shipments', subconController.getShipments);
+
+/**
+ * @swagger
+ * /api/subcon/vehicles:
+ *   get:
+ *     summary: Get vehicles for the authenticated subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of vehicles
+ */
+router.get('/vehicles', subconVehicleController.listVehicles);
+
+/**
+ * @swagger
+ * /api/subcon/vehicles/{id}:
+ *   get:
+ *     summary: Get vehicle by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Vehicle details
+ */
+router.get('/vehicles/:id', subconVehicleController.getVehicleById);
+
+/**
+ * @swagger
+ * /api/subcon/subcontractors:
+ *   get:
+ *     summary: Get all subcontractors
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of subcontractors
+ */
+router.get('/subcontractors', subconSubcontractorController.listSubcontractors);
+
+/**
+ * @swagger
+ * /api/subcon/subcontractors/{id}:
+ *   get:
+ *     summary: Get subcontractor by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Subcontractor details
+ */
+router.get('/subcontractors/:id', subconSubcontractorController.getSubcontractorById);
+
+/**
+ * @swagger
+ * /api/subcon/subcontractors:
+ *   post:
+ *     summary: Create a new subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sap_card_code:
+ *                 type: string
+ *               company_name:
+ *                 type: string
+ *               email_address:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Subcontractor created
+ */
+router.post('/subcontractors', validateSubcontractorCreate, subconSubcontractorController.createSubcontractor);
+
+/**
+ * @swagger
+ * /api/subcon/subcontractors/{id}:
+ *   put:
+ *     summary: Update a subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Subcontractor updated
+ */
+router.put('/subcontractors/:id', validateSubcontractorUpdate, subconSubcontractorController.updateSubcontractor);
+
+/**
+ * @swagger
+ * /api/subcon/subcontractors/{id}:
+ *   delete:
+ *     summary: Delete a subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Subcontractor deleted
+ */
+router.delete('/subcontractors/:id', subconSubcontractorController.deleteSubcontractor);
+
+/**
+ * @swagger
+ * /api/subcon/vehicles:
+ *   post:
+ *     summary: Create a new vehicle
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               vehicle_reg_no:
+ *                 type: string
+ *               asset_type:
+ *                 type: string
+ *               max_payload_tonnes:
+ *                 type: number
+ *               sap_equip_code:
+ *                 type: string
+ *               dcc_ng_status:
+ *                 type: string
+ *               insurance_expiry_date:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       201:
+ *         description: Vehicle created
+ */
+router.post('/vehicles', validateVehicleCreate, subconVehicleController.createVehicle);
+
+/**
+ * @swagger
+ * /api/subcon/vehicles/{id}:
+ *   put:
+ *     summary: Update a vehicle
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Vehicle updated
+ */
+router.put('/vehicles/:id', validateVehicleUpdate, subconVehicleController.updateVehicle);
+
+/**
+ * @swagger
+ * /api/subcon/incidents:
+ *   get:
+ *     summary: Get incidents for the authenticated subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of incidents
+ */
+router.get('/incidents', subconIncidentController.listIncidents);
+
+/**
+ * @swagger
+ * /api/subcon/incidents/{id}:
+ *   get:
+ *     summary: Get an incident by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Incident details
+ */
+router.get('/incidents/:id', subconIncidentController.getIncidentById);
+
+/**
+ * @swagger
+ * /api/subcon/incidents:
+ *   post:
+ *     summary: Create a new incident
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               shipment_id:
+ *                 type: integer
+ *               incident_type:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               reported_date:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *               severity:
+ *                 type: string
+ *               incident_location:
+ *                 type: string
+ *               resolution_notes:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Incident created
+ */
+router.post('/incidents', validateIncidentCreate, subconIncidentController.createIncident);
+
+/**
+ * @swagger
+ * /api/subcon/incidents/{id}:
+ *   put:
+ *     summary: Update an incident
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Incident updated
+ */
+router.put('/incidents/:id', validateIncidentUpdate, subconIncidentController.updateIncident);
+
+/**
+ * @swagger
+ * /api/subcon/incidents/{id}:
+ *   delete:
+ *     summary: Delete an incident
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Incident deleted
+ */
+router.delete('/incidents/:id', subconIncidentController.deleteIncident);
+
+/**
+ * @swagger
+ * /api/subcon/vehicles/{id}:
+ *   delete:
+ *     summary: Delete a vehicle
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Vehicle deleted
+ */
+router.delete('/vehicles/:id', subconVehicleController.deleteVehicle);
 
 /**
  * @swagger
