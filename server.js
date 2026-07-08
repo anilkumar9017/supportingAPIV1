@@ -51,7 +51,7 @@ app.use('/api/saga', sagaRoutes);
 app.use('/api/subcon', subconRoutes);
 
 // Swagger docs
-app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
