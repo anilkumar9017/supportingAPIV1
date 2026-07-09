@@ -7,6 +7,7 @@ const subconUserController = require('../controllers/subconUserController');
 const subconVehicleController = require('../controllers/subconVehicleController');
 const subconIncidentController = require('../controllers/subconIncidentController');
 const subconSubcontractorController = require('../controllers/subconSubcontractorController');
+const subconLoadAgreementController = require('../controllers/subconLoadAgreementController');
 const {
   validateVehicleCreate,
   validateVehicleUpdate,
@@ -175,6 +176,167 @@ router.get('/agreements', subconController.getAgreements);
  *         description: Agreement accepted
  */
 router.post('/agreements/accept', subconController.acceptAgreement);
+
+/**
+ * @swagger
+ * /api/subcon/load-agreements:
+ *   get:
+ *     summary: Get load agreements for the authenticated subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of load agreements
+ *   post:
+ *     summary: Create a load agreement
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dcc_offer_ref:
+ *                 type: string
+ *               origin_location:
+ *                 type: string
+ *               destination_location:
+ *                 type: string
+ *               cargo_description:
+ *                 type: string
+ *               tonnage:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *               vehicle_id:
+ *                 type: integer
+ *               driver_name:
+ *                 type: string
+ *               agreed_rate_lc:
+ *                 type: number
+ *               agreed_rate_sys:
+ *                 type: number
+ *               available_from:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       201:
+ *         description: Load agreement created
+ */
+router.get('/load-agreements', subconLoadAgreementController.listLoadAgreements);
+router.post('/load-agreements', subconLoadAgreementController.createLoadAgreement);
+
+/**
+ * @swagger
+ * /api/subcon/load-agreements/{id}:
+ *   get:
+ *     summary: Get a load agreement by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Load agreement details
+ *   put:
+ *     summary: Update a load agreement
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dcc_offer_ref:
+ *                 type: string
+ *               origin_location:
+ *                 type: string
+ *               destination_location:
+ *                 type: string
+ *               cargo_description:
+ *                 type: string
+ *               tonnage:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *               vehicle_id:
+ *                 type: integer
+ *               driver_name:
+ *                 type: string
+ *               agreed_rate_lc:
+ *                 type: number
+ *               agreed_rate_sys:
+ *                 type: number
+ *               available_from:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Load agreement updated
+ *   delete:
+ *     summary: Delete a load agreement
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Load agreement deleted
+ */
+router.get('/load-agreements/:id', subconLoadAgreementController.getLoadAgreementById);
+router.put('/load-agreements/:id', subconLoadAgreementController.updateLoadAgreement);
+router.delete('/load-agreements/:id', subconLoadAgreementController.deleteLoadAgreement);
+
+/**
+ * @swagger
+ * /api/subcon/load-agreements/accept:
+ *   post:
+ *     summary: Accept a load agreement
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               agreementId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Agreement accepted
+ */
+router.post('/load-agreements/accept', subconLoadAgreementController.acceptAgreement);
 
 /**
  * @swagger
