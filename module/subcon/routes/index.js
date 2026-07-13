@@ -552,6 +552,8 @@ router.get('/shipments/:id', subconShipmentController.getShipmentById);
  *     responses:
  *       200:
  *         description: Shipment order updated
+ *       409:
+ *         description: Conflict - record was modified by another user
  */
 router.put('/shipments/:id', validateShipmentOrderUpdate, subconShipmentController.updateShipmentOrder);
 

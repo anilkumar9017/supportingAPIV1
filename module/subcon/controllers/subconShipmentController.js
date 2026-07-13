@@ -39,6 +39,14 @@ async function updateShipmentOrder(req, res) {
 
     res.json(result);
   } catch (error) {
+    if (error && error.code === 'CONFLICT') {
+      return res.status(409).json({ success: false, message: error.message || 'Conflict updating shipment order' });
+    }
+
+    if (error && error.code === 'NOT_FOUND') {
+      return res.status(404).json({ success: false, message: error.message || 'Shipment not found' });
+    }
+
     res.status(500).json({ success: false, message: error.message || 'Failed to update shipment order' });
   }
 }
