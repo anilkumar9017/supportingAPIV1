@@ -96,18 +96,6 @@ async function acceptAgreement(databaseName, agreementId, subcontractorId, userI
   return { success: true, message: 'Agreement accepted.' };
 }
 
-async function getShipments(databaseName, subcontractorId) {
-  const query = `
-    SELECT s.id, s.dcc_shipment_ref, v.vehicle_reg_no, s.origin_location, s.destination_location,
-           s.dep_origin_time, s.arr_border1_time, s.arr_dest_time, s.offloaded_time, s.status
-    FROM [subcon].[shipment_orders] s
-    INNER JOIN [subcon].[vehicles] v ON s.vehicle_id = v.id
-    WHERE s.subcontractor_id = @subId AND s.status IN ('dispatched', 'in_transit', 'delayed')
-  `;
-
-  return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
-}
-
 async function updateMilestones(databaseName, updates, userId) {
   for (const update of updates) {
     const query = `
@@ -346,7 +334,6 @@ module.exports = {
   loginSubconUser,
   getAgreements,
   acceptAgreement,
-  getShipments,
   getActionCenter,
   updateMilestones,
   requestAdvance,

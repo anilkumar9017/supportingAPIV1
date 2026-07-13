@@ -83,15 +83,6 @@ async function acceptAgreement(req, res) {
   }
 }
 
-async function getShipments(req, res) {
-  try {
-    const result = await subconService.getShipments(req.databaseName, req.user.subcontractor_id);
-    res.json({ success: true, data: result });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message || 'Failed to fetch shipments' });
-  }
-}
-
 async function listVehicles(req, res) {
   try {
     const result = await subconService.getVehicles(req.databaseName, req.user.subcontractor_id);
@@ -223,7 +214,6 @@ module.exports = {
   login,
   getAgreements,
   acceptAgreement,
-  getShipments,
   updateMilestones,
   requestAdvance,
   getFinancials,

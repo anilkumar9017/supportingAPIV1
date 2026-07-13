@@ -8,13 +8,15 @@ const subconVehicleController = require('../controllers/subconVehicleController'
 const subconIncidentController = require('../controllers/subconIncidentController');
 const subconSubcontractorController = require('../controllers/subconSubcontractorController');
 const subconLoadAgreementController = require('../controllers/subconLoadAgreementController');
+const subconShipmentController = require('../controllers/subconShipmentController');
 const {
   validateVehicleCreate,
   validateVehicleUpdate,
   validateSubcontractorCreate,
   validateSubcontractorUpdate,
   validateIncidentCreate,
-  validateIncidentUpdate
+  validateIncidentUpdate,
+  validateShipmentOrderUpdate
 } = require('../middleware/subconValidation');
 
 /**
@@ -349,8 +351,209 @@ router.post('/load-agreements/accept', subconLoadAgreementController.acceptAgree
  *     responses:
  *       200:
  *         description: List of shipments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   dcc_shipment_ref:
+ *                     type: string
+ *                   vehicle_reg_no:
+ *                     type: string
+ *                   origin_location:
+ *                     type: string
+ *                   destination_location:
+ *                     type: string
+ *                   dep_origin_time:
+ *                     type: string
+ *                     format: date-time
+ *                   arr_border1_time:
+ *                     type: string
+ *                     format: date-time
+ *                   arr_dest_time:
+ *                     type: string
+ *                     format: date-time
+ *                   offloaded_time:
+ *                     type: string
+ *                     format: date-time
+ *                   status:
+ *                     type: string
  */
-router.get('/shipments', subconController.getShipments);
+router.get('/shipments', subconShipmentController.getShipments);
+
+/**
+ * @swagger
+ * /api/subcon/shipments/{id}:
+ *   get:
+ *     summary: Get shipment order by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Shipment order details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 subcontractor_id:
+ *                   type: integer
+ *                 dcc_shipment_ref:
+ *                   type: string
+ *                 sap_doc_num:
+ *                   type: integer
+ *                 vehicle_id:
+ *                   type: integer
+ *                 origin_location:
+ *                   type: string
+ *                 destination_location:
+ *                   type: string
+ *                 dep_origin_time:
+ *                   type: string
+ *                   format: date-time
+ *                 arr_border1_time:
+ *                   type: string
+ *                   format: date-time
+ *                 dep_border1_time:
+ *                   type: string
+ *                   format: date-time
+ *                 arr_dest_time:
+ *                   type: string
+ *                   format: date-time
+ *                 offloaded_time:
+ *                   type: string
+ *                   format: date-time
+ *                 gross_rate_lc:
+ *                   type: number
+ *                 gross_rate_sys:
+ *                   type: number
+ *                 status:
+ *                   type: string
+ *                 pod_document_url:
+ *                   type: string
+ *                 final_invoice_url:
+ *                   type: string
+ *                 last_sync_date:
+ *                   type: string
+ *                   format: date-time
+ *                 createdate:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedate:
+ *                   type: string
+ *                   format: date-time
+ *                 createdby:
+ *                   type: integer
+ *                 updatedby:
+ *                   type: integer
+ *                 log_inst:
+ *                   type: integer
+ *                 delivery_date:
+ *                   type: string
+ *                   format: date
+ *                 deliver_qty:
+ *                   type: number
+ *                 short_qty:
+ *                   type: number
+ *                 damage_qty:
+ *                   type: number
+ *                 receiver_name:
+ *                   type: string
+ *       404:
+ *         description: Shipment order not found
+ */
+router.get('/shipments/:id', subconShipmentController.getShipmentById);
+
+/**
+ * @swagger
+ * /api/subcon/shipments/{id}:
+ *   put:
+ *     summary: Update a shipment order
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dcc_shipment_ref:
+ *                 type: string
+ *               sap_doc_num:
+ *                 type: integer
+ *               vehicle_id:
+ *                 type: integer
+ *               origin_location:
+ *                 type: string
+ *               destination_location:
+ *                 type: string
+ *               dep_origin_time:
+ *                 type: string
+ *                 format: date-time
+ *               arr_border1_time:
+ *                 type: string
+ *                 format: date-time
+ *               dep_border1_time:
+ *                 type: string
+ *                 format: date-time
+ *               arr_dest_time:
+ *                 type: string
+ *                 format: date-time
+ *               offloaded_time:
+ *                 type: string
+ *                 format: date-time
+ *               gross_rate_lc:
+ *                 type: number
+ *               gross_rate_sys:
+ *                 type: number
+ *               status:
+ *                 type: string
+ *               pod_document_url:
+ *                 type: string
+ *               final_invoice_url:
+ *                 type: string
+ *               last_sync_date:
+ *                 type: string
+ *                 format: date-time
+ *               delivery_date:
+ *                 type: string
+ *                 format: date
+ *               deliver_qty:
+ *                 type: number
+ *               short_qty:
+ *                 type: number
+ *               damage_qty:
+ *                 type: number
+ *               receiver_name:
+ *                 type: string
+ *               log_inst:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Shipment order updated
+ */
+router.put('/shipments/:id', validateShipmentOrderUpdate, subconShipmentController.updateShipmentOrder);
 
 /**
  * @swagger
@@ -685,6 +888,27 @@ router.delete('/vehicles/:id', subconVehicleController.deleteVehicle);
  *     tags: [Subcon]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     shipmentId:
+ *                       type: integer
+ *                     milestoneField:
+ *                       type: string
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *             required:
+ *               - data
  *     responses:
  *       200:
  *         description: Milestones updated
