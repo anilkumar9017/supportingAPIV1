@@ -72,11 +72,19 @@ async function loginSubconUser({ email, password, databaseName }) {
 }
 
 async function getAgreements(databaseName, subcontractorId) {
-  const query = `
-    SELECT id, dcc_offer_ref, origin_location, destination_location, cargo_description, tonnage, agreed_rate_lc, agreed_rate_sys, status
-    FROM [subcon].[load_agreements]
+  /* const query = `
+    SELECT l.id, l.dcc_offer_ref, l.origin_location, l.destination_location, l.cargo_description, l.tonnage, l.agreed_rate_lc, l.agreed_rate_sys, v.vehicle_reg_no, l.driver_name l.status
+    FROM [subcon].[load_agreements] l
+    INNER JOIN [subcon].[vehicles] v ON l.vehicle_id = v.id
     WHERE subcontractor_id = @subId AND status = 'pending'
-  `;
+  `; */
+
+  const query = `	SELECT
+        l.id, l.dcc_offer_ref, l.origin_location,l.destination_location, l.cargo_description, l.tonnage, l.agreed_rate_lc, l.agreed_rate_sys, v.vehicle_reg_no, l.driver_name, l.status
+        FROM [subcon].[load_agreements] l
+        LEFT JOIN [subcon].[vehicles] v ON l.vehicle_id = v.id
+        WHERE l.subcontractor_id = @subId
+        AND l.status = 'pending';`
 
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
 }
