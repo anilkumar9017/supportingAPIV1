@@ -3,7 +3,7 @@ const db = require('../../../config/database');
 async function getShipments(databaseName, subcontractorId) {
   const query = `
     SELECT s.id, s.dcc_shipment_ref, v.vehicle_reg_no, s.origin_location, s.destination_location,
-           s.dep_origin_time, s.arr_border1_time, s.arr_dest_time, s.offloaded_time, s.status, s.exception
+           s.dep_origin_time, s.arr_border1_time, s.dep_border1_time, s.arr_dest_time, s.offloaded_time, s.status, s.exception
     FROM [subcon].[shipment_orders] s
     INNER JOIN [subcon].[vehicles] v ON s.vehicle_id = v.id
     WHERE s.subcontractor_id = @subId AND s.status IN ('dispatched', 'in_transit', 'delayed')
@@ -124,7 +124,7 @@ async function updateShipmentOrder(databaseName, shipmentId, payload, updatedBy,
   return { success: true, message: 'Shipment order updated successfully.', log_inst: newLogInst };
 }
 
-async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryStatus, receiverName, deliveryDate, deliverQty, shortQty, damageQty, userId, subcontractorId }) {
+async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryStatus, receiverName, deliveryDate, exception, deliverQty, shortQty, damageQty, userId, subcontractorId }) {
   await db.executeQuery(
     databaseName,
     `

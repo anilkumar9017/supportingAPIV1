@@ -55,7 +55,7 @@ async function uploadPODDocuments(req, res) {
   try {
     const { id } = req.params;
     const podFile = req.file ? req.file.filename : null;
-    const { deliveryStatus, receiverName, deliveryDate, deliverQty, shortQty, damageQty } = req.body;
+    const { deliveryStatus, receiverName, deliveryDate, exception, deliverQty, shortQty, damageQty } = req.body;
 
     const result = await subconShipmentService.uploadPODDocuments(req.databaseName, {
       shipmentId: id,
