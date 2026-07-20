@@ -559,6 +559,50 @@ router.put('/shipments/:id', validateShipmentOrderUpdate, subconShipmentControll
 
 /**
  * @swagger
+ * /api/subcon/shipments/{id}/upload-pod:
+ *   post:
+ *     summary: Upload POD documents for a shipment
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               podFile:
+ *                 type: string
+ *                 format: binary
+ *               deliveryStatus:
+ *                 type: string
+ *               receiverName:
+ *                 type: string
+ *               deliveryDate:
+ *                 type: string
+ *                 format: date
+ *               deliverQty:
+ *                 type: number
+ *               shortQty:
+ *                 type: number
+ *               damageQty:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Documents uploaded and sent.
+ */
+router.post('/shipments/:id/upload-pod', upload.single('podFile'), subconShipmentController.uploadPODDocuments);
+
+
+/**
+ * @swagger
  * /api/subcon/vehicles:
  *   get:
  *     summary: Get vehicles for the authenticated subcontractor

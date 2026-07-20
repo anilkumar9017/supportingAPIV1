@@ -51,8 +51,34 @@ async function updateShipmentOrder(req, res) {
   }
 }
 
+async function uploadPODDocuments(req, res) {
+  try {
+    const { id } = req.params;
+    const podFile = req.file ? req.file.filename : null;
+    const { deliveryStatus, receiverName, deliveryDate, deliverQty, shortQty, damageQty } = req.body;
+
+    const result = await subconShipmentService.uploadPODDocuments(req.databaseName, {
+      shipmentId: id,
+      podFile,
+      deliveryStatus,
+      receiverName,
+      deliveryDate,
+      deliverQty,
+      shortQty,
+      damageQty,
+      userId: req.user?.id || null,
+      subcontractorId: req.user?.subcontractor_id || null
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to upload POD documents' });
+  }
+}
+
 module.exports = {
   getShipments,
   getShipmentById,
-  updateShipmentOrder
+  updateShipmentOrder,
+  uploadPODDocuments
 };

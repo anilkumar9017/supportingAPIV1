@@ -123,8 +123,44 @@ async function updateShipmentOrder(databaseName, shipmentId, payload, updatedBy,
   return { success: true, message: 'Shipment order updated successfully.', log_inst: newLogInst };
 }
 
+async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryStatus, receiverName, deliveryDate, deliverQty, shortQty, damageQty, userId, subcontractorId }) {
+  await db.executeQuery(
+    databaseName,
+    `
+      UPDATE [subcon].[shipment_orders]
+      SET pod_document_url = @podUrl,
+          status = @deliveryStatus,
+          receiver_name = @receiverName,
+          delivery_date = @deliveryDate,
+          deliver_qty = @deliverQty,
+          short_qty = @shortQty,
+          damage_qty = @damageQty,
+          log_inst = log_inst + 1,
+          updatedate = GETUTCDATE(),
+          updatedby = @userId
+      WHERE id = @id AND (@subId IS NULL OR subcontractor_id = @subId)
+    `,
+    {
+      id: shipmentId,
+      subId: subcontractorId,
+      podUrl: podFile ? `/uploads/${podFile}` : null,
+      deliveryStatus,
+      receiverName,
+      deliveryDate,
+      deliverQty,
+      shortQty,
+      damageQty,
+      userId,
+    },
+    false
+  );
+
+  return { success: true, message: 'Documents uploaded and sent.' };
+}
+
 module.exports = {
   getShipments,
   getShipmentById,
-  updateShipmentOrder
+  updateShipmentOrder,
+  uploadPODDocuments
 };
