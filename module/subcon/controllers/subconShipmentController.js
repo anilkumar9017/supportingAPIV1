@@ -63,6 +63,7 @@ async function uploadPODDocuments(req, res) {
       deliveryStatus,
       receiverName,
       deliveryDate,
+      exception,
       deliverQty,
       shortQty,
       damageQty,

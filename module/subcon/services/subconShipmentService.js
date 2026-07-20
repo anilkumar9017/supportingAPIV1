@@ -3,7 +3,7 @@ const db = require('../../../config/database');
 async function getShipments(databaseName, subcontractorId) {
   const query = `
     SELECT s.id, s.dcc_shipment_ref, v.vehicle_reg_no, s.origin_location, s.destination_location,
-           s.dep_origin_time, s.arr_border1_time, s.arr_dest_time, s.offloaded_time, s.status
+           s.dep_origin_time, s.arr_border1_time, s.arr_dest_time, s.offloaded_time, s.status, s.exception
     FROM [subcon].[shipment_orders] s
     INNER JOIN [subcon].[vehicles] v ON s.vehicle_id = v.id
     WHERE s.subcontractor_id = @subId AND s.status IN ('dispatched', 'in_transit', 'delayed')
@@ -20,7 +20,7 @@ async function getShipmentById(databaseName, shipmentId, subcontractorId) {
            s.gross_rate_sys, s.status, s.pod_document_url, s.final_invoice_url,
            s.last_sync_date, s.createdate, s.updatedate, s.createdby, s.updatedby,
            s.log_inst, s.delivery_date, s.deliver_qty, s.short_qty, s.damage_qty,
-           s.receiver_name
+           s.receiver_name, s.exception
     FROM [subcon].[shipment_orders] s
     WHERE s.id = @id AND s.subcontractor_id = @subId
   `;
@@ -54,7 +54,8 @@ async function updateShipmentOrder(databaseName, shipmentId, payload, updatedBy,
     'deliver_qty',
     'short_qty',
     'damage_qty',
-    'receiver_name'
+    'receiver_name',
+    'exception'
   ];
 
   // Read current log_inst to detect concurrent modifications
@@ -132,6 +133,7 @@ async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryS
           status = @deliveryStatus,
           receiver_name = @receiverName,
           delivery_date = @deliveryDate,
+          exception = @exception,
           deliver_qty = @deliverQty,
           short_qty = @shortQty,
           damage_qty = @damageQty,
@@ -147,6 +149,7 @@ async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryS
       deliveryStatus,
       receiverName,
       deliveryDate,
+      exception,
       deliverQty,
       shortQty,
       damageQty,

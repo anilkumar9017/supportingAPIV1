@@ -463,7 +463,9 @@ router.get('/shipments', subconShipmentController.getShipments);
  *                   type: integer
  *                 delivery_date:
  *                   type: string
- *                   format: date
+ *                   format: date,
+ *                 exception:
+ *                   type: string
  *                 deliver_qty:
  *                   type: number
  *                 short_qty:
@@ -538,7 +540,9 @@ router.get('/shipments/:id', subconShipmentController.getShipmentById);
  *                 format: date-time
  *               delivery_date:
  *                 type: string
- *                 format: date
+ *                 format: date,
+ *               exception:
+ *                 type: string
  *               deliver_qty:
  *                 type: number
  *               short_qty:
@@ -587,7 +591,9 @@ router.put('/shipments/:id', validateShipmentOrderUpdate, subconShipmentControll
  *                 type: string
  *               deliveryDate:
  *                 type: string
- *                 format: date
+ *                 format: date,
+ *               exception:
+ *                 type: string
  *               deliverQty:
  *                 type: number
  *               shortQty:
