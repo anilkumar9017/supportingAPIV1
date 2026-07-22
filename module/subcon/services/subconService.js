@@ -71,6 +71,66 @@ async function loginSubconUser({ email, password, databaseName }) {
   };
 }
 
+async function issueContractorToken({ databaseName, userId, subcontractorId }) {
+  if (!userId && !subcontractorId) {
+    throw new Error('subcontractor_id or userId is required');
+  }
+
+  let query = `
+    SELECT TOP 1
+      u.id,
+      u.subcontractor_id,
+      u.role_name,
+      s.sap_card_code,
+      s.company_name
+    FROM [subcon].[users] u
+    INNER JOIN [subcon].[subcontractors] s ON u.subcontractor_id = s.id
+    WHERE u.is_active = 1
+  `;
+
+  const params = {};
+  if (userId) {
+    query += ' AND u.id = @userId';
+    params.userId = userId;
+  } else {
+    query += ' AND u.subcontractor_id = @subcontractorId';
+    params.subcontractorId = subcontractorId;
+  }
+
+  const users = await db.executeQuery(databaseName, query, params, false);
+  if (!users || users.length === 0) {
+    throw new Error('Contractor not found or not active');
+  }
+
+  const user = users[0];
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      subcontractor_id: user.subcontractor_id,
+      sap_card_code: user.sap_card_code,
+      role_name: user.role_name,
+      dbname: databaseName
+    },
+    SUBCON_JWT_SECRET,
+    { expiresIn: '12h' }
+  );
+
+  await db.executeQuery(
+    databaseName,
+    `UPDATE [subcon].[users] SET last_login_date = GETUTCDATE(), updatedate = GETUTCDATE(), updatedby = @userId WHERE id = @userId`,
+    { userId: user.id },
+    false
+  );
+
+  return {
+    success: true,
+    token,
+    company: user.company_name,
+    userId: user.id
+  };
+}
+
 async function getAgreements(databaseName, subcontractorId) {
   /* const query = `
     SELECT l.id, l.dcc_offer_ref, l.origin_location, l.destination_location, l.cargo_description, l.tonnage, l.agreed_rate_lc, l.agreed_rate_sys, v.vehicle_reg_no, l.driver_name l.status

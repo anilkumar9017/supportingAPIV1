@@ -15,6 +15,26 @@ async function login(req, res) {
   }
 }
 
+async function getContractorToken(req, res) {
+  try {
+    const { id, userId, subcontractor_id: subcontractorId } = req.body;
+    const databaseName = req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
+
+    const result = await subconService.issueContractorToken({
+      databaseName,
+      userId: id || userId,
+      subcontractorId
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(403).json({
+      success: false,
+      message: error.message || 'Failed to generate contractor token'
+    });
+  }
+}
+
 async function listUsers(req, res) {
   try {
     const result = await subconService.getUsers(req.databaseName);
@@ -212,6 +232,7 @@ async function uploadDocuments(req, res) {
 
 module.exports = {
   login,
+  getContractorToken,
   getAgreements,
   acceptAgreement,
   updateMilestones,

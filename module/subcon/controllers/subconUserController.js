@@ -2,7 +2,8 @@ const subconUserService = require('../services/subconUserService');
 
 async function listUsers(req, res) {
   try {
-    const result = await subconUserService.getUsers(req.databaseName);
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
+    const result = await subconUserService.getUsers(databaseName);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to fetch users' });

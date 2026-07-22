@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../../../middleware/upload');
+const { authenticateToken } = require('../../../middleware/auth');
 const { authenticateSubconToken } = require('../middleware/subconAuth');
 const subconController = require('../controllers/subconController');
 const subconUserController = require('../controllers/subconUserController');
@@ -46,6 +47,36 @@ const {
  */
 router.post('/auth/login', subconController.login);
 
+/**
+ * @swagger
+ * /api/subcon/contractor-token:
+ *   post:
+ *     summary: Issue a subcontractor token for the selected contractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: Subcon user id to impersonate
+ *               subcontractor_id:
+ *                 type: integer
+ *                 description: Subcontractor id to generate a token for
+ *     responses:
+ *       200:
+ *         description: Subcon token issued
+ *       403:
+ *         description: Not authorized to generate token
+ */
+router.post('/contractor-token', authenticateToken, subconController.getContractorToken);
+
+router.get('/users', authenticateToken, subconUserController.listUsers);
 router.use(authenticateSubconToken);
 
 /**
