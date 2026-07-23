@@ -14,6 +14,7 @@ async function loginSubconUser({ email, password, databaseName }) {
       u.id,
       u.subcontractor_id,
       u.role_name,
+      u.is_superadmin,
       u.password_hash,
       s.sap_card_code,
       s.company_name
@@ -50,6 +51,7 @@ async function loginSubconUser({ email, password, databaseName }) {
       subcontractor_id: user.subcontractor_id,
       sap_card_code: user.sap_card_code,
       role_name: user.role_name,
+      is_superadmin: user.is_superadmin,
       dbname: databaseName
     },
     SUBCON_JWT_SECRET,
@@ -81,6 +83,7 @@ async function issueContractorToken({ databaseName, userId, subcontractorId }) {
       u.id,
       u.subcontractor_id,
       u.role_name,
+      u.is_superadmin,
       s.sap_card_code,
       s.company_name
     FROM [subcon].[users] u
@@ -110,6 +113,7 @@ async function issueContractorToken({ databaseName, userId, subcontractorId }) {
       subcontractor_id: user.subcontractor_id,
       sap_card_code: user.sap_card_code,
       role_name: user.role_name,
+      is_superadmin: user.is_superadmin,
       dbname: databaseName
     },
     SUBCON_JWT_SECRET,

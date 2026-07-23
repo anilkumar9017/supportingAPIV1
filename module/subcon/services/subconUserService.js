@@ -15,7 +15,7 @@ async function ensurePasswordHash(password) {
 
 async function getUsers(databaseName) {
   const query = `
-    SELECT id, subcontractor_id, role_name, full_name, email, password_hash, is_active, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
+    SELECT id, subcontractor_id, role_name, full_name, email, password_hash, is_active, is_superadmin, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
     FROM [subcon].[users]
     ORDER BY createdate DESC
   `;
@@ -25,7 +25,7 @@ async function getUsers(databaseName) {
 
 async function getUserById(databaseName, userId) {
   const query = `
-    SELECT id, subcontractor_id, role_name, full_name, email, password_hash, is_active, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
+    SELECT id, subcontractor_id, role_name, full_name, email, password_hash, is_active, is_superadmin, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
     FROM [subcon].[users]
     WHERE id = @id
   `;
@@ -37,9 +37,9 @@ async function getUserById(databaseName, userId) {
 async function createUser(databaseName, payload) {
   const query = `
     INSERT INTO [subcon].[users] (
-      subcontractor_id, role_name, full_name, email, password_hash, is_active, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
+      subcontractor_id, role_name, full_name, email, password_hash, is_active, is_superadmin, last_login_date, createdate, updatedate, createdby, updatedby, log_inst
     ) VALUES (
-      @subcontractor_id, @role_name, @full_name, @email, @password_hash, @is_active, @last_login_date, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst
+      @subcontractor_id, @role_name, @full_name, @email, @password_hash, @is_active, @is_superadmin, @last_login_date, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst
     )
   `;
 
@@ -55,6 +55,7 @@ async function createUser(databaseName, payload) {
       email: payload.email,
       password_hash: passwordHash,
       is_active: payload.is_active !== undefined ? payload.is_active : 1,
+      is_superadmin: payload.is_superadmin !== undefined ? payload.is_superadmin : 'N',
       last_login_date: payload.last_login_date || null,
       createdby: payload.createdby || null,
       updatedby: payload.updatedby || null,
@@ -67,7 +68,7 @@ async function createUser(databaseName, payload) {
 }
 
 async function updateUser(databaseName, userId, payload, updatedBy) {
-  const allowedFields = ['subcontractor_id', 'role_name', 'full_name', 'email', 'password_hash', 'is_active', 'last_login_date', 'log_inst'];
+  const allowedFields = ['subcontractor_id', 'role_name', 'full_name', 'email', 'password_hash', 'is_active', 'is_superadmin', 'last_login_date', 'log_inst'];
   const updates = [];
   const params = { id: userId, updatedby: updatedBy };
 

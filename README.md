@@ -1,6 +1,18 @@
 # DCC Log Suite APIs
 
-Express.js backend API server with public and authenticated routes, dynamic database configuration, and token-based authentication.
+Express.js backend API server for DCC Log Suite with public, authenticated, and subcontractor-specific routes.
+
+## Overview
+
+This project provides a multi-tenant API layer with token-based authentication and dynamic database resolution.
+
+It supports:
+
+- public endpoints without authentication
+- authenticated NG app routes with JWT tokens
+- subcontractor-specific CRUD access via dedicated subcontractor tokens
+- dynamic database lookup from external config API or `.env`
+- multiple database types: MSSQL, MySQL, PostgreSQL
 
 ## Features
 
@@ -16,229 +28,238 @@ Express.js backend API server with public and authenticated routes, dynamic data
 ## Project Structure
 
 ```
-dcclogsuiteapis/
+supportingAPIV1/
 ├── config/
-│   └── database.js          # Database connection manager
-├── controllers/              # Business logic controllers
+│   ├── database.js          # Database connection manager
+│   └── swagger.js           # Swagger configuration
+├── controllers/             # Business logic controllers
 │   ├── agreementController.js
+│   ├── approvalController.js
+│   ├── excellController.js
+│   ├── powerBiController.js
 │   ├── shipmentController.js
-│   └── configController.js
-├── middleware/
-│   └── auth.js              # Authentication middleware
-├── routes/
-│   ├── public.js            # Public API routes
-│   └── authenticated.js     # Authenticated API routes
-├── services/
-│   └── configService.js     # Configuration service
-├── .env.example            # Environment variables example
-├── .gitignore
+│   ├── syncController.js
+│   └── udqController.js
+├── middleware/              # Application middleware
+│   ├── auth.js              # JWT authentication middleware
+│   ├── domainMiddleware.js  # Database resolution middleware
+│   └── upload.js            # File upload middleware
+├── module/
+│   └── subcon/              # Subcontractor module
+│       ├── controllers/
+│       ├── middleware/
+│       ├── routes/
+│       └── services/
+├── routes/                  # API route definitions
+│   ├── authenticated.js
+│   ├── email.js
+│   ├── excel.routes.js
+│   ├── public.js
+│   └── sanaga.routes.js
+├── services/                # External and shared services
+│   ├── configService.js
+│   └── excell/
+├── tools/
+│   └── validate-excel.js
+├── .env.example             # Example environment variables
 ├── package.json
-├── server.js                # Main server file
-└── README.md
+├── README.md
+└── server.js                # Main server entry point
 ```
 
 ## Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and configure:
+2. Copy `.env.example` to `.env` and update values:
+
 ```bash
-cp .env.example .env
+copy .env.example .env
 ```
 
-3. Update `.env` with your configuration:
-```env
-PORT=3000
-JWT_SECRET=your-secret-key
-DB_CONFIG_API_URL=http://localhost:5000/api/config/database
-DB_CONFIG_API_TOKEN=your-api-token
-```
+3. Configure environment variables in `.env`.
 
 ## Running the Server
 
-### Development (with auto-reload):
+### Development
+
 ```bash
 npm run dev
 ```
 
-### Production:
+### Production
+
 ```bash
 npm start
 ```
 
+## Environment Variables
+
+Configure the application with these variables:
+
+```env
+PORT=3000
+NODE_ENV=development
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=24h
+DB_CONFIG_API_URL=http://localhost:5000/api/config/database
+DB_CONFIG_API_TOKEN=your-api-token
+DEFAULT_DB_TYPE=mssql
+DEFAULT_DB_HOST=localhost
+DEFAULT_DB_PORT=1433
+DEFAULT_DB_NAME=your_database
+DEFAULT_DB_USER=sa
+DEFAULT_DB_PASSWORD=your_password
+DEFAULT_DB_CONNECTION_TIMEOUT_MS=300000
+DEFAULT_DB_REQUEST_TIMEOUT_MS=300000
+MAX_UPLOAD_FILE_SIZE_BYTES=20971520
+```
+
 ## API Endpoints
+
+### Health
+
+- `GET /health` - Server health check
 
 ### Public Endpoints (No Authentication)
 
-- `GET /health` - Health check
-- `GET /api/public/health` - Public API health check
-- `GET /api/public/agreement/:guid` - Get agreement by GUID (for public signature page)
-- `PUT /api/public/agreement/:guid/sign` - Submit signed agreement
-- `GET /api/public/config/database/:id` - Get database config (limited info)
+- `GET /api/public/*` - Public domain-based endpoints
 
-### Authenticated Endpoints (Require JWT Token)
+### Authenticated NG Routes
 
 **Headers Required:**
+
 ```
 Authorization: Bearer <your-jwt-token>
 ```
 
-- `GET /api/auth/agreements` - Get all agreements (with optional status filter)
-- `GET /api/auth/agreement/:id` - Get agreement by ID
-- `POST /api/auth/agreement` - Create new agreement
-- `PUT /api/auth/agreement/:id` - Update agreement
-- `DELETE /api/auth/agreement/:id` - Delete agreement
-- `POST /api/auth/agreement/:id/send-email` - Send agreement email
-- `GET /api/auth/config/database/:id` - Get full database configuration
+- `GET /api/subcon/users` - Get subcontractor users list
+- `POST /api/subcon/contractor-token` - Issue subcontractor-scoped token
+
+### Subcontractor Routes
+
+These routes require `subconToken`.
+
+- `POST /api/subcon/auth/login`
+- `POST /api/subcon/contractor-token`
+- `GET /api/subcon/users/:id`
+- `POST /api/subcon/users`
+- `PUT /api/subcon/users/:id`
+- `DELETE /api/subcon/users/:id`
+- `GET /api/subcon/agreements`
+- `POST /api/subcon/agreements/accept`
+- `GET /api/subcon/load-agreements`
+- `POST /api/subcon/load-agreements`
+- `GET /api/subcon/load-agreements/:id`
+- `PUT /api/subcon/load-agreements/:id`
+- `DELETE /api/subcon/load-agreements/:id`
+- `GET /api/subcon/shipments`
+- `GET /api/subcon/shipments/:id`
+- `PUT /api/subcon/shipments/:id`
+- `POST /api/subcon/shipments/:id/upload-pod`
+- `GET /api/subcon/vehicles`
+- `GET /api/subcon/vehicles/:id`
+- `POST /api/subcon/vehicles`
+- `PUT /api/subcon/vehicles/:id`
+- `DELETE /api/subcon/vehicles/:id`
+- `GET /api/subcon/subcontractors`
+- `GET /api/subcon/subcontractors/:id`
+- `POST /api/subcon/subcontractors`
+- `PUT /api/subcon/subcontractors/:id`
+- `DELETE /api/subcon/subcontractors/:id`
+- `GET /api/subcon/incidents`
+- `GET /api/subcon/incidents/:id`
+- `POST /api/subcon/incidents`
+- `PUT /api/subcon/incidents/:id`
+- `DELETE /api/subcon/incidents/:id`
+- `POST /api/subcon/shipments/milestone`
+- `POST /api/subcon/shipments/advance`
+- `GET /api/subcon/financials`
+- `GET /api/subcon/dashboard/overview`
+- `GET /api/subcon/action-center`
+- `POST /api/subcon/financials/upload`
 
 ## Database Configuration
 
-The API uses a hybrid approach for database configuration:
+The API uses a hybrid approach for database configuration.
 
 ### Public Routes (API Call)
-- **Public routes** (`/api/public/*`) call an external API to fetch **only the database name**
-- All other database settings (host, port, user, password, type) come from `.env` file
-- **API Response Format** (should return only database name):
-  ```json
-  {
-    "success": true,
-    "data": "database_name"
-  }
-  ```
-  OR
-  ```json
-  {
-    "success": true,
-    "data": {
-      "database": "database_name"
-    }
-  }
-  ```
-  OR simply:
-  ```json
-  "database_name"
-  ```
 
-### Authenticated Routes (.env Only)
-- **Authenticated routes** (`/api/auth/*`) use database configuration **directly from `.env` file**
-- No API call is made for authenticated routes
-- All settings come from environment variables
+- Public routes (`/api/public/*`) call an external API to fetch only the database name.
+- All other database settings (host, port, user, password, type) come from `.env`.
 
-### Environment Variables (.env)
-All database settings (except database name for public routes) come from `.env`:
-```env
-DEFAULT_DB_TYPE=mssql
-DEFAULT_DB_HOST=localhost
-DEFAULT_DB_PORT=1433
-DEFAULT_DB_NAME=your_database  # Used as fallback for public routes
-DEFAULT_DB_USER=sa
-DEFAULT_DB_PASSWORD=your_password
-DEFAULT_DB_ENCRYPT=false
-DEFAULT_DB_TRUST_CERT=true
-```
+**API Response Format** should return the database name in one of these forms:
 
-### Configuration API Setup
-- Set `DB_CONFIG_API_URL` in `.env` to the endpoint that returns database name
-- Set `DB_CONFIG_API_TOKEN` for API authentication
-- If API is unavailable, public routes fallback to `DEFAULT_DB_NAME` from `.env`
-
-## Authentication
-
-### Generating JWT Tokens
-
-You can generate tokens using the `generateToken` function:
-
-```javascript
-const { generateToken } = require('./middleware/auth');
-const token = generateToken({ userId: 123, username: 'user' });
-```
-
-### Using Tokens
-
-Include the token in the Authorization header:
-```
-Authorization: Bearer <token>
-```
-
-## Database Support
-
-- **MSSQL/SQL Server**: Full support
-- **MySQL/MariaDB**: Full support
-- **PostgreSQL**: Full support
-
-Connection pools are automatically created and cached per database configuration.
-
-## Error Handling
-
-All errors return a consistent format:
 ```json
 {
-  "success": false,
-  "error": "Error Type",
-  "message": "Error message"
+  "success": true,
+  "data": "database_name"
 }
 ```
 
-## Development
+or
 
-### Architecture
-
-The project follows a **Controller-Route** pattern:
-
-- **Routes** (`routes/`) - Handle HTTP requests/responses and route definitions
-- **Controllers** (`controllers/`) - Contain business logic and database operations
-- **Middleware** (`middleware/`) - Handle cross-cutting concerns (authentication, etc.)
-- **Services** (`services/`) - External service integrations
-- **Config** (`config/`) - Configuration and database setup
-
-### Adding New Routes
-
-1. **Create Controller Function** in `controllers/yourController.js`:
-```javascript
-async function yourFunction(req, res) {
-  try {
-    const useApi = req.useApi || false; // Set by route middleware
-    // Your business logic here
-    const result = await db.executeQuery('default', query, params, useApi);
-    res.json({ success: true, data: result });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+```json
+{
+  "success": true,
+  "data": {
+    "database": "database_name"
   }
 }
-
-module.exports = { yourFunction };
 ```
 
-2. **Add Route** in `routes/public.js` or `routes/authenticated.js`:
-```javascript
-const yourController = require('../controllers/yourController');
+or simply:
 
-// Public route
-router.get('/your-endpoint', yourController.yourFunction);
-
-// Authenticated route (already has auth middleware)
-router.get('/your-endpoint', yourController.yourFunction);
+```json
+"database_name"
 ```
 
-### Database Queries in Controllers
+### Authenticated Routes (.env Only)
 
-Use the database helper in controllers:
-```javascript
-const db = require('../config/database');
+- Authenticated routes (`/api/auth/*`) use database configuration directly from `.env`.
+- No API call is made for authenticated routes.
 
-// Get useApi from request (set by route middleware)
-const useApi = req.useApi || false;
+## Authentication Flow
 
-// Execute query
-const result = await db.executeQuery('default', 'SELECT * FROM Table', {}, useApi);
-```
+### NG Token (`ngToken`)
 
-**Note**: The `useApi` flag is automatically set by route middleware:
-- `req.useApi = true` for public routes (fetch DB name from API)
-- `req.useApi = false` for authenticated routes (use .env directly)
+- Used for authenticated NG app routes and subcontractor list access.
+- Verified by `middleware/auth.js` using `jwt.decode()` for DB resolution and then checking token existence in `m_login_detail`.
+- Allows access to `GET /api/subcon/users`.
+
+### Subcontractor Token (`subconToken`)
+
+- Issued by `POST /api/subcon/contractor-token`.
+- Valid only for the selected subcontractor context.
+- Used for subcontractor CRUD routes protected by `authenticateSubconToken`.
+
+### Contractor Token Flow
+
+1. NG user authenticates and obtains `ngToken`.
+2. User selects a subcontractor from the `/api/subcon/users` list.
+3. Client calls `POST /api/subcon/contractor-token` with the selected contractor info.
+4. Server verifies the NG token and issues a `subconToken`.
+5. Client uses `subconToken` for subcontractor-specific routes.
+
+## Subcon Module Structure
+
+The subcontractor module is under `module/subcon`:
+
+- `module/subcon/routes/index.js` - Subcon route definitions
+- `module/subcon/controllers/` - Business logic controllers
+- `module/subcon/services/` - Subcon service logic
+- `module/subcon/middleware/subconAuth.js` - Subcontractor JWT middleware
+
+## Notes
+
+- `middleware/auth.js` validates NG tokens and checks token existence in `m_login_detail`.
+- `module/subcon/middleware/subconAuth.js` validates subcontractor tokens.
+- The current implementation does not verify full JWT signature for NG tokens yet.
+- Future improvement: implement full JWT signature verification in `auth.js`.
 
 ## License
 
