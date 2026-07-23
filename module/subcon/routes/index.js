@@ -77,6 +77,9 @@ router.post('/auth/login', subconController.login);
 router.post('/contractor-token', authenticateToken, subconController.getContractorToken);
 
 router.get('/users', authenticateToken, subconUserController.listUsers);
+router.post('/users', authenticateToken, subconUserController.createUser);
+router.get('/users/:id', authenticateToken, subconUserController.getUserById);
+router.put('/users/:id', authenticateToken, subconUserController.updateUser);
 router.use(authenticateSubconToken);
 
 /**
