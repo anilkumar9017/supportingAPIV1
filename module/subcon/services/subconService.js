@@ -404,6 +404,7 @@ async function uploadDocuments(databaseName, { shipmentId, podFile, invFile, inv
 
 module.exports = {
   loginSubconUser,
+  issueContractorToken,
   getAgreements,
   acceptAgreement,
   getActionCenter,

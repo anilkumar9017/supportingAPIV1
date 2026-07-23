@@ -68,6 +68,7 @@ async function createUser(databaseName, payload) {
 }
 
 async function updateUser(databaseName, userId, payload, updatedBy) {
+  console.log("update ", databaseName, userId, payload, updatedBy);
   const allowedFields = ['subcontractor_id', 'role_name', 'full_name', 'email', 'password_hash', 'is_active', 'is_superadmin', 'last_login_date', 'log_inst'];
   const updates = [];
   const params = { id: userId, updatedby: updatedBy };

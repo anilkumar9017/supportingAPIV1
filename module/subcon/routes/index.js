@@ -76,10 +76,107 @@ router.post('/auth/login', subconController.login);
  */
 router.post('/contractor-token', authenticateToken, subconController.getContractorToken);
 
-router.get('/users', authenticateToken, subconUserController.listUsers);
-router.post('/users', authenticateToken, subconUserController.createUser);
-router.get('/users/:id', authenticateToken, subconUserController.getUserById);
-router.put('/users/:id', authenticateToken, subconUserController.updateUser);
+/**
+ * @swagger
+ * /api/subcon/ng-users:
+ *   get:
+ *     summary: Get all Subcon ngtoken users
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *   post:
+ *     summary: Create a new Subcon user
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subcontractor_id:
+ *                 type: integer
+ *               role_name:
+ *                 type: string
+ *               full_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password_hash:
+ *                 type: string
+ *               is_active:
+ *                 type: integer
+ *               log_inst:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: User created
+ */
+router.get('/ng-users', authenticateToken, subconUserController.listUsers);
+router.post('/ng-users', authenticateToken, subconUserController.createUser);
+
+
+/**
+ * @swagger
+ * /api/subcon/ng-users/{id}:
+ *   put:
+ *     summary: Update a Subcon user
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               subcontractor_id:
+ *                 type: integer
+ *               role_name:
+ *                 type: string
+ *               full_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password_hash:
+ *                 type: string
+ *               is_active:
+ *                 type: integer
+ *               log_inst:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: User updated
+ */
+router.get('/ng-users/:id', authenticateToken, subconUserController.getUserById);
+router.put('/ng-users/:id', authenticateToken, subconUserController.updateUser);
+
+/**
+ * @swagger
+ * /api/subcon/ng-subcontractors:
+ *   get:
+ *     summary: Get all subcontractors using ng token
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of subcontractors
+ */
+router.get('/ng-subcontractors', authenticateToken, subconSubcontractorController.listSubcontractors);
+
 router.use(authenticateSubconToken);
 
 /**

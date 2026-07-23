@@ -66,7 +66,7 @@
     { header: 'Attachment', key: 'attachment', type: 'text', width: 40 },
     { header: 'Salary Currency', key: 'salary_currency', type: 'dropdown', dataType: 'number', width: 20, dropdown: { sheetName: 'Currencies', query: "select id, cur_code from m_currencies", labelField: 'cur_code', valueField: 'id' } },
     { header: 'Employee Cost Currency', key: 'emp_cost_currency', type: 'dropdown', dataType: 'number', width: 20, dropdown: { sheetName: 'Currencies', query: "select id, cur_code from m_currencies", labelField: 'cur_code', valueField: 'id' } },
-    { header: 'Position', key: 'position', type: 'dropdown', dataType: 'number', width: 25, dropdown: { sheetName: 'Positions', query: 'select id, name from m_position_type', labelField: 'name', valueField: 'id' } },
+    { header: 'Position', key: 'position', type: 'dropdown', dataType: 'number', width: 25, dropdown: { sheetName: 'Positions', query: "select id, 'desc' from m_emp_position", labelField: 'desc', valueField: 'id' } },
     { header: 'Cost Center', key: 'cost_center', type: 'dropdown', dataType: 'number', width: 25, dropdown: { sheetName: 'Cost Centers', query: 'select id, name from m_costcenters', labelField: 'name', valueField: 'id' } },
     { header: 'External Employee No', key: 'ext_emp_no', type: 'text', width: 25 },
     { header: 'Birth Place', key: 'birth_place', type: 'text', width: 30 },

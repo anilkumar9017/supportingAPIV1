@@ -2,7 +2,8 @@ const subconSubcontractorService = require('../services/subconSubcontractorServi
 
 async function listSubcontractors(req, res) {
   try {
-    const result = await subconSubcontractorService.getSubcontractors(req.databaseName);
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
+    const result = await subconSubcontractorService.getSubcontractors(databaseName);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to fetch subcontractors' });
