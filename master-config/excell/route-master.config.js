@@ -224,6 +224,7 @@ module.exports = {
             key: 'tolerance_limit',
             type: 'number'
         },
+        { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
 
         {
             header: 'Route Expenses',

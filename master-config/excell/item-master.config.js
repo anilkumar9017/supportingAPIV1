@@ -436,7 +436,8 @@ module.exports = {
             header: 'Inventory Weight',
             key: 'inventory_weight',
             type: 'number'
-        }
+        },
+        { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
 
     ]
 

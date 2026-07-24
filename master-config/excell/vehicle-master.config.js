@@ -201,6 +201,7 @@ module.exports = {
             ]
         } },
       { header: 'Self Owned', key: 'self_owned', type: 'checkbox', values: ['Y', 'N'], width: 20 },
+      { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
   
       // Child Arrays - Hierarchical Data
       {

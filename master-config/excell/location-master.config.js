@@ -137,6 +137,7 @@ module.exports = {
             type: 'checkbox',
             values: ['Y', 'N']
         },
+        { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
 
         {
             header: 'Location Contacts',

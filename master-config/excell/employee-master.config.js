@@ -80,6 +80,8 @@
     { header: 'Per Hour Rate', key: 'per_hour_rate', type: 'number', width: 20 },
     { header: 'Payable Account', key: 'payable_acct', type: 'text', width: 30 },
     { header: 'Down Payment Account', key: 'down_pymnt_acct', type: 'text', width: 30 },
+    { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
+    
     {
       header: 'Employee Absence',
       key: 'm_employee_absence',
@@ -156,6 +158,6 @@
       columns: [
         { header: 'ID', key: 'id', type: 'number', width: 10 }
       ]
-    }
+    },
   ]
 };

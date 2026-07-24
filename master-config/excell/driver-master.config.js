@@ -99,6 +99,7 @@ module.exports = {
             key: 'default_vehicle_code',
             type: 'text'
         },
+        { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
 
         {
             header: 'Driver Attachments',
