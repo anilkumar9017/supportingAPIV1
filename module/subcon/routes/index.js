@@ -304,6 +304,10 @@ router.get('/agreements', subconController.getAgreements);
  *             properties:
  *               agreementId:
  *                 type: integer
+ *               signature:
+ *                type: string
+ *               remarks:
+ *                type: string
  *     responses:
  *       200:
  *         description: Agreement accepted
