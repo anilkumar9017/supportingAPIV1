@@ -308,6 +308,8 @@ router.get('/agreements', subconController.getAgreements);
  *                type: string
  *               remarks:
  *                type: string
+ *               status:
+ *                type: string
  *     responses:
  *       200:
  *         description: Agreement accepted

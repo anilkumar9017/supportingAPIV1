@@ -95,8 +95,8 @@ async function getAgreements(req, res) {
 
 async function acceptAgreement(req, res) {
   try {
-    const { agreementId, signature, remarks } = req.body;
-    const result = await subconService.acceptAgreement(req.databaseName, {agreementId, signature, remarks}, req.user.subcontractor_id, req.user.id);
+    const { agreementId, signature, remarks, status } = req.body;
+    const result = await subconService.acceptAgreement(req.databaseName, {agreementId, signature, remarks, status}, req.user.subcontractor_id, req.user.id);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to accept agreement' });

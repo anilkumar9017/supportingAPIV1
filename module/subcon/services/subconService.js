@@ -154,19 +154,19 @@ async function getAgreements(databaseName, subcontractorId) {
 }
 
 async function acceptAgreement(databaseName, objAgreement, subcontractorId, userId) {
-  //agreementId, signature, remarks
+  //agreementId, signature, remarks, status=accepted/rejected
   await db.executeQuery(
     databaseName,
     `
       UPDATE [subcon].[load_agreements]
-      SET status = 'accepted', signature = @signature, remarks = @remarks, responded_at = GETUTCDATE(), updatedate = GETUTCDATE(), updatedby = @userId
+      SET status = @status, signature = @signature, remarks = @remarks, responded_at = GETUTCDATE(), updatedate = GETUTCDATE(), updatedby = @userId
       WHERE id = @id AND subcontractor_id = @subId
     `,
-    { id: objAgreement?.agreementId, signature: objAgreement?.signature, remarks: objAgreement?.remarks, subId: subcontractorId, userId },
+    { id: objAgreement?.agreementId, status: objAgreement?.status, signature: objAgreement?.signature, remarks: objAgreement?.remarks, subId: subcontractorId, userId },
     false
   );
 
-  return { success: true, message: 'Agreement accepted.' };
+  return { success: true, message: `Agreement updated.` };
 }
 
 async function updateMilestones(databaseName, updates, userId) {
