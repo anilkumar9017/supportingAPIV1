@@ -1219,3 +1219,36 @@ VALUES (
     1,
     1
 ); */
+
+
+/* CREATE TABLE 
+(
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+
+    [shipment_id] INT NOT NULL,
+
+    [arrival_time] DATETIME NULL,
+    [offloaded_time] DATETIME NULL,
+
+    [turnaround_hours] DECIMAL(8,2) NULL,
+    [free_hours] DECIMAL(8,2) NULL,
+    [billable_hours] DECIMAL(8,2) NULL,
+
+    [claim_amount] DECIMAL(18,2) NOT NULL,
+
+    [remarks] NVARCHAR(MAX) NULL,
+
+    -- Supporting document
+    [supporting_document_url] NVARCHAR(500) NULL,
+
+    [status] NVARCHAR(50) NOT NULL DEFAULT ('Draft'),
+
+    [sap_document_no] NVARCHAR(100) NULL,
+    [sap_status] NVARCHAR(50) NULL,
+
+    [created_by] INT NOT NULL,
+    [approved_by] INT NULL,
+
+    [created_at] DATETIME NOT NULL DEFAULT (GETDATE()),
+    [updated_at] DATETIME NOT NULL DEFAULT (GETDATE()),
+); */
