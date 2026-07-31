@@ -10,6 +10,7 @@ const subconIncidentController = require('../controllers/subconIncidentControlle
 const subconSubcontractorController = require('../controllers/subconSubcontractorController');
 const subconLoadAgreementController = require('../controllers/subconLoadAgreementController');
 const subconShipmentController = require('../controllers/subconShipmentController');
+const subconDemurrageClaimController = require('../controllers/subconDemurrageClaimController');
 const {
   validateVehicleCreate,
   validateVehicleUpdate,
@@ -1120,6 +1121,147 @@ router.post('/shipments/advance', subconController.requestAdvance);
 
 /**
  * @swagger
+ * /api/subcon/demurrage-claims:
+ *   get:
+ *     summary: Get demurrage claims for the authenticated subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of demurrage claims
+ *   post:
+ *     summary: Create a new demurrage claim
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               shipment_id:
+ *                 type: integer
+ *               arrival_time:
+ *                 type: string
+ *                 format: date-time
+ *               offloaded_time:
+ *                 type: string
+ *                 format: date-time
+ *               turnaround_hours:
+ *                 type: number
+ *               free_hours:
+ *                 type: number
+ *               billable_hours:
+ *                 type: number
+ *               claim_amount:
+ *                 type: number
+ *               remarks:
+ *                 type: string
+ *               supporting_document_url:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               sap_document_no:
+ *                 type: string
+ *               sap_status:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Demurrage claim created
+ */
+router.get('/demurrage-claims', subconDemurrageClaimController.listDemurrageClaims);
+router.post('/demurrage-claims', subconDemurrageClaimController.createDemurrageClaim);
+
+/**
+ * @swagger
+ * /api/subcon/demurrage-claims/{id}:
+ *   get:
+ *     summary: Get a demurrage claim by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Demurrage claim details
+ *   put:
+ *     summary: Update a demurrage claim
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Demurrage claim updated
+ *   delete:
+ *     summary: Delete a demurrage claim
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Demurrage claim deleted
+ */
+router.get('/demurrage-claims/:id', subconDemurrageClaimController.getDemurrageClaimById);
+router.put('/demurrage-claims/:id', subconDemurrageClaimController.updateDemurrageClaim);
+router.delete('/demurrage-claims/:id', subconDemurrageClaimController.deleteDemurrageClaim);
+
+/**
+ * @swagger
+ * /api/subcon/demurrage-claims/{id}/upload-document:
+ *   post:
+ *     summary: Upload supporting document for a demurrage claim
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               supportingDocument:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Supporting document uploaded
+ */
+router.post('/demurrage-claims/:id/upload-document', upload.single('supportingDocument'), subconDemurrageClaimController.uploadSupportingDocument);
+
+/**
+ * @swagger
  * /api/subcon/financials:
  *   get:
  *     summary: Get financial summary for the authenticated subcontractor
@@ -1193,62 +1335,3 @@ router.post('/financials/upload', upload.fields([{ name: 'pod' }, { name: 'invoi
 
 module.exports = router;
 
-/* INSERT INTO [subcon].[users] (
-    subcontractor_id,
-    role_name,
-    full_name,
-    email,
-    password_hash,
-    is_active,
-    createdate,
-    updatedate,
-    createdby,
-    updatedby,
-    log_inst
-)
-VALUES (
-    1,
-    'admin',
-    'Subcon Admin',
-    'subconadmin@example.com',
-    '$2a$10$vdjs6EpI4doeZg3RxVuHzeQzM5/K/oEuCqlpkvAUGb1FMGrhPGqo.',
-    1,
-    GETUTCDATE(),
-    GETUTCDATE(),
-    1,
-    1,
-    1
-); */
-
-
-/* CREATE TABLE 
-(
-    [id] INT IDENTITY(1,1) PRIMARY KEY,
-
-    [shipment_id] INT NOT NULL,
-
-    [arrival_time] DATETIME NULL,
-    [offloaded_time] DATETIME NULL,
-
-    [turnaround_hours] DECIMAL(8,2) NULL,
-    [free_hours] DECIMAL(8,2) NULL,
-    [billable_hours] DECIMAL(8,2) NULL,
-
-    [claim_amount] DECIMAL(18,2) NOT NULL,
-
-    [remarks] NVARCHAR(MAX) NULL,
-
-    -- Supporting document
-    [supporting_document_url] NVARCHAR(500) NULL,
-
-    [status] NVARCHAR(50) NOT NULL DEFAULT ('Draft'),
-
-    [sap_document_no] NVARCHAR(100) NULL,
-    [sap_status] NVARCHAR(50) NULL,
-
-    [created_by] INT NOT NULL,
-    [approved_by] INT NULL,
-
-    [created_at] DATETIME NOT NULL DEFAULT (GETDATE()),
-    [updated_at] DATETIME NOT NULL DEFAULT (GETDATE()),
-); */
