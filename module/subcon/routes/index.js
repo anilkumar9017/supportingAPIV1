@@ -991,12 +991,12 @@ router.get('/incidents/:id', subconIncidentController.getIncidentById);
  *                 type: integer
  *               incident_type:
  *                 type: string
- *               description:
+ *               incident_description:
  *                 type: string
- *               reported_date:
+ *               reported_at:
  *                 type: string
  *                 format: date-time
- *               status:
+ *               is_resolved:
  *                 type: string
  *               severity:
  *                 type: string

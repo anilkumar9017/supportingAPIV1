@@ -179,19 +179,13 @@ function validateIncidentCreate(req, res, next) {
     errors.push('incident_type is required and must be a non-empty string.');
   }
 
-  if (!isNonEmptyString(payload.description)) {
-    errors.push('description is required and must be a non-empty string.');
+  if (!isNonEmptyString(payload.incident_description)) {
+    errors.push('incident_description is required and must be a non-empty string.');
   }
 
-  if (payload.reported_date !== undefined && payload.reported_date !== null && payload.reported_date !== '') {
-    if (!isValidDate(payload.reported_date)) {
+  if (payload.reported_at !== undefined && payload.reported_at !== null && payload.reported_at !== '') {
+    if (!isValidDate(payload.reported_at)) {
       errors.push('reported_date must be a valid date string when provided.');
-    }
-  }
-
-  if (payload.status !== undefined && payload.status !== null && payload.status !== '') {
-    if (!isNonEmptyString(payload.status)) {
-      errors.push('status must be a non-empty string when provided.');
     }
   }
 
@@ -222,7 +216,7 @@ function validateIncidentCreate(req, res, next) {
 
 function validateIncidentUpdate(req, res, next) {
   const payload = req.body || {};
-  const allowedFields = ['shipment_id', 'incident_type', 'description', 'reported_date', 'status', 'severity', 'incident_location', 'resolution_notes', 'log_inst'];
+  const allowedFields = ['shipment_id', 'incident_type', 'description', 'reported_date', 'is_resolved', 'severity', 'incident_location', 'resolution_notes', 'log_inst'];
   const providedFields = Object.keys(payload).filter((field) => allowedFields.includes(field));
   const errors = [];
 
@@ -243,21 +237,15 @@ function validateIncidentUpdate(req, res, next) {
     }
   }
 
-  if (payload.description !== undefined && payload.description !== null && payload.description !== '') {
-    if (!isNonEmptyString(payload.description)) {
-      errors.push('description must be a non-empty string when provided.');
+  if (payload.incident_description !== undefined && payload.incident_description !== null && payload.incident_description !== '') {
+    if (!isNonEmptyString(payload.incident_description)) {
+      errors.push('incident_description must be a non-empty string when provided.');
     }
   }
 
-  if (payload.reported_date !== undefined && payload.reported_date !== null && payload.reported_date !== '') {
-    if (!isValidDate(payload.reported_date)) {
-      errors.push('reported_date must be a valid date string when provided.');
-    }
-  }
-
-  if (payload.status !== undefined && payload.status !== null && payload.status !== '') {
-    if (!isNonEmptyString(payload.status)) {
-      errors.push('status must be a non-empty string when provided.');
+  if (payload.reported_at !== undefined && payload.reported_at !== null && payload.reported_at !== '') {
+    if (!isValidDate(payload.reported_at)) {
+      errors.push('reported_at must be a valid date string when provided.');
     }
   }
 

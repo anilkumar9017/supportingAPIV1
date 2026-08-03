@@ -2,12 +2,12 @@ const db = require('../../../config/database');
 
 async function getIncidents(databaseName, subcontractorId) {
   const query = `
-    SELECT id, subcontractor_id, shipment_id, incident_type, description, reported_date,
-           status, severity, incident_location, resolution_notes, createdate, updatedate,
+    SELECT id, subcontractor_id, shipment_id, incident_type, incident_description, reported_at,
+           is_resolved, severity, incident_location, resolution_notes, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[incidents]
     WHERE subcontractor_id = @subId
-    ORDER BY reported_date DESC, id DESC
+    ORDER BY reported_at DESC, id DESC
   `;
 
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
@@ -15,8 +15,8 @@ async function getIncidents(databaseName, subcontractorId) {
 
 async function getIncidentById(databaseName, incidentId, subcontractorId) {
   const query = `
-    SELECT id, subcontractor_id, shipment_id, incident_type, description, reported_date,
-           status, severity, incident_location, resolution_notes, createdate, updatedate,
+    SELECT id, subcontractor_id, shipment_id, incident_type, incident_description, reported_at,
+           is_resolved, severity, incident_location, resolution_notes, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[incidents]
     WHERE id = @id AND subcontractor_id = @subId
@@ -29,10 +29,10 @@ async function getIncidentById(databaseName, incidentId, subcontractorId) {
 async function createIncident(databaseName, payload) {
   const query = `
     INSERT INTO [subcon].[incidents]
-      (subcontractor_id, shipment_id, incident_type, description, reported_date, status,
+      (subcontractor_id, shipment_id, incident_type, incident_description, reported_at, is_resolved,
        severity, incident_location, resolution_notes, createdate, updatedate, createdby, updatedby, log_inst)
     VALUES
-      (@subcontractor_id, @shipment_id, @incident_type, @description, @reported_date, @status,
+      (@subcontractor_id, @shipment_id, @incident_type, @incident_description, @reported_at, @is_resolved,
        @severity, @incident_location, @resolution_notes, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst)
   `;
 
@@ -40,9 +40,9 @@ async function createIncident(databaseName, payload) {
     subcontractor_id: payload.subcontractor_id,
     shipment_id: payload.shipment_id,
     incident_type: payload.incident_type,
-    description: payload.description,
-    reported_date: payload.reported_date,
-    status: payload.status,
+    incident_description: payload.incident_description,
+    reported_at: payload.reported_at,
+    is_resolved: payload.is_resolved,
     severity: payload.severity,
     incident_location: payload.incident_location,
     resolution_notes: payload.resolution_notes,
@@ -55,7 +55,7 @@ async function createIncident(databaseName, payload) {
 }
 
 async function updateIncident(databaseName, incidentId, payload, updatedBy, subcontractorId) {
-  const allowedFields = ['shipment_id', 'incident_type', 'description', 'reported_date', 'status', 'severity', 'incident_location', 'resolution_notes', 'log_inst'];
+  const allowedFields = ['shipment_id', 'incident_type', 'incident_description', 'reported_at', 'is_resolved', 'severity', 'incident_location', 'resolution_notes', 'log_inst'];
   const updates = [];
   const params = { id: incidentId, subId: subcontractorId, updatedby: updatedBy };
 
