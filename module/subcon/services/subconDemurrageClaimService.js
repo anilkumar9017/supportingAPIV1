@@ -86,14 +86,14 @@ async function createDemurrageClaim(databaseName, payload) {
     INSERT INTO [subcon].[demurrage_claims]
       (shipment_id, arrival_time, offloaded_time, turnaround_hours, free_hours, billable_hours,
        claim_amount, remarks, supporting_document_url, status, sap_document_no, sap_status,
-       created_by, approved_by, created_at, updated_at)
+       created_by, approved_by, created_at, updated_at) OUTPUT INSERTED.id 
     VALUES
       (@shipment_id, @arrival_time, @offloaded_time, @turnaround_hours, @free_hours, @billable_hours,
        @claim_amount, @remarks, @supporting_document_url, @status, @sap_document_no, @sap_status,
        @created_by, @approved_by, GETDATE(), GETDATE())
   `;
 
-  await db.executeQuery(databaseName, query, {
+  const result =  await db.executeQuery(databaseName, query, {
     shipment_id: payload.shipment_id,
     arrival_time: payload.arrival_time || null,
     offloaded_time: payload.offloaded_time || null,
@@ -110,7 +110,7 @@ async function createDemurrageClaim(databaseName, payload) {
     approved_by: payload.approved_by || null
   }, false);
 
-  return { success: true, message: 'Demurrage claim created successfully.' };
+  return { success: true, message: 'Demurrage claim created successfully.', response: result };
 }
 
 async function updateDemurrageClaim(databaseName, claimId, payload, updatedBy, subcontractorId) {
