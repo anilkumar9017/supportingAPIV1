@@ -82,6 +82,7 @@ async function signAgreement(req, res) {
       });
     }
     
+    /* update agreement */
     const updateQuery = `
       UPDATE d_bp_agreement_docs 
       SET 
@@ -100,6 +101,22 @@ async function signAgreement(req, res) {
       bp_remarks,
       log_inst
     }, useApi);
+
+    /* update subcon */
+    const updateSubConAllocationQuery = `
+      UPDATE subcon_allocation_request
+      SET
+        subcon_accepted = 'A',
+        updatedate = GETDATE()
+      WHERE temp_guid = @guid
+    `;
+
+    await db.executeQuery(
+      databaseName,
+      updateSubConAllocationQuery,
+      { guid },
+      useApi
+    );
     
     res.json({
       success: true,

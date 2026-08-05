@@ -5,7 +5,7 @@ async function listLoadAgreements(databaseName, subcontractorId, filters = {}) {
   let query = `
     SELECT id, subcontractor_id, dcc_offer_ref, origin_location, destination_location,
            cargo_description, tonnage, status, vehicle_id, driver_name, responded_at,
-           agreed_rate_lc, agreed_rate_sys, available_from, createdate, updatedate,
+           agreed_rate_lc, agreed_rate_sys, available_from, agreement_url, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[load_agreements]
     WHERE subcontractor_id = @subId
@@ -27,7 +27,7 @@ async function getLoadAgreementById(databaseName, agreementId, subcontractorId) 
   const query = `
     SELECT id, subcontractor_id, dcc_offer_ref, origin_location, destination_location,
            cargo_description, tonnage, status, vehicle_id, driver_name, responded_at,
-           agreed_rate_lc, agreed_rate_sys, available_from, createdate, updatedate,
+           agreed_rate_lc, agreed_rate_sys, available_from, agreement_url, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[load_agreements]
     WHERE id = @id AND subcontractor_id = @subId
