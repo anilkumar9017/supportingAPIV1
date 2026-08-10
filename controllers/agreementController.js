@@ -108,7 +108,7 @@ async function signAgreement(req, res) {
     const updateSubConAllocationQuery = `
       UPDATE subcon_allocation_request
       SET
-        subcon_accepted = subconStatus,
+        subcon_accepted = @subconStatus,
         updatedate = GETDATE()
       WHERE temp_guid = @guid
     `;

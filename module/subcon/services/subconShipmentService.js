@@ -13,7 +13,6 @@ async function getShipments(databaseName, subcontractorId) {
 }
 
 async function getShipmentsPOD(databaseName, subcontractorId, status) {
-  console.log("status ", status);
   const query = `
     SELECT s.id, s.dcc_shipment_ref, v.vehicle_reg_no, s.origin_location, s.destination_location,
            s.dep_origin_time, s.arr_border1_time, s.dep_border1_time, s.arr_dest_time, s.offloaded_time, s.status, s.exception
