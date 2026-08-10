@@ -12,6 +12,19 @@ async function getShipments(databaseName, subcontractorId) {
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
 }
 
+async function getShipmentsPOD(databaseName, subcontractorId, status) {
+  console.log("status ", status);
+  const query = `
+    SELECT s.id, s.dcc_shipment_ref, v.vehicle_reg_no, s.origin_location, s.destination_location,
+           s.dep_origin_time, s.arr_border1_time, s.dep_border1_time, s.arr_dest_time, s.offloaded_time, s.status, s.exception
+    FROM [subcon].[shipment_orders] s
+    INNER JOIN [subcon].[vehicles] v ON s.vehicle_id = v.id
+    WHERE s.subcontractor_id = @subId AND s.status = @status
+  `;
+
+  return db.executeQuery(databaseName, query, { subId: subcontractorId,  status: status}, false);
+}
+
 async function getShipmentById(databaseName, shipmentId, subcontractorId) {
   const query = `
     SELECT s.id, s.subcontractor_id, s.dcc_shipment_ref, s.sap_doc_num, s.vehicle_id,
@@ -165,5 +178,6 @@ module.exports = {
   getShipments,
   getShipmentById,
   updateShipmentOrder,
-  uploadPODDocuments
+  uploadPODDocuments,
+  getShipmentsPOD
 };

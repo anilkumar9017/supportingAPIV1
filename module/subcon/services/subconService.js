@@ -174,6 +174,7 @@ async function updateMilestones(databaseName, updates, userId) {
     const query = `
       UPDATE [subcon].[shipment_orders]
       SET ${update.milestoneField} = @timestampVal,
+          status = @status
           updatedate = GETUTCDATE(),
           updatedby = @updatedBy
       WHERE id = @shipmentId
@@ -185,6 +186,7 @@ async function updateMilestones(databaseName, updates, userId) {
       {
         shipmentId: update.shipmentId,
         timestampVal: update.timestamp,
+        status: update?.status || 'in_transit',
         updatedBy: userId
       },
       false

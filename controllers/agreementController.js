@@ -64,7 +64,7 @@ async function getAgreementByGuid(req, res) {
 async function signAgreement(req, res) {
   try {
     const { guid } = req.params;
-    const { html_template, bp_remarks, log_inst } = req.body;
+    const { html_template, bp_remarks, status, log_inst } = req.body;
     const useApi = req.useApi || false;
     // Get database name from middleware (already resolved)
     const databaseName = req.databaseName;
@@ -82,13 +82,13 @@ async function signAgreement(req, res) {
       });
     }
     
-    /* update agreement */
+    /* update agreement 'signed',*/
     const updateQuery = `
       UPDATE d_bp_agreement_docs 
       SET 
         html_template = @html_template,
         is_signed = 'Y',
-        status = 'signed',
+        status = @status,
         bp_remarks = @bp_remarks,
         updatedate = GETDATE(),
         log_inst = @log_inst
@@ -98,15 +98,17 @@ async function signAgreement(req, res) {
     await db.executeQuery(databaseName, updateQuery, {
       guid,
       html_template,
+      status,
       bp_remarks,
       log_inst
     }, useApi);
 
     /* update subcon */
+    const subconStatus = status == 'signed' ? 'A':'R';
     const updateSubConAllocationQuery = `
       UPDATE subcon_allocation_request
       SET
-        subcon_accepted = 'A',
+        subcon_accepted = subconStatus,
         updatedate = GETDATE()
       WHERE temp_guid = @guid
     `;
@@ -114,7 +116,7 @@ async function signAgreement(req, res) {
     await db.executeQuery(
       databaseName,
       updateSubConAllocationQuery,
-      { guid },
+      { guid, subconStatus },
       useApi
     );
     

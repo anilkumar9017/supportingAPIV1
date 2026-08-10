@@ -525,6 +525,33 @@ router.get('/shipments', subconShipmentController.getShipments);
 
 /**
  * @swagger
+ * /api/subcon/shipmentPOD:
+ *   post:
+ *     summary: Get pod shipments for the authenticated subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: List of shipments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.post('/shipmentPOD', subconShipmentController.getShipmentsPOD);
+
+
+/**
+ * @swagger
  * /api/subcon/shipments/{id}:
  *   get:
  *     summary: Get shipment order by id

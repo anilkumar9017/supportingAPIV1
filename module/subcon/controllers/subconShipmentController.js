@@ -9,6 +9,16 @@ async function getShipments(req, res) {
   }
 }
 
+async function getShipmentsPOD(req, res) {
+  try {
+    const payload = req.body || {};
+    const result = await subconShipmentService.getShipmentsPOD(req.databaseName, req.user.subcontractor_id, payload.status);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch shipments' });
+  }
+}
+
 async function getShipmentById(req, res) {
   try {
     const { id } = req.params;
@@ -81,5 +91,6 @@ module.exports = {
   getShipments,
   getShipmentById,
   updateShipmentOrder,
-  uploadPODDocuments
+  uploadPODDocuments,
+  getShipmentsPOD
 };

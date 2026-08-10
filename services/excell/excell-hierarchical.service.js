@@ -54,7 +54,7 @@ function extractHierarchicalConfig(menuCode) {
     };
 }
 
-async function fetchExistingRowsByUniqueValues(db, databaseName, useApi, tableName, primaryKey, uniqueKey, values, chunkSize = 1000, transaction = null) {
+async function fetchExistingRowsByUniqueValues(db, databaseName, useApi, tableName, primaryKey, uniqueKey, values, chunkSize = 1000) {
     const normalizedValues = [...new Set(
         values
             .map(value => value === undefined || value === null ? '' : String(value).trim().toUpperCase())
@@ -69,18 +69,13 @@ async function fetchExistingRowsByUniqueValues(db, databaseName, useApi, tableNa
         chunk.forEach((value, index) => {
             params[`value${index}`] = value;
         });
-        let chunkRows;
-        if (transaction) {
-            chunkRows = await db.executeTransactionQuery(process.env.DEFAULT_DB_TYPE || 'mssql', transaction, query, params);
-        } else {
-            chunkRows = await db.executeQuery(databaseName, query, params, useApi);
-        }
+        const chunkRows = await db.executeQuery(databaseName, query, params, useApi);
         rows.push(...(chunkRows || []));
     }
     return rows;
 }
 
-async function fetchExistingRowIdByUniqueValue(db, databaseName, useApi, tableName, primaryKey, uniqueKey, value, transaction = null) {
+async function fetchExistingRowIdByUniqueValue(db, databaseName, useApi, tableName, primaryKey, uniqueKey, value) {
     const normalizedValue = String(value === undefined || value === null ? '' : String(value)).trim().toUpperCase();
     if (!normalizedValue) {
         return null;
@@ -88,12 +83,7 @@ async function fetchExistingRowIdByUniqueValue(db, databaseName, useApi, tableNa
 
     const query = `SELECT ${primaryKey}, ${uniqueKey} FROM ${tableName} WHERE UPPER(LTRIM(RTRIM(${uniqueKey}))) = @value`;
     const params = { value: normalizedValue };
-    let rows;
-    if (transaction) {
-        rows = await db.executeTransactionQuery(process.env.DEFAULT_DB_TYPE || 'mssql', transaction, query, params);
-    } else {
-        rows = await db.executeQuery(databaseName, query, params, useApi);
-    }
+    const rows = await db.executeQuery(databaseName, query, params, useApi);
     const row = Array.isArray(rows) ? rows[0] : null;
     return row ? row[primaryKey] : null;
 }
@@ -860,8 +850,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                         config.primaryKey,
                         config.uniqueKey,
                         distinctValues,
-                        1000,
-                        transaction
+                        1000
                     );
                     existingRows.forEach(existingRow => {
                         existingRecordMap.set(String(existingRow[config.uniqueKey] || '').trim().toUpperCase(), existingRow[config.primaryKey]);
@@ -902,8 +891,7 @@ async function importMainSheet(workbook, config, db, databaseName, useApi, userO
                         config.tableName,
                         config.primaryKey,
                         config.uniqueKey,
-                        normalizedUniqueKey,
-                        transaction
+                        normalizedUniqueKey
                     );
                     if (existingId) {
                         existingRecordMap.set(normalizedUniqueKey, existingId);
@@ -1010,7 +998,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
             !parentIdCache.has(String(code).trim().toUpperCase())
         );
 
-                if (uncachedCodes.length > 0) {
+        if (uncachedCodes.length > 0) {
             try {
                 const parentResults = await fetchExistingRowsByUniqueValues(
                     db,
@@ -1021,8 +1009,6 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                     config.uniqueKey,
                     uncachedCodes,
                     1000
-                            ,
-                            transaction
                 );
                 parentResults.forEach(parentRow => {
                     parentIdCache.set(String(parentRow[config.uniqueKey] || '').trim().toUpperCase(), parentRow[config.primaryKey]);
@@ -1173,7 +1159,7 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
             for (let i = 0; i < recordsToInsert.length; i++) {
                 const insertEntry = recordsToInsert[i];
                 try {
-                    const newId = await insertRecord({
+                    await insertRecord({
                         transaction,
                         db,
                         databaseName,
@@ -1181,10 +1167,6 @@ async function importChildSheet(workbook, config, childConfig, childKey, db, dat
                         row: insertEntry.row,
                         useApi
                     });
-                    // Capture returned id for consistency; not required further here
-                    if (newId) {
-                        // noop for now
-                    }
                     results.inserted++;
                 } catch (error) {
                     const rowNumber = insertEntry.rowNumber || (rowData.find(r => r.data === insertEntry.row)?.rowNumber) || 'unknown';
