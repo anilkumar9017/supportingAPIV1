@@ -62,19 +62,7 @@ module.exports = {
         {
             header: 'Applicable For',
             key: 'applicable_for',
-            type: 'number',
-            type: 'dropdown',
-            data_type: 'number',
-            dropdown: {
-                sheetName: 'AccountType',
-                labelField: 'name',
-                valueField: 'id',
-                options: [
-                    { id: 1, name: 'Truck' },
-                    { id: 2, name: 'Trailer' },
-                    { id: 3, name: 'Both' },
-                ]
-            }
+            type: 'number'
         },
 
         {

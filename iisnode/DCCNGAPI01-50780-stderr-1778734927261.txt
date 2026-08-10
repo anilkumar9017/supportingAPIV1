@@ -1,0 +1,23 @@
+Application has thrown an uncaught exception and is terminated:
+Error: Cannot find module 'react'
+Require stack:
+- C:\inetpub\wwwroot\ng_supporting_api\test\services\whapi\messageHandler.js
+- C:\inetpub\wwwroot\ng_supporting_api\test\services\whapi\whapiService.js
+- C:\inetpub\wwwroot\ng_supporting_api\test\server.js
+- C:\Program Files\iisnode\interceptor.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\inetpub\wwwroot\ng_supporting_api\test\services\whapi\messageHandler.js:5:17)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
