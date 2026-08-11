@@ -210,7 +210,6 @@ async function executeQuery(dbName, query, params = {}, useApi = false) {
   }
 }
 
-<<<<<<< HEAD
 
 /* 
   * Execute query within a transaction (works with all database types)
@@ -326,8 +325,6 @@ function buildInsertQuery(dbType, tableName, row) {
   return query;
 }
 
-=======
->>>>>>> master
 /**
  * Close all connection pools
  */
