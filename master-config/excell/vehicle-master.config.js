@@ -88,16 +88,12 @@ module.exports = {
       { header: 'Dimensions 4', key: 'dimension4', type: 'text', width: 20 },
       { header: 'Dimensions 5', key: 'dimension5', type: 'text', width: 20 },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-<<<<<<< HEAD
       /* { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
             sheetName: 'VehicleClass',
             query: 'select id, name from m_fm_vehicle_class',
             labelField: 'name',
             valueField: 'id'
         }}, */
-=======
-      //{ header: 'Class', key: '_class', type: 'number', width: 20 },
->>>>>>> master
       { header: 'Model No', key: 'modelno', type: 'text', width: 20 },
       { header: 'Model Name', key: 'modelname', type: 'text', width: 20 },
       { header: 'Vehicle Series', key: 'vehicleseries', type: 'number', width: 20 },

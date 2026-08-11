@@ -191,19 +191,14 @@ module.exports = {
         { header: 'log_inst', key: 'log_inst', type: 'number', width: 15 },
 
         {
-<<<<<<< HEAD
             header: 'Route Expenses',
             key: 'route_expenses',
             type: 'child_array',
-=======
-
->>>>>>> master
             sheetName: 'Route Expenses',
 
             tableName: 'm_route_expenses',
 
             parentKey: 'parent_id',
-<<<<<<< HEAD
             columns: [
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
                 { header: 'Vehicle Type', key: 'vehicle_type', type: 'dropdown', dataType: 'number', width: 15, dropdown: { sheetName: 'Vehicle Types', query: 'select id, name from m_vehicle_type', labelField: 'name', valueField: 'id' } },
@@ -222,130 +217,6 @@ module.exports = {
                 { header: 'Supplier', key: 'cardcode', type: 'dropdown', dataType: 'text', width: 30, dropdown: { sheetName: 'Supplier', query: "select id, card_code from m_customer where card_type = 'S'", labelField: 'card_code', valueField: 'id' } },
                 { header: 'Supplier Name', key: 'cardname', type: 'text' },
                 { header: 'Employee', key: 'employee_id', type: 'dropdown', dropdown: { sheetName: 'Employees', query: `SELECT e.id, e.first_name +' '+e.last_name as name FROM m_employee e JOIN m_emp_position p ON e.position = p.id WHERE p.is_driver = 'Y'`, labelField: 'name', valueField: 'id' } }
-=======
-
-            referenceColumn: 'Route Code',
-
-            columns: [
-
-                {
-                    header: 'Route Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Vehicle Type',
-                    key: 'vehicle_type',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Commodity',
-                    key: 'commodity',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Border',
-                    key: 'border',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Expense',
-                    key: 'expense_id',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Expenses',
-                        query: `select id, expense_name from m_expense`,
-                        labelField: 'expense_name',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Fund Account',
-                    key: 'fund_account',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Doc Type',
-                    key: 'doctype',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Quantity',
-                    key: 'quantity',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Unit Price',
-                    key: 'unitprice',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Currency',
-                    key: 'currency',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'ExpenseCurrencies',
-                        query: `select id, code from m_currency`,
-                        labelField: 'code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Total Amount',
-                    key: 'total_amount',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Remarks',
-                    key: 'remarks',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Card Code',
-                    key: 'cardcode',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Card Name',
-                    key: 'cardname',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Account Type',
-                    key: 'account_type',
-                    type: 'text'
-                },
-
-                {
-                    header: 'Employee',
-                    key: 'employee_id',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Employees',
-                        query: `select id, employee_name from m_employee`,
-                        labelField: 'employee_name',
-                        valueField: 'id'
-                    }
-                }
-
->>>>>>> master
             ]
         },
 
@@ -357,7 +228,6 @@ module.exports = {
             tableName: 'm_route_licenses',
             parentKey: 'parent_id',
             columns: [
-<<<<<<< HEAD
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
                 { header: 'Vehicle Class', key: 'vehicle_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: { sheetName: 'VehicleClass', query: 'select id, name from m_fm_vehicle_class', labelField: 'name', valueField: 'id' } },
                 { header: 'License', key: 'license_id', type: 'dropdown', dataType: 'number', width: 20, dropdown: { sheetName: 'License Types', query: 'select id, name from m_license_type', labelField: 'name', valueField: 'id' } },
@@ -367,83 +237,6 @@ module.exports = {
                 { header: 'Validity', key: 'validity', type: 'number' },
                 { header: 'Currency', key: 'currency', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'Currencies', query: `select id, cur_code from m_currencies`, labelField: 'cur_code', valueField: 'id' } },
                 { header: 'Remarks', key: 'remarks', type: 'text' }
-=======
-
-                {
-                    header: 'Route Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Sequence No',
-                    key: 'sequence_no',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Vehicle Class',
-                    key: 'vehicle_class',
-                    type: 'number'
-                },
-
-                {
-                    header: 'License',
-                    key: 'license_id',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'Licenses',
-                        query: `select id, name from m_license`,
-                        labelField: 'name',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Paid From Account',
-                    key: 'paidfrom_account',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Quantity',
-                    key: 'quantity',
-                    type: 'number'
-                },
-
-                {
-                    header: 'License Cost',
-                    key: 'license_cost',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Validity',
-                    key: 'validity',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Currency',
-                    key: 'currency',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'LicenseCurrencies',
-                        query: `select id, code from m_currency`,
-                        labelField: 'code',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Remarks',
-                    key: 'remarks',
-                    type: 'text'
-                }
-
->>>>>>> master
             ]
         },
 
@@ -455,7 +248,6 @@ module.exports = {
             tableName: 'm_route_stops',
             parentKey: 'parent_id',
             columns: [
-<<<<<<< HEAD
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
                 { header: 'Sequence No', key: 'sequence_no', type: 'number' },
                 { header: 'Location', key: 'location_id', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'Origins', query: `select id, name from m_fm_location`, labelField: 'name', valueField: 'id' } },
@@ -464,64 +256,6 @@ module.exports = {
                 { header: 'Min Stop Hours', key: 'min_stop_hrs', type: 'number' },
                 { header: 'Max Stop Hours', key: 'max_stop_hrs', type: 'number' },
                 { header: 'Days To Reach', key: 'days_to_reach', type: 'number' }
-=======
-
-                {
-                    header: 'Route Code',
-                    key: 'parent_code',
-                    type: 'reference'
-                },
-
-                {
-                    header: 'Sequence No',
-                    key: 'sequence_no',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Location',
-                    key: 'location_id',
-                    type: 'dropdown',
-
-                    dropdown: {
-                        sheetName: 'StopLocations',
-                        query: `select id, name from m_fm_location`,
-                        labelField: 'name',
-                        valueField: 'id'
-                    }
-                },
-
-                {
-                    header: 'Stop Type',
-                    key: 'stop_type_id',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Distance',
-                    key: 'distance',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Min Stop Hours',
-                    key: 'min_stop_hrs',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Max Stop Hours',
-                    key: 'max_stop_hrs',
-                    type: 'number'
-                },
-
-                {
-                    header: 'Days To Reach',
-                    key: 'days_to_reach',
-                    type: 'number'
-                }
-
->>>>>>> master
             ]
         }
 

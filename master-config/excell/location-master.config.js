@@ -151,7 +151,6 @@ module.exports = {
                 {
                     header: 'Title',
                     key: 'title',
-<<<<<<< HEAD
                     type: 'dropdown',
                     data_type: 'text',
                     dropdown: {
@@ -165,9 +164,6 @@ module.exports = {
                             { id: 'Mx', name: 'Mx' }
                         ]
                     }
-=======
-                    type: 'text'
->>>>>>> master
                 },
                 { header: 'Name', key: 'name', type: 'text' },
                 { header: 'Position', key: 'position', type: 'text' },
