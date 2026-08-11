@@ -26,14 +26,10 @@ const authenticatedRoutes = require('./routes/authenticated');
 const emailRoutes = require('./routes/email');
 // utility routes
 const excelRoutes = require('./routes/excel.routes');
-<<<<<<< HEAD
 // sagaroutes powerBi
 const sagaRoutes = require('./routes/sanaga.routes');
 // subcon routes
 const subconRoutes = require('./module/subcon/routes');
-=======
-const sagaRoutes = require('./routes/sanaga.routes');
->>>>>>> master
 
 
 // Public routes (no authentication required)
@@ -48,7 +44,6 @@ app.use('/api/email', emailRoutes);
 //import export excell routes
 app.use('/api/ie', excelRoutes);
 
-<<<<<<< HEAD
 //saga routes
 app.use('/api/saga', sagaRoutes);
 
@@ -57,10 +52,7 @@ app.use('/api/subcon', subconRoutes);
 
 // Swagger docs
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
-=======
-//sananga routes
-app.use('/api/saga', sagaRoutes)
->>>>>>> master
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
