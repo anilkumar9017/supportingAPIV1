@@ -349,6 +349,8 @@ module.exports = {
   getConnection,
   executeQuery,
   getDatabaseConfig,
-  closeAllConnections
+  closeAllConnections,
+  buildInsertQuery,
+  executeTransactionQuery
 };
 
