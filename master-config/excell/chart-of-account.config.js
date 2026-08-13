@@ -28,7 +28,8 @@ module.exports = {
         {
             header: 'Account Type',
             key: 'account_type',
-            type: 'text'
+            type: 'text',
+            dropdown: { sheetName: 'AccountTypes', labelField: 'name', valueField: 'id', options: [{id:"S",name: 'Sales'},{id:"E",name: 'Expenditure'},{id:"O",name: 'Others'}] }
         },
 
         {
@@ -216,6 +217,12 @@ module.exports = {
             key: 'is_active',
             type: 'checkbox',
             values: ['Y', 'N']
+        },
+        {
+            header: 'Log Inst',
+            key: 'log_inst',
+            type: 'number',
+            width: 15 
         }
 
     ]

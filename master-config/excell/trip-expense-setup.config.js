@@ -205,8 +205,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currencies`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currencies`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
