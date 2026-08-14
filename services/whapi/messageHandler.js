@@ -22,11 +22,12 @@ async function handleMessage(message) {
 
     // 1. Handle image upload
     if (type === "image" || type == "document") {
+      console.log("Image found:",type,whapi);
       return handleImage(message, whapi);
     }
     const state = await session.getState(userId);
     
-    //console.log("State",whapi_token,chat_id,state);
+    console.log("State",whapi_token,chat_id,state);
     if (!state || (state && Object.keys(state).length == 0)) {
       return whapi.sendText(
         chat_id,
@@ -63,23 +64,26 @@ async function handleMessage(message) {
 // ============================================================
 async function handleImage(message, whapi) {
   const { chat_id, type, from: userId, userRole } = message;
-  
+ 
   const media = message.image || message.document;
   if (type !== "image" && type !== "document") {
    
     return; // ignore other types
   }
+  console.log("Image Media ---",media);
   if (!media) {
     await whapi.sendText(chat_id, "❌ Unsupported file.");
     return;
   }
 
+  const mimeType = media.mime_type || "image/jpeg";
+  const extension = mimeTypes.extension(mimeType) || "jpg";
   const mime = media.mime_type || "";
   const fileName = media.file_name || `image_${Date.now()}.${extension}`;
-  const mimeType = media.mime_type || "image/jpeg";
+ 
 
-  const extension = mimeTypes.extension(mimeType) || "jpg";
-
+  
+  console.log("Image Upload 1",media);
   // ============================================================
   // DOWNLOAD MEDIA BUFFER
   // ============================================================
@@ -89,6 +93,7 @@ async function handleImage(message, whapi) {
     await whapi.sendText(chat_id, "❌ Failed to fetch file.");
     return;
   }
+
   // ============================================================
   // CREATE src/uploads DIRECTORY
   // ============================================================
@@ -97,7 +102,7 @@ async function handleImage(message, whapi) {
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
-
+ console.log("Image Upload 2");
   // ============================================================
   // SAVE FILE
   // ============================================================

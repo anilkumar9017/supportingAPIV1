@@ -348,9 +348,9 @@ module.exports = {
   createMSSQLPool,
   getConnection,
   executeQuery,
+  executeTransactionQuery,
   getDatabaseConfig,
   closeAllConnections,
-  buildInsertQuery,
-  executeTransactionQuery
+  buildInsertQuery
 };
 

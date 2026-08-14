@@ -32,6 +32,7 @@ async function processWebhook(payload, context) {
         const query =`select * FROM m_driver where driver_phone1='${message.from}' OR driver_phone2='${message.from}'`;
        
         const result = await db.executeQuery(databaseName, query, {  }, true);
+        console.log("Check Phone",result);
         if(result[0]){
             message.userRole = "DRIVER";
             message.driver_id = result[0].id;

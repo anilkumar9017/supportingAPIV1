@@ -8,7 +8,7 @@ async function resolveTenant(whatsappNumber) {
     const response = await axios.get(url);
 
     const data = response.data;
-
+    console.log("DomainData",data);
     if (!data || !data.data) {
       return null;
     }
