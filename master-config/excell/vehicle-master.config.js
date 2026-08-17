@@ -82,11 +82,36 @@ module.exports = {
       { header: 'Cube Capacity', key: 'cube_capacity', type: 'number', width: 20 },
       { header: 'Number of Axle', key: 'noofaxle', type: 'number', width: 20 },
       { header: 'Max Weight per Axle', key: 'max_weightcap_axle', type: 'number', width: 20 },
-      { header: 'Dimensions 1', key: 'dimension1', type: 'text', width: 20 },
-      { header: 'Dimensions 2', key: 'dimension2', type: 'text', width: 20 },
-      { header: 'Dimensions 3', key: 'dimension3', type: 'text', width: 20 },
-      { header: 'Dimensions 4', key: 'dimension4', type: 'text', width: 20 },
-      { header: 'Dimensions 5', key: 'dimension5', type: 'text', width: 20 },
+      { header: 'Dimensions 1', key: 'dimension1', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Dimensions1',
+        query: 'select id, name from m_costcenters where dimension_id = 1',
+        labelField: 'name',
+        valueField: 'id'
+      }},
+      { header: 'Dimensions 2', key: 'dimension2', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Dimensions2',
+        query: 'select id, name from m_costcenters where dimension_id = 2',
+        labelField: 'name',
+        valueField: 'id'
+      } },
+      { header: 'Dimensions 3', key: 'dimension3', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Dimensions3',
+        query: 'select id, name from m_costcenters where dimension_id = 3',
+        labelField: 'name',
+        valueField: 'id'
+      } },
+      { header: 'Dimensions 4', key: 'dimension4', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Dimensions4',
+        query: 'select id, name from m_costcenters where dimension_id = 4',
+        labelField: 'name',
+        valueField: 'id'
+      } },
+      { header: 'Dimensions 5', key: 'dimension5', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
+        sheetName: 'Dimensions5',
+        query: 'select id, name from m_costcenters where dimension_id = 5',
+        labelField: 'name',
+        valueField: 'id'
+      } },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
       /* { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
             sheetName: 'VehicleClass',
