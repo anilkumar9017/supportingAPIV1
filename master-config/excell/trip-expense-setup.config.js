@@ -1,7 +1,7 @@
 module.exports = {
     menuCode: 'trip-expense-setup',
     sheetName: 'Trip Expenses',
-    tableName: 'm_trip_expense',
+    tableName: 'm_trip_expenses',
     primaryKey: 'id',
     uniqueKey: 'expense_name',
 

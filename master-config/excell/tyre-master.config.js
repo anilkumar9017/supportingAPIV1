@@ -1,7 +1,7 @@
 module.exports = {
     menuCode: 'tyre-master',
     sheetName: 'Tyres',
-    tableName: 'm_tyre',
+    tableName: 'd_tm_tyremaster',
     primaryKey: 'id',
     uniqueKey: 'part_serial_no',
   
@@ -89,100 +89,125 @@ module.exports = {
       { header: 'Remarks', key: 'remark', type: 'text', width: 40 },
       { header: 'Scrap Remarks', key: 'scrap_remarks', type: 'text', width: 40 },
       { header: 'Projected KM', key: 'projected_km', type: 'number', width: 15 },
+      { header: 'Part ID', key: 'part_id', type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'Items',
+                query: `select id, item_code from m_item`,
+                labelField: 'item_code',
+                valueField: 'id'
+      } },
       { header: 'Part Code', key: 'part_code', type: 'text', width: 20 },
       { header: 'Part Name', key: 'part_name', type: 'text', width: 30 },
       { header: 'Lot No', key: 'lot_no', type: 'text', width: 20 },
-      { header: 'Retread Code', key: 'retread_code', type: 'text', width: 20 },
-      { header: 'Retread Name', key: 'retread_name', type: 'text', width: 30 },
-      { header: 'Retread Supplier', key: 'retread_supplier_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
+      { header: 'Retread Code', key: 'retread_code', type: 'text', width: 20,
+        type: 'dropdown', dataType: 'number', width: 30, dropdown: {
           sheetName: 'Suppliers',
-          query: "select id, card_code from m_customer where card_type = 'S'",
+          query: "select card_code, card_code from m_customer where card_type = 'S'",
+          labelField: 'card_code',
+          valueField: 'card_code'
+        }
+      },
+      { header: 'Retread Name', key: 'retread_name', type: 'text', width: 30 },
+      { header: 'Sold Amount', key: 'sold_amount', type: 'number', width: 15 },
+      { header: 'Incoming Receipt No', key: 'incoming_receipt_no', type: 'text', width: 20 },
+      { header: 'Approved By Name', key: 'approved_by_name', type: 'text', width: 30 },
+      { header: 'Expected CPK', key: 'expected_cpk', type: 'number', width: 15 },
+      { header: 'Actual CPK', key: 'actual_cpk', type: 'number', width: 15 },
+      { header: 'Used Life', key: 'used_life', type: 'text', width: 20 },
+      { header: 'Remaining Life', key: 'remaing_life', type: 'text', width: 20 },
+      { header: 'Tyre Status Movement', key: 'tyre_status_movement', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+          sheetName: 'Tyre Movement Status',
+          query: 'select id, name from m_tyre_status',
+          labelField: 'name',
+          valueField: 'id'
+        }
+      },
+      { header: 'Original Month', key: 'original_month', type: 'text', width: 20 },
+      { header: 'Current Month', key: 'current_month', type: 'text', width: 20 },
+      { header: 'Removed KM', key: 'removed_km', type: 'number', width: 15 },
+      { header: 'Remaining Cost', key: 'remaining_cost', type: 'number', width: 15 },
+      { header: 'Branch', key: 'branch', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
+          sheetName: 'Branch',
+          query: 'select id, name from m_branch',
+          labelField: 'name',
+          valueField: 'id'
+        }
+      },
+      { header: 'Scrap Warehouse', key: 'scrap_warehouse', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+          sheetName: 'Warehouses',
+          query: 'select id, name from m_warehouse',
+          labelField: 'name',
+          valueField: 'id'
+        }
+      },
+      { header: 'Retread Supplier', key: 'retread_supplier_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
+          sheetName: 'Customers',
+          query: "select id, card_code from m_customer where card_type = 'C'",
           labelField: 'card_code',
           valueField: 'id'
         }
       },
       { header: 'Retread Supplier Name', key: 'retread_supplier_name', type: 'text', width: 40 },
+      { header: 'Invoice No', key: 'invoice_no', type: 'text', width: 20 },
+      { header: 'ID', key: 'id', type: 'number', width: 10 },
+      { header: 'Log Instance', key: 'log_inst', type: 'number', width: 15 },
 
       // Child Arrays - Hierarchical Data
       {
-        header: 'Tyre History',
-        key: 'm_tyre_history',
+        header: 'Tyre Retread',
+        key: 'd_tm_tyremaster_retread',
         type: 'child_array',
-        tableName: 'm_tyre_history',
+        tableName: 'd_tm_tyremaster_retread',
         parentKey: 'parent_id',
         foreignKey: 'id',
-        sheetName: 'Tyre History',
+        sheetName: 'Tyre Retread',
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Vehicle', key: 'vehicle_id', type: 'dropdown', dataType: 'number', width: 25, dropdown: {
-              sheetName: 'Vehicles',
-              query: 'select id, code from m_vehicle',
-              labelField: 'code',
+          { header: 'Parent ID', key: 'parent_id', type: 'number', width: 12 },
+          { header: 'Job Type', key: 'job_type', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+              sheetName: 'Tyre Retread Job Type',
+              labelField: 'name',
+              valueField: 'id',
+              options:[{"id": 1, "name": "Retreading"},{"id": 2, "name": "Repair"}]
+            }
+          },
+          { header: 'Send Date', key: 'send_date', type: 'date', width: 15 },
+          { header: 'Vendor ID', key: 'venor_id', type: 'number', width: 15 },
+          { header: 'Vendor', key: 'vendor', type: 'text', width: 20 },
+          { header: 'Vendor Name', key: 'vendor_name', type: 'text', width: 30 },
+          { header: 'Retread ID', key: 'retread_id', type: 'number', width: 15 },
+          { header: 'Retread Code', key: 'retread_code', type: 'text', width: 20 },
+          { header: 'Retread Name', key: 'retread_name', type: 'text', width: 30 },
+          { header: 'Order No', key: 'order_no', type: 'text', width: 20 },
+          { header: 'Remark', key: 'remark', type: 'text', width: 30 },
+          { header: 'Date Received', key: 'date_received', type: 'date', width: 15 },
+          { header: 'After Retread ID', key: 'after_retread_id', type: 'number', width: 15 },
+          { header: 'After Retread Code', key: 'after_retread_code', type: 'text', width: 20 },
+          { header: 'After Retread Name', key: 'after_retread_name', type: 'text', width: 30 },
+          { header: 'Currency', key: 'currency', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+              sheetName: 'Currencies',
+              query: 'select id, cur_code from m_currencies',
+              labelField: 'cur_code',
               valueField: 'id'
             }
           },
-          { header: 'Position Code', key: 'position_code', type: 'text', width: 20 },
-          { header: 'Axle Number', key: 'axle_number', type: 'text', width: 15 },
-          { header: 'Fitted Date', key: 'fitted_date', type: 'date', width: 15 },
-          { header: 'Removed Date', key: 'removed_date', type: 'date', width: 15 },
-          { header: 'Opening Tread Depth', key: 'opening_tread_depth', type: 'number', width: 20 },
-          { header: 'Closing Tread Depth', key: 'closing_tread_depth', type: 'number', width: 20 },
-          { header: 'Opening KM', key: 'opening_km', type: 'number', width: 15 },
-          { header: 'Closing KM', key: 'closing_km', type: 'number', width: 15 },
-          { header: 'Total KM', key: 'total_km', type: 'number', width: 15 },
-          { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
-        ]
-      },
-      {
-        header: 'Tyre Maintenance',
-        key: 'm_tyre_maintenance',
-        type: 'child_array',
-        tableName: 'm_tyre_maintenance',
-        parentKey: 'parent_id',
-        foreignKey: 'id',
-        sheetName: 'Tyre Maintenance',
-        columns: [
-          { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Maintenance Type', key: 'maintenance_type', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
-              sheetName: 'Maintenance Types',
-              query: 'select id, name from m_maintenance_type',
+          { header: 'Service Cost', key: 'service_cost', type: 'number', width: 15 },
+          { header: 'Invoice No', key: 'invoice_no', type: 'text', width: 20 },
+          { header: 'Status', key: 'status', type: 'dropdown', dataType: 'number', width: 15, dropdown: {
+              sheetName: 'Retread Status',
+              options: [{"id": "1", "name": "Retreaded"},{"id": "2", "name": "Repaired"},{"id": "3", "name": "Rejected"}],
               labelField: 'name',
               valueField: 'id'
             }
           },
-          { header: 'Maintenance Date', key: 'maintenance_date', type: 'date', width: 15 },
-          { header: 'Tread Depth Before', key: 'tread_depth_before', type: 'number', width: 20 },
-          { header: 'Tread Depth After', key: 'tread_depth_after', type: 'number', width: 20 },
-          { header: 'Cost', key: 'cost', type: 'number', width: 15 },
-          { header: 'Service Provider', key: 'service_provider', type: 'text', width: 30 },
-          { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
-        ]
-      },
-      {
-        header: 'Tyre Inspection',
-        key: 'm_tyre_inspection',
-        type: 'child_array',
-        tableName: 'm_tyre_inspection',
-        parentKey: 'parent_id',
-        foreignKey: 'id',
-        sheetName: 'Tyre Inspection',
-        columns: [
-          { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Inspection Date', key: 'inspection_date', type: 'date', width: 15 },
-          { header: 'Tread Depth', key: 'tread_depth', type: 'number', width: 15 },
-          { header: 'Condition', key: 'condition', type: 'text', width: 20 },
-          { header: 'Inspection Result', key: 'inspection_result', type: 'dropdown', dataType: 'text', width: 15, dropdown: {
-              sheetName: 'Inspection Results',
-              labelField: 'name',
-              valueField: 'code',
-              options: [
-                { name: 'Pass', code: 'PASS' },
-                { name: 'Fail', code: 'FAIL' },
-                { name: 'Conditional', code: 'CONDITIONAL' }
-              ]
-            }
-          },
-          { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
+          { header: 'PO No', key: 'po_no', type: 'number', width: 15 },
+          { header: 'GD No', key: 'gd_no', type: 'number', width: 15 },
+          { header: 'PO Line', key: 'po_line', type: 'text', width: 20 },
+          { header: 'GRPO No', key: 'grpo_no', type: 'number', width: 15 },
+          { header: 'Retread Pattern', key: 'retread_pattern', type: 'text', width: 20 },
+          { header: 'Approved', key: 'approved', type: 'text', width: 15 },
+          { header: 'Approved By', key: 'approved_by', type: 'number', width: 15 }
         ]
       },
       {
@@ -195,7 +220,17 @@ module.exports = {
         sheetName: 'Tyre Movement',
         columns: [
           { header: 'ID', key: 'id', type: 'number', width: 10 },
-          { header: 'Part ID', key: 'part_id', type: 'number', width: 12 },
+          { header: 'Parent ID', key: 'parent_id', type: 'number', width: 12 },
+          { header: 'Part ID', key: 'part_id', width: 12,
+            type: 'dropdown',
+            data_type: 'number',
+            dropdown: {
+                sheetName: 'Items',
+                query: `select id, item_code from m_item`,
+                labelField: 'item_code',
+                valueField: 'id'
+            }
+          },
           { header: 'Part Code', key: 'part_code', type: 'text', width: 20 },
           { header: 'Part Name', key: 'part_name', type: 'text', width: 30 },
           { header: 'Vehicle', key: 'vehicle_id', type: 'dropdown', dataType: 'number', width: 25, dropdown: {
@@ -205,10 +240,14 @@ module.exports = {
               valueField: 'id'
             }
           },
-          { header: 'Fitted As', key: 'fitted_as', type: 'text', width: 15 },
           { header: 'Vehicle Name', key: 'vehicle_name', type: 'text', width: 30 },
-          { header: 'Position Code', key: 'position_code', type: 'number', width: 15 },
-          { header: 'Axle Number', key: 'axle_number', type: 'text', width: 15 },
+          { header: 'Fitted As', key: 'fitted_as', type: 'text', width: 15 },
+          { header: 'Position Code', key: 'position_code', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+              sheetName: 'Position Type',
+              query: 'select id, name from m_position_type',
+              labelField: 'name',
+              valueField: 'id'
+          }},
           { header: 'Axle Config', key: 'axle_config', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
               sheetName: 'Axle Config',
               query: 'select id, name from m_axle_conf',
@@ -216,6 +255,7 @@ module.exports = {
               valueField: 'id'
             }
           },
+          { header: 'Axle Number', key: 'axle_number', type: 'text', width: 15 },
           { header: 'Fitted On', key: 'fitted_on', type: 'date', width: 15 },
           { header: 'Fitment Tread Depth', key: 'fitment_td', type: 'number', width: 18 },
           { header: 'Fitment KM', key: 'fitment_km', type: 'number', width: 15 },
@@ -233,7 +273,16 @@ module.exports = {
           { header: 'GR Approved By', key: 'gr_approved_by', type: 'text', width: 20 },
           { header: 'GI Approved By', key: 'gi_approved_by', type: 'text', width: 20 },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-          { header: 'Waiting Warehouse', key: 'waiting_warehouse', type: 'text', width: 20 },
+          { header: 'Waiting Warehouse', key: 'waiting_warehouse', width: 20,
+            type: 'dropdown',
+            data_type: 'text',
+            dropdown: {
+                sheetName: 'Warehouses',
+                query: `select id, name from m_warehouse`,
+                labelField: 'name',
+                valueField: 'id'
+            }
+           },
           { header: 'Scrap Reason', key: 'scrap_reason', type: 'number', width: 15 },
           { header: 'Action', key: 'action', type: 'text', dataType: 'text', width: 20, dropdown: {
             sheetName: 'PlyRatings',
@@ -242,6 +291,25 @@ module.exports = {
             options:[{"id": "1", "name": "Active"},{"id": "2", "name": "Remove for retreading"},{"id": "3", "name": "Remove for repair"},{"id": "4", "name": "Others"}, {"id": "5", "name": "Remove for Scrap/Diprosal"}]
             } 
         }
+        ]
+      },
+      {
+        header: 'Tyre Cost Distribution',
+        key: 'd_tm_tyremaster_cost_distrib',
+        type: 'child_array',
+        tableName: 'd_tm_tyremaster_cost_distrib',
+        parentKey: 'parent_id',
+        foreignKey: 'id',
+        sheetName: 'Tyre Cost Distribution',
+        columns: [
+          { header: 'ID', key: 'id', type: 'number', width: 10 },
+          { header: 'Parent ID', key: 'parent_id', type: 'number', width: 12 },
+          { header: 'Doc Date', key: 'doc_date', type: 'date', width: 15 },
+          { header: 'Part Name', key: 'part_name', type: 'text', width: 30 },
+          { header: 'JE No', key: 'je_no', type: 'number', width: 15 },
+          { header: 'Issue Date', key: 'issue_date', type: 'date', width: 15 },
+          { header: 'End Date', key: 'end_date', type: 'date', width: 15 },
+          { header: 'Cost', key: 'cost', type: 'number', width: 15 }
         ]
       }
     ]
