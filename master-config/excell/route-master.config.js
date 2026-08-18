@@ -46,6 +46,7 @@ module.exports = {
                 valueField: 'id'
             }
         },
+        {header: 'Origin Name',  key: 'origin_name',  type: 'text'},
 
         {
             header: 'Destination',
@@ -59,6 +60,7 @@ module.exports = {
                 valueField: 'id'
             }
         },
+        {header: 'Destination Name',  key: 'destination_name',  type: 'text'},
 
         {
             header: 'Item',
@@ -93,12 +95,6 @@ module.exports = {
         },
 
         {
-            header: 'Revenue Account',
-            key: 'revenue_account',
-            type: 'text'
-        },
-
-        {
             header: 'Account',
             key: 'account_id',
             type: 'dropdown',
@@ -111,6 +107,16 @@ module.exports = {
             }
         },
 
+        {
+            header: 'Revenue Account',
+            key: 'revenue_account',
+            type: 'text'
+        },
+        {
+            header: 'Account Name',
+            key: 'account_name',
+            type: 'text'
+        },
         {
             header: 'Return Load Bonus',
             key: 'return_load_bonus',

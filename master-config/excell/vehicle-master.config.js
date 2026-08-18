@@ -37,6 +37,13 @@ module.exports = {
         valueField: 'id'
       } },
       { header: 'Serial No', key: 'serialno', type: 'text', width: 20 },
+      { header: 'Driver Id', key: 'driverid', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+        sheetName: 'DriverMaster',
+        query: 'select id, driver_name from m_driver',
+        labelField: 'driver_name',
+        valueField: 'id'
+      } },
+      { header: 'Driver Name', key: 'driver_name', type: 'text', width: 20},
       { header: 'Owner', key: 'owner_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
           sheetName: 'Owners',
           query: "select id, card_code from m_customer where card_type = 'S'",
@@ -44,6 +51,8 @@ module.exports = {
           valueField: 'id'
         }
       },
+      { header: 'Owner Code', key: 'owner_code', type: 'text', width: 20},
+      { header: 'Owner Name', key: 'owner_name', type: 'text', width: 20},
       { header: 'Manufacturer', key: 'manufacturer', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
           sheetName: 'Manufacturers',
           query: 'select id, name from m_manufacture',
@@ -82,6 +91,15 @@ module.exports = {
       { header: 'Cube Capacity', key: 'cube_capacity', type: 'number', width: 20 },
       { header: 'Number of Axle', key: 'noofaxle', type: 'number', width: 20 },
       { header: 'Max Weight per Axle', key: 'max_weightcap_axle', type: 'number', width: 20 },
+      { header: 'Customer Id', key: 'customer_id', type: 'dropdown', dataType: 'number', width: 30, dropdown: {
+          sheetName: 'Customers',
+          query: "select id, card_code from m_customer where card_type = 'C'",
+          labelField: 'card_code',
+          valueField: 'id'
+        }
+      },
+      { header: 'Customer Code', key: 'customer_code', type: 'text', width: 20},
+      { header: 'Customer Name', key: 'customer_name', type: 'text', width: 20},
       { header: 'Dimensions 1', key: 'dimension1', type: 'dropdown', dataType: 'text', width: 20, dropdown: {
         sheetName: 'Dimensions1',
         query: 'select id, name from m_costcenters where dimension_id = 1',
@@ -313,6 +331,21 @@ module.exports = {
               valueField: 'id'
             }
           },
+          { header: 'Item Id', key: 'itemid', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+            sheetName: 'Items',
+                query: `select id, item_code from m_item`,
+                labelField: 'item_code',
+                valueField: 'id'
+          } },
+          { header: 'Item Name', key: 'item_name', type: 'text', width: 20 },
+          { header: 'Driver Id', key: 'driverid', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+            sheetName: 'DriverMaster',
+            query: 'select id, driver_name from m_driver',
+            labelField: 'driver_name',
+            valueField: 'id'
+          } },
+          { header: 'Driver Name', key: 'driver_name', type: 'text', width: 20 },
+          { header: 'Given Date', key: 'given_date', type: 'date', width: 15 },
           { header: 'Quantity', key: 'qty', type: 'number', width: 10 },
           { header: 'Remarks', key: 'remarks', type: 'text', width: 30 }
         ]
