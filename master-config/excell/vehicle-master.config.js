@@ -113,12 +113,12 @@ module.exports = {
         valueField: 'id'
       } },
       { header: 'Remarks', key: 'remarks', type: 'text', width: 30 },
-      /* { header: 'Class', key: '_class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
+      { header: 'Class', key: 'class', type: 'dropdown', dataType: 'number', width: 20, dropdown: {
             sheetName: 'VehicleClass',
             query: 'select id, name from m_fm_vehicle_class',
             labelField: 'name',
             valueField: 'id'
-        }}, */
+      }},
       { header: 'Model No', key: 'modelno', type: 'text', width: 20 },
       { header: 'Model Name', key: 'modelname', type: 'text', width: 20 },
       { header: 'Vehicle Series', key: 'vehicleseries', type: 'number', width: 20 },
