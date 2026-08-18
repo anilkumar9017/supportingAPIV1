@@ -3,7 +3,7 @@
  */
 
 class DropdownCache {
-    constructor(ttl = 3600000) { // 1 hour default TTL
+    constructor(ttl = 360000) { // 1 hour default TTL
         this.cache = new Map();
         this.ttl = ttl;
     }
