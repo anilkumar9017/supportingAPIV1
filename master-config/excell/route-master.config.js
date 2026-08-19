@@ -87,8 +87,8 @@ module.exports = {
             type: 'dropdown',
 
             dropdown: {
-                sheetName: 'Currencies',
-                query: `select id, cur_code from m_currency`,
+                sheetName: 'Currencies', 
+                query: `select id, cur_code from m_currencies`,
                 labelField: 'cur_code',
                 valueField: 'id'
             }
@@ -101,8 +101,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Accounts',
-                query: `select id, account_name from m_account`,
-                labelField: 'account_name',
+                query: `select id, account_code from m_chartofaccounts where is_postable='Y'`,
+                labelField: 'account_code',
                 valueField: 'id'
             }
         },
