@@ -207,7 +207,7 @@ module.exports = {
             parentKey: 'parent_id',
             columns: [
                 { header: 'ID', key: 'id', type: 'number', width: 10 },
-                { header: 'Vehicle Type', key: 'vehicle_type', type: 'dropdown', dataType: 'number', width: 15, dropdown: { sheetName: 'Vehicle Types', query: 'select id, name from m_vehicle_type', labelField: 'name', valueField: 'id' } },
+                { header: 'Vehicle Class', key: 'vehicle_type', type: 'dropdown', dataType: 'number', width: 15, dropdown: { sheetName: 'VehicleClass', query: 'select id, name from m_fm_vehicle_class', labelField: 'name', valueField: 'id' } },
                 { header: 'Commodity', key: 'commodity', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'Commodity', query: `select id, name from m_commodity_type`, labelField: 'name', valueField: 'id' } },
                 { header: 'Border', key: 'border', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'Origins', query: `select id, name from m_fm_location`, labelField: 'name', valueField: 'id' } },
                 { header: 'Expense', key: 'expense_id', type: 'dropdown', data_type: 'number', dropdown: { sheetName: 'Expenses', query: `select id, expense_name from m_trip_expenses`, labelField: 'expense_name', valueField: 'id' } },
