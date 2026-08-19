@@ -69,8 +69,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Items',
-                query: `select id, itemcode from m_item`,
-                labelField: 'itemcode',
+                query: `select id, item_code from m_item`,
+                labelField: 'item_code',
                 valueField: 'id'
             }
         },
@@ -88,8 +88,8 @@ module.exports = {
 
             dropdown: {
                 sheetName: 'Currencies',
-                query: `select id, code from m_currency`,
-                labelField: 'code',
+                query: `select id, cur_code from m_currency`,
+                labelField: 'cur_code',
                 valueField: 'id'
             }
         },
