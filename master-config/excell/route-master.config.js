@@ -74,6 +74,12 @@ module.exports = {
                 valueField: 'id'
             }
         },
+ 
+        {
+            header: 'Item Code',
+            key: 'itemcode',
+            type: 'text'
+        },
 
         {
             header: 'Trip Rate',
