@@ -1,4 +1,5 @@
 const db = require('../../../config/database');
+const subconCommitService = require('./subconCommitService');
 
 async function getShipments(databaseName, subcontractorId) {
   const query = `
@@ -170,6 +171,7 @@ async function uploadPODDocuments(databaseName, { shipmentId, podFile, deliveryS
     false
   );
 
+  await subconCommitService.commit(databaseName, 'subcon.shipment_orders', 'U', shipmentId);
   return { success: true, message: 'Documents uploaded and sent.' };
 }
 

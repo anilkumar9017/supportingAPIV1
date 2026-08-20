@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../../../config/database');
+const subconCommitService = require('./subconCommitService');
 
 const SUBCON_JWT_SECRET = process.env.SUBCON_JWT_SECRET || process.env.JWT_SECRET || 'super-secret-logistics-key';
 
@@ -191,16 +192,19 @@ async function updateMilestones(databaseName, updates, userId) {
       },
       false
     );
+
+    await subconCommitService.commit(databaseName, 'subcon.shipment_orders', 'U', update.shipmentId);
   }
 
   return { success: true, message: 'Tracking milestones updated successfully.' };
 }
 
 async function requestAdvance(databaseName, { shipmentId, type, amount, amountSys, remarks }) {
-  await db.executeQuery(
+  const result = await db.executeQuery(
     databaseName,
     `
       INSERT INTO [subcon].[advance_requests] (shipment_id, advance_type, amount_requested_lc, amount_requested_sys, status, requested_at, remarks)
+      OUTPUT INSERTED.id
       VALUES (@shipmentId, @type, @amountLc, @amountSys, 'pending', GETUTCDATE(), @remarks)
     `,
     {
@@ -213,6 +217,7 @@ async function requestAdvance(databaseName, { shipmentId, type, amount, amountSy
     false
   );
 
+  await subconCommitService.commit(databaseName, 'subcon.advance_requests', 'C', result[0]?.id);
   return { success: true, message: 'Advance request queued for SAP B1.' };
 }
 
@@ -250,8 +255,9 @@ async function getActionCenter(databaseName, subcontractorId) {
 
   const pendingAdvanceRequestsQuery = `
     SELECT COUNT(1) AS count
-    FROM [subcon].[advance_requests]
-    WHERE subcontractor_id = @subId AND status = 'pending'
+    FROM [subcon].[advance_requests] ar
+    INNER JOIN [subcon].[shipment_orders] so ON so.id = ar.shipment_id
+    WHERE so.subcontractor_id = @subId AND ar.status = 'pending'
   `;
 
   const missingDocumentsQuery = `
@@ -336,17 +342,18 @@ async function getDashboardOverview(databaseName, subcontractorId) {
 
   const advanceRequestsQuery = `
     SELECT TOP 20
-      id,
-      shipment_id,
-      advance_type,
-      amount_requested_lc,
-      amount_requested_sys,
-      status,
-      requested_at,
-      remarks
-    FROM [subcon].[advance_requests]
-    WHERE subcontractor_id = @subId
-    ORDER BY requested_at DESC
+      ar.id,
+      ar.shipment_id,
+      ar.advance_type,
+      ar.amount_requested_lc,
+      ar.amount_requested_sys,
+      ar.status,
+      ar.requested_at,
+      ar.remarks
+    FROM [subcon].[advance_requests] ar
+    INNER JOIN [subcon].[shipment_orders] so ON so.id = ar.shipment_id
+    WHERE so.subcontractor_id = @subId
+    ORDER BY ar.requested_at DESC
   `;
 
   const financialRowsQuery = `

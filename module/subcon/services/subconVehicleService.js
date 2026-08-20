@@ -1,4 +1,5 @@
 const db = require('../../../config/database');
+const subconCommitService = require('./subconCommitService');
 
 async function getVehicles(databaseName, subcontractorId) {
   const query = `
@@ -30,11 +31,12 @@ async function createVehicle(databaseName, payload) {
   const query = `
     INSERT INTO [subcon].[vehicles]
       (subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes, sap_equip_code, dcc_ng_status, insurance_expiry_date, createdate, updatedate, createdby, updatedby, log_inst)
+    OUTPUT INSERTED.id
     VALUES
       (@subcontractor_id, @vehicle_reg_no, @asset_type, @max_payload_tonnes, @sap_equip_code, @dcc_ng_status, @insurance_expiry_date, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst)
   `;
 
-  await db.executeQuery(databaseName, query, {
+  const result = await db.executeQuery(databaseName, query, {
     subcontractor_id: payload.subcontractor_id,
     vehicle_reg_no: payload.vehicle_reg_no,
     asset_type: payload.asset_type,
@@ -47,6 +49,7 @@ async function createVehicle(databaseName, payload) {
     log_inst: payload.log_inst || 1
   }, false);
 
+  await subconCommitService.commit(databaseName, 'subcon.vehicles', 'C', result[0]?.id);
   return { success: true, message: 'Vehicle created successfully.' };
 }
 
@@ -75,6 +78,7 @@ async function updateVehicle(databaseName, vehicleId, payload, updatedBy, subcon
   params.subId = subcontractorId;
 
   await db.executeQuery(databaseName, query, params, false);
+  await subconCommitService.commit(databaseName, 'subcon.vehicles', 'U', vehicleId);
   return { success: true, message: 'Vehicle updated successfully.' };
 }
 
