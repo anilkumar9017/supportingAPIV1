@@ -178,6 +178,79 @@ router.put('/ng-users/:id', authenticateToken, subconUserController.updateUser);
  */
 router.get('/ng-subcontractors', authenticateToken, subconSubcontractorController.listSubcontractors);
 
+
+/**
+ * @swagger
+ * /api/subcon/ng-subcontractors/{id}:
+ *   get:
+ *     summary: Get subcontractor by id
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Subcontractor details
+ */
+router.get('/ng-subcontractors/:id', authenticateToken, subconSubcontractorController.getSubcontractorById);
+
+/**
+ * @swagger
+ * /api/subcon/ng-subcontractors:
+ *   post:
+ *     summary: Create a new subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sap_card_code:
+ *                 type: string
+ *               company_name:
+ *                 type: string
+ *               email_address:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
+ *               is_active:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Subcontractor created
+ */
+router.post('/ng-subcontractors', authenticateToken, validateSubcontractorCreate, subconSubcontractorController.createSubcontractor);
+
+/**
+ * @swagger
+ * /api/subcon/ng-subcontractors/{id}:
+ *   put:
+ *     summary: Update a subcontractor
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Subcontractor updated
+ */
+router.put('/ng-subcontractors/:id', authenticateToken, validateSubcontractorUpdate, subconSubcontractorController.updateSubcontractor);
+
+
 router.use(authenticateSubconToken);
 
 /**
