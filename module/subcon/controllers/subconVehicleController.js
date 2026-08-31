@@ -33,6 +33,9 @@ async function createVehicle(req, res) {
       sap_equip_code: payload.sap_equip_code,
       dcc_ng_status: payload.dcc_ng_status || 'pending',
       insurance_expiry_date: payload.insurance_expiry_date || null,
+      available_date: payload.available_date || null,
+      current_location: payload.current_location || null,
+      container_size: payload.container_size || null,
       createdby: req.user?.id || null,
       updatedby: req.user?.id || null,
       log_inst: payload.log_inst || 1
