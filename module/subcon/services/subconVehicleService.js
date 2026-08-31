@@ -4,7 +4,7 @@ const subconCommitService = require('./subconCommitService');
 async function getVehicles(databaseName, subcontractorId) {
   const query = `
     SELECT id, subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes,
-           sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, container_size, createdate, updatedate,
+           sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, route_location, container_size, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[vehicles]
     WHERE subcontractor_id = @subId
@@ -17,7 +17,7 @@ async function getVehicles(databaseName, subcontractorId) {
 async function getVehicleById(databaseName, vehicleId) {
   const query = `
     SELECT id, subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes,
-           sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, container_size, createdate, updatedate,
+           sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, route_location, container_size, createdate, updatedate,
            createdby, updatedby, log_inst
     FROM [subcon].[vehicles]
     WHERE id = @id
@@ -30,10 +30,10 @@ async function getVehicleById(databaseName, vehicleId) {
 async function createVehicle(databaseName, payload) {
   const query = `
     INSERT INTO [subcon].[vehicles]
-      (subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes, sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, container_size, createdate, updatedate, createdby, updatedby, log_inst)
+      (subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes, sap_equip_code, dcc_ng_status, insurance_expiry_date, available_date, current_location, route_location, container_size, createdate, updatedate, createdby, updatedby, log_inst)
     OUTPUT INSERTED.id
     VALUES
-      (@subcontractor_id, @vehicle_reg_no, @asset_type, @max_payload_tonnes, @sap_equip_code, @dcc_ng_status, @insurance_expiry_date, @available_date, @current_location, @container_size, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst)
+      (@subcontractor_id, @vehicle_reg_no, @asset_type, @max_payload_tonnes, @sap_equip_code, @dcc_ng_status, @insurance_expiry_date, @available_date, @current_location, @route_location, @container_size, GETUTCDATE(), GETUTCDATE(), @createdby, @updatedby, @log_inst)
   `;
 
   const result = await db.executeQuery(databaseName, query, {
@@ -46,6 +46,7 @@ async function createVehicle(databaseName, payload) {
     insurance_expiry_date: payload.insurance_expiry_date || null,
     available_date: payload.available_date || null,
     current_location: payload.current_location || null,
+    route_location: payload.route_location || null,
     container_size: payload.container_size || null,
     createdby: payload.createdby || null,
     updatedby: payload.updatedby || null,
@@ -57,7 +58,7 @@ async function createVehicle(databaseName, payload) {
 }
 
 async function updateVehicle(databaseName, vehicleId, payload, updatedBy, subcontractorId) {
-  const allowedFields = ['vehicle_reg_no', 'asset_type', 'max_payload_tonnes', 'sap_equip_code', 'dcc_ng_status', 'insurance_expiry_date', 'log_inst'];
+  const allowedFields = ['vehicle_reg_no', 'asset_type', 'max_payload_tonnes', 'sap_equip_code', 'dcc_ng_status', 'insurance_expiry_date', 'available_date', 'current_location', 'route_location', 'container_size', 'log_inst'];
   const updates = [];
   const params = { id: vehicleId, updatedby: updatedBy };
 

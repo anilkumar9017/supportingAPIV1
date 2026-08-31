@@ -35,6 +35,7 @@ async function createVehicle(req, res) {
       insurance_expiry_date: payload.insurance_expiry_date || null,
       available_date: payload.available_date || null,
       current_location: payload.current_location || null,
+      route_location: payload.route_location || null,
       container_size: payload.container_size || null,
       createdby: req.user?.id || null,
       updatedby: req.user?.id || null,
