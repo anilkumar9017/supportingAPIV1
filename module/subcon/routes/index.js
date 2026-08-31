@@ -1012,6 +1012,13 @@ router.delete('/subcontractors/:id', subconSubcontractorController.deleteSubcont
  *               insurance_expiry_date:
  *                 type: string
  *                 format: date
+ *               available_date:
+ *                 type: string
+ *                 format: date
+ *               current_location:
+ *                 type: string
+ *               container_size:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Vehicle created
@@ -1032,6 +1039,33 @@ router.post('/vehicles', validateVehicleCreate, subconVehicleController.createVe
  *         required: true
  *         schema:
  *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               vehicle_reg_no:
+ *                 type: string
+ *               asset_type:
+ *                 type: string
+ *               max_payload_tonnes:
+ *                 type: number
+ *               sap_equip_code:
+ *                 type: string
+ *               dcc_ng_status:
+ *                 type: string
+ *               insurance_expiry_date:
+ *                 type: string
+ *                 format: date
+ *               available_date:
+ *                 type: string
+ *                 format: date
+ *               current_location:
+ *                 type: string
+ *               container_size:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Vehicle updated
