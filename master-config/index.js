@@ -14,6 +14,7 @@ const employeeMasterConfig = require('./excell/employee-master.config');
 const costCenterConfig = require('./excell/cost-center-master.config');
 const tyreMasterConfig = require('./excell/tyre-master.config');
 const batteryMasterConfig = require('./excell/battery-master.config');
+const importStuffingConfig = require('./excell/import-stuffing.config');
 
 module.exports = {
     project: projectConfig,
@@ -31,5 +32,6 @@ module.exports = {
     maintenanceType: maintenanceTypeConfig,
     employeeMaster: employeeMasterConfig,
     costCenter: costCenterConfig,
-    batteryMaster: batteryMasterConfig
+    batteryMaster: batteryMasterConfig,
+    importStuffing: importStuffingConfig
 };

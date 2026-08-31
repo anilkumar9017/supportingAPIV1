@@ -13,7 +13,8 @@ async function listSubcontractors(req, res) {
 async function getSubcontractorById(req, res) {
   try {
     const { id } = req.params;
-    const result = await subconSubcontractorService.getSubcontractorById(req.databaseName, id);
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
+    const result = await subconSubcontractorService.getSubcontractorById(databaseName, id);
     if (!result) {
       return res.status(404).json({ success: false, message: 'Subcontractor not found' });
     }
@@ -25,6 +26,7 @@ async function getSubcontractorById(req, res) {
 
 async function createSubcontractor(req, res) {
   try {
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
     const payload = req.body || {};
     const data = {
       sap_card_code: payload.sap_card_code,
@@ -37,7 +39,7 @@ async function createSubcontractor(req, res) {
       log_inst: payload.log_inst || 1
     };
 
-    const result = await subconSubcontractorService.createSubcontractor(req.databaseName, data);
+    const result = await subconSubcontractorService.createSubcontractor(databaseName, data);
     res.status(201).json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to create subcontractor' });
@@ -48,8 +50,9 @@ async function updateSubcontractor(req, res) {
   try {
     const { id } = req.params;
     const payload = req.body || {};
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
     const result = await subconSubcontractorService.updateSubcontractor(
-      req.databaseName,
+      databaseName,
       id,
       payload,
       req.user?.id || null
@@ -63,7 +66,8 @@ async function updateSubcontractor(req, res) {
 async function deleteSubcontractor(req, res) {
   try {
     const { id } = req.params;
-    const result = await subconSubcontractorService.deleteSubcontractor(req.databaseName, id);
+    const databaseName = req.databaseName || req.user?.dbname || process.env.DEFAULT_DB_NAME || 'default';
+    const result = await subconSubcontractorService.deleteSubcontractor(databaseName, id);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message || 'Failed to delete subcontractor' });
