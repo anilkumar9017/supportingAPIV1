@@ -37,7 +37,7 @@ async function getAgreementByGuid(req, res) {
             data: result[0]
         });
       }else{
-        res.status(204).json({
+        return res.status(410).json({
             success: false,
             message: 'Agreement expired'
         });
