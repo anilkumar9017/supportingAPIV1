@@ -1,6 +1,11 @@
 const db = require('../config/database');
 const crypto = require('crypto');
 const moment = require('moment');
+const uploadFile = require('../tools/backplace');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const puppeteer = require('puppeteer');
 
 
 /**
@@ -62,6 +67,9 @@ async function getAgreementByGuid(req, res) {
  * Submit signed agreement (public access)
  */
 async function signAgreement(req, res) {
+  let generatedFilePath;
+  let browser;
+
   try {
     const { guid } = req.params;
     const { html_template, bp_remarks, status, log_inst } = req.body;
@@ -75,18 +83,81 @@ async function signAgreement(req, res) {
       });
     }
     
-    if (!html_template) {
+    if (!html_template && !req.file) {
       return res.status(400).json({
         success: false,
-        message: 'html_template is required'
+        message: 'Either html_template or a PDF file is required'
       });
     }
-    
+
+    let filePath;
+    let fileName;
+    let mimeType;
+
+    if (req.file) {
+      filePath = req.file.path;
+      fileName = req.file.originalname || path.basename(req.file.path);
+      mimeType = req.file.mimetype || 'application/pdf';
+    } else {
+      generatedFilePath = path.join(os.tmpdir(), `${guid}-${Date.now()}.pdf`);
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      await page.setContent(html_template, { waitUntil: 'networkidle0' });
+      await page.pdf({
+        path: generatedFilePath,
+        format: 'A4',
+        printBackground: true,
+        preferCSSPageSize: true
+      });
+
+      filePath = generatedFilePath;
+      fileName = `${guid}.pdf`;
+      mimeType = 'application/pdf';
+    }
+
+    // Upload either the browser file or the server-generated PDF.
+    const uploadRes = await uploadFile({
+      filePath,
+      fileName,
+      mimeType,
+      docType: 'agreement',
+      domain: req.domain
+    });
+    // ============================================================
+    // GET PUBLIC URL
+    // ============================================================
+    const publicUrl = uploadRes?.data?.public_url || uploadRes?.public_url;
+    if (!publicUrl) {
+      return res.status(502).json({
+        success: false,
+        message: 'Agreement file upload failed'
+      });
+    }
+
+    /* update url on allocation request */
+    const updateUrlQuery = `
+      UPDATE subcon_allocation_request
+      SET 
+        signed_agreement_url = @publicUrl, 
+        updatedate = GETDATE(),
+        log_inst = @log_inst
+      WHERE temp_guid = @guid
+    `;
+
+    await db.executeQuery(databaseName, updateUrlQuery, {
+      guid,
+      publicUrl,
+      log_inst
+    }, useApi);
+
     /* update agreement 'signed',*/
     const updateQuery = `
       UPDATE d_bp_agreement_docs 
       SET 
-        html_template = @html_template,
+        html_template = COALESCE(@html_template, html_template),
         is_signed = 'Y',
         status = @status,
         bp_remarks = @bp_remarks,
@@ -120,9 +191,12 @@ async function signAgreement(req, res) {
       useApi
     );
     
-    res.json({
+    return res.json({
       success: true,
-      message: 'Agreement signed successfully'
+      message: 'Agreement signed successfully',
+      data: {
+        publicUrl
+      }
     });
   } catch (error) {
     console.error('Error signing agreement:', error);
@@ -131,6 +205,15 @@ async function signAgreement(req, res) {
       error: 'Internal server error',
       message: error.message
     });
+  } finally {
+    if (browser) {
+      await browser.close().catch(() => {});
+    }
+
+    const fileToDelete = generatedFilePath || req.file?.path;
+    if (fileToDelete && fs.existsSync(fileToDelete)) {
+      fs.unlinkSync(fileToDelete);
+    }
   }
 }
 

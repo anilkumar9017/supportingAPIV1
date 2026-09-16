@@ -7,6 +7,7 @@ const shipmentController = require('../controllers/shipmentController');
 
 // Import middleware
 const domainMiddleware = require('../middleware/domainMiddleware');
+const upload = require('../middleware/upload');
 
 /**
  * Middleware to set useApi flag for all public routes
@@ -41,7 +42,7 @@ router.use(domainMiddleware);
  * Public Agreement Routes
  */
 router.get('/agreement/:guid', agreementController.getAgreementByGuid);
-router.put('/agreement/:guid/sign', agreementController.signAgreement);
+router.put('/agreement/:guid/sign', upload.single('file'), agreementController.signAgreement);
 
 /**
  * Public Shipment Routes
