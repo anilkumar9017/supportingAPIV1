@@ -35,6 +35,20 @@ async function getQuotationByGuid(req, res) {
     }
 
     const quotation = quotationResult[0];
+
+    if (quotation.incoterm) {
+      const incotermResult = await db.executeQuery(
+        databaseName,
+        'SELECT * FROM m_incoterms WHERE id = @incoterm',
+        { incoterm: quotation.incoterm },
+        useApi
+      );
+
+      if (incotermResult && incotermResult.length > 0) {
+        quotation.incoterm = incotermResult[0].name;
+      }
+    }
+
     const lineResult = await db.executeQuery(
       databaseName,
       'SELECT * FROM sales_d_quotation_line WHERE parent_id = @parent_id',
