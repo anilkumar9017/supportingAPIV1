@@ -7,6 +7,16 @@ const os = require('os');
 const path = require('path');
 const puppeteer = require('puppeteer');
 
+function getPuppeteerLaunchOptions() {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+
+  return {
+    headless: true,
+    ...(executablePath ? { executablePath } : {}),
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  };
+}
+
 
 /**
  * Get agreement by GUID (public access)
@@ -100,10 +110,7 @@ async function signAgreement(req, res) {
       mimeType = req.file.mimetype || 'application/pdf';
     } else {
       generatedFilePath = path.join(os.tmpdir(), `${guid}-${Date.now()}.pdf`);
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
+      browser = await puppeteer.launch(getPuppeteerLaunchOptions());
       const page = await browser.newPage();
       await page.setContent(html_template, { waitUntil: 'networkidle0' });
       await page.pdf({
@@ -200,10 +207,13 @@ async function signAgreement(req, res) {
     });
   } catch (error) {
     console.error('Error signing agreement:', error);
+    const browserNotFound = error.message?.includes('Could not find Chrome');
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      message: error.message
+      message: browserNotFound
+        ? 'Chrome is not installed for Puppeteer. Install it with `npx puppeteer browsers install chrome` or configure PUPPETEER_EXECUTABLE_PATH.'
+        : error.message
     });
   } finally {
     if (browser) {

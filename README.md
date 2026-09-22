@@ -83,6 +83,17 @@ copy .env.example .env
 
 3. Configure environment variables in `.env`.
 
+4. Install the Chrome binary used to generate signed agreement PDFs:
+
+```bash
+npx puppeteer browsers install chrome
+```
+
+The project stores this browser under `.cache/puppeteer`, which allows IIS or
+IISNode to use the same installation even when the application runs as a
+Windows service account. If Chrome is installed separately, set
+`PUPPETEER_EXECUTABLE_PATH` to its full executable path instead.
+
 ## Running the Server
 
 ### Development
