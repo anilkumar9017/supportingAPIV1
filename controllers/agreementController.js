@@ -148,7 +148,7 @@ async function signAgreement(req, res) {
     const updateUrlQuery = `
       UPDATE subcon_allocation_request
       SET 
-        signed_agreement_url = @publicUrl, 
+        agreement_docs = @publicUrl, 
         updatedate = GETDATE(),
         log_inst = @log_inst
       WHERE temp_guid = @guid
