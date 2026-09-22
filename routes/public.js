@@ -3,6 +3,7 @@ const router = express.Router();
 
 // Import controllers
 const agreementController = require('../controllers/agreementController');
+const quotationController = require('../controllers/quotation/quotationController');
 const shipmentController = require('../controllers/shipmentController');
 
 // Import middleware
@@ -43,6 +44,8 @@ router.use(domainMiddleware);
  */
 router.get('/agreement/:guid', agreementController.getAgreementByGuid);
 router.put('/agreement/:guid/sign', upload.single('file'), agreementController.signAgreement);
+router.get('/quotation/:temp_guid', quotationController.getQuotationByGuid);
+router.put('/quotation/:temp_guid/sign', quotationController.signQuotation);
 
 /**
  * Public Shipment Routes
