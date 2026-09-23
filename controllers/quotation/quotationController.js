@@ -260,7 +260,9 @@ async function signQuotation(req, res) {
           fileName: `${temp_guid}-signature.${extension}`,
           mimeType,
           docType: 'quotation-signature',
-          domain: req.domain
+          domain: req.domain,
+          databaseName,
+          useApi
         });
         const uploadedSignatureUrl = getUploadedFileUrl(uploadRes);
 

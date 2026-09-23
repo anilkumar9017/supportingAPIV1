@@ -131,7 +131,9 @@ async function signAgreement(req, res) {
       fileName,
       mimeType,
       docType: 'agreement',
-      domain: req.domain
+      domain: req.domain,
+      databaseName,
+      useApi
     });
     // ============================================================
     // GET PUBLIC URL
