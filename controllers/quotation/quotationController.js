@@ -49,19 +49,6 @@ async function getQuotationByGuid(req, res) {
       }
     }
 
-    if (quotation.uom) {
-      const uomResult = await db.executeQuery(
-        databaseName,
-        'SELECT * FROM m_uom WHERE id = @uom',
-        { uom: quotation.uom },
-        useApi
-      );
-
-      if (uomResult && uomResult.length > 0) {
-        quotation.uom = uomResult[0].name;
-      }
-    }
-
     if (quotation.salesperson_id) {
       const salespersonResult = await db.executeQuery(
         databaseName,
@@ -95,6 +82,23 @@ async function getQuotationByGuid(req, res) {
       { parent_id: quotation.id },
       useApi
     );
+
+    if(lineResult && lineResult.length > 0) {
+      for (const line of lineResult) {
+          if (line.uom) {
+            const uomResult = await db.executeQuery(
+              databaseName,
+              'SELECT * FROM m_uom WHERE id = @uom',
+              { uom: line.uom },
+              useApi
+            );
+
+            if (uomResult && uomResult.length > 0) {
+              line.uom = uomResult[0].name;
+            }
+          }
+      }
+    }
 
     quotation.sales_d_quotation_line = lineResult || [];
 
