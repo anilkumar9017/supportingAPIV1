@@ -49,6 +49,19 @@ async function getQuotationByGuid(req, res) {
       }
     }
 
+    if (quotation.payment_term) {
+      const paymentTermResult = await db.executeQuery(
+        databaseName,
+        'SELECT * FROM m_payment_terms WHERE id = @payment_term',
+        { payment_term: quotation.payment_term },
+        useApi
+      );
+
+      if (paymentTermResult && paymentTermResult.length > 0) {
+        quotation.payment_term = paymentTermResult[0].terms_name;
+      }
+    }
+
     if (quotation.salesperson_id) {
       const salespersonResult = await db.executeQuery(
         databaseName,
