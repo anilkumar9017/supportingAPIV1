@@ -4,6 +4,39 @@ const os = require('os');
 const path = require('path');
 const uploadFile = require('../../tools/backplace');
 
+function getUploadedFileUrl(uploadResponse) {
+  const urlKeys = new Set([
+    'public_url',
+    'publicUrl',
+    'file_url',
+    'fileUrl',
+    'download_url',
+    'downloadUrl',
+    'url'
+  ]);
+
+  function findUrl(value) {
+    if (!value || typeof value !== 'object') {
+      return typeof value === 'string' && /^https?:\/\//i.test(value) ? value : null;
+    }
+
+    for (const [key, nestedValue] of Object.entries(value)) {
+      if (urlKeys.has(key) && typeof nestedValue === 'string' && nestedValue.trim()) {
+        return nestedValue;
+      }
+
+      const nestedUrl = findUrl(nestedValue);
+      if (nestedUrl) {
+        return nestedUrl;
+      }
+    }
+
+    return null;
+  }
+
+  return findUrl(uploadResponse);
+}
+
 /**
  * Get quotation by temporary GUID (public access)
  */
@@ -209,6 +242,13 @@ async function signQuotation(req, res) {
         }
 
         const signatureMatch = signature_url.match(/^data:([^;]+);base64,(.+)$/s);
+        if (!signatureMatch) {
+          return res.status(400).json({
+            success: false,
+            message: 'signature_url must be a valid base64 data URL'
+          });
+        }
+
         const mimeType = signatureMatch?.[1] || 'image/png';
         const base64Data = signatureMatch?.[2] || signature_url;
         const extension = mimeType.split('/')[1]?.replace(/[^a-z0-9]/gi, '') || 'png';
@@ -222,9 +262,10 @@ async function signQuotation(req, res) {
           docType: 'quotation-signature',
           domain: req.domain
         });
-        const uploadedSignatureUrl = uploadRes?.data?.public_url || uploadRes?.public_url;
+        const uploadedSignatureUrl = getUploadedFileUrl(uploadRes);
 
         if (!uploadedSignatureUrl) {
+          console.error('Signature upload response did not contain a public URL:', uploadRes);
           return res.status(502).json({
             success: false,
             message: 'Signature upload failed'
