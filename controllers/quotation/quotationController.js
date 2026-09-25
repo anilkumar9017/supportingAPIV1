@@ -131,6 +131,19 @@ async function getQuotationByGuid(req, res) {
 
     if(lineResult && lineResult.length > 0) {
       for (const line of lineResult) {
+          if(line.expense_id){
+            const expense = line.expense_module == 'C' ? 'm_file_expense_type': 'm_trip_expenses';
+            const expenseResult = await db.executeQuery(
+              databaseName,
+              `SELECT * FROM ${expense} WHERE id = @expense_id`,
+              { expense_id: line.expense_id },
+              useApi
+            );
+            const columnKey = line.expense_module == 'C' ? 'name': 'expense_name';
+            if (expenseResult && expenseResult.length > 0) {
+              line.expense_id = expenseResult[0][columnKey];
+            }
+          }
           if (line.uom) {
             const uomResult = await db.executeQuery(
               databaseName,
@@ -267,7 +280,7 @@ async function signQuotation(req, res) {
         const uploadedSignatureUrl = getUploadedFileUrl(uploadRes);
 
         if (!uploadedSignatureUrl) {
-          console.error('Signature upload response did not contain a public URL:', uploadRes);
+          // console.error('Signature upload response did not contain a public URL:', uploadRes);
           return res.status(502).json({
             success: false,
             message: 'Signature upload failed'
