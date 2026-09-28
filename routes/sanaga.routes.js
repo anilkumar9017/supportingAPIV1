@@ -43,6 +43,7 @@ router.get('/health', (req, res) => {
 /* check saga gomain */
 function domainVerify(req, res, next) {
   const domain = req.headers['x-domain'] || req.headers.domain;
+  const workspace = req.headers['x-workspace'] || req.headers.workspace;
 
   if (!domain) {
     return res.status(400).json({
@@ -51,11 +52,17 @@ function domainVerify(req, res, next) {
     });
   }
 
-  if (domain.toLowerCase() !== 'saga') {
-    return res.status(403).json({
+  if(!workspace) {
+    return res.status(400).json({
       success: false,
-      message: 'Access denied: invalid domain'
+      message: 'X-Workspace header is required'
     });
+  }
+
+  if( domain && workspace) {
+    //add workspace into request object for later use
+    req.workspace = workspace;
+    req.domain = domain;
   }
 
   // domain is valid, proceed to next middleware / route handler

@@ -1,7 +1,7 @@
 const db = require('../../config/database');
 const axios = require('axios');
 
-const workspaceId = "9401bf6e-960c-4624-b63a-4e710f2d2011"; //"f7f27648-38db-4365-b91c-2ba3552f6bb4";
+let workspaceId = "9401bf6e-960c-4624-b63a-4e710f2d2011"; //"f7f27648-38db-4365-b91c-2ba3552f6bb4";
 
 const tokenCache = new Map();
 async function getAzureADToken(tenatObj) {
@@ -69,7 +69,6 @@ async function generateReportEmbedToken(req, res) {
         return res.status(400).json({ success: false, message: "report_id is required" });
       }
   
-      console.log("Report ID:", report_id);
   
       const databaseName = 'DCCBusinessSuite_mowara_test';
       const query = `SELECT * FROM vw_bi_basic_configuration`;
@@ -80,6 +79,10 @@ async function generateReportEmbedToken(req, res) {
       }
   
       const tenantObj = result[0];
+      //when req.workspace is not provided, use the default workspaceId from the configuration
+      if(req.workspace) {
+        workspaceId = req.workspace;
+      }
   
       // Generate embed token
       const response = await powerBIRequest(async (token) => {
@@ -162,6 +165,12 @@ async function generateReportEmbedToken(req, res) {
             });
           }
           const config = result[0];
+
+          //req.workspace is set in the domainVerify middleware, if not provided, use the default workspaceId from the configuration
+          if(req.workspace) {
+            workspaceId = req.workspace;
+          }
+
           //refresh dataset
           let response  = await powerBIRequest(async (token) => {
            return axios.post(
@@ -200,6 +209,11 @@ async function generateReportEmbedToken(req, res) {
       
           const config = result[0];
       
+          //req.workspace is set in the domainVerify middleware, if not provided, use the default workspaceId from the configuration
+          if(req.workspace) {
+            workspaceId = req.workspace;
+          }
+
           const response = await powerBIRequest(async (token) => {
             return axios.get(
               `https://api.powerbi.com/v1.0/myorg/groups/${workspaceId}/datasets/${datasetId}/refreshes?$top=1`,
