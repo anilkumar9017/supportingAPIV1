@@ -181,10 +181,10 @@ module.exports = {
             labelField: 'name',
             valueField: 'code',
             options: [
-                { name: 'T', code: 'Transit' },
-                { name: 'L', code: 'Local' },
-                { name: 'U', code: 'UpCountry' },
-                { name: 'A', code: 'All' },
+                { code: 'T', name: 'Transit' },
+                { code: 'L', name: 'Local' },
+                { code: 'U', name: 'UpCountry' },
+                { code: 'A', name: 'All' },
             ]
         } },
       { header: 'Self Owned', key: 'self_owned', type: 'checkbox', values: ['Y', 'N'], width: 20 },
