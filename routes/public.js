@@ -5,6 +5,7 @@ const router = express.Router();
 const agreementController = require('../controllers/agreementController');
 const quotationController = require('../controllers/quotation/quotationController');
 const shipmentController = require('../controllers/shipmentController');
+const licenseController = require('../controllers/licenseController');
 
 // Import middleware
 const domainMiddleware = require('../middleware/domainMiddleware');
@@ -46,6 +47,8 @@ router.get('/agreement/:guid', agreementController.getAgreementByGuid);
 router.put('/agreement/:guid/sign', upload.single('file'), agreementController.signAgreement);
 router.get('/quotation/:temp_guid', quotationController.getQuotationByGuid);
 router.put('/quotation/:temp_guid/sign', quotationController.signQuotation);
+router.get('/license-expire', licenseController.getLicenseExpire);
+//select * from m_initialize_company
 
 /**
  * Public Shipment Routes
