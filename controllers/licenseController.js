@@ -16,7 +16,6 @@ async function getLicenseExpire(req, res) {
         const query = `
         SELECT license_expiry_date, license_activated_at, license_status
         FROM m_initialize_company
-        LIMIT 1
         `;
 
         const result = await db.executeQuery(databaseName, query, { guid }, useApi);
