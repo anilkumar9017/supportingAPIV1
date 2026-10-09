@@ -18,7 +18,7 @@ async function getLicenseExpire(req, res) {
         FROM m_initialize_company
         `;
 
-        const result = await db.executeQuery(databaseName, query, { guid }, useApi);
+        const result = await db.executeQuery(databaseName, query, {}, useApi);
         if (result.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -33,7 +33,7 @@ async function getLicenseExpire(req, res) {
     }catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Internal server error'
+            message: error?.message || 'Internal server error'
         });
     }
 }
