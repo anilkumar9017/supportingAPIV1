@@ -76,7 +76,8 @@ async function getQuotationByGuid(req, res) {
         {},
         useApi
       );
-
+      
+      const company = companyResult?.[0];
       if (company) {
         const [currencyResult, currencyResultSY] = await Promise.all([
           db.executeQuery(
