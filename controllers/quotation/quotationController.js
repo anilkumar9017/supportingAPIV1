@@ -69,6 +69,41 @@ async function getQuotationByGuid(req, res) {
 
     const quotation = quotationResult[0];
 
+    if(quotation?.currency_code){
+      const companyResult = await db.executeQuery(
+        databaseName,
+        'select currency_lc, currency_sys from cfg_companysetup',
+        {},
+        useApi
+      );
+
+      if (company) {
+        const [currencyResult, currencyResultSY] = await Promise.all([
+          db.executeQuery(
+            databaseName,
+            'SELECT cur_code FROM m_currencies WHERE id = @currency_id',
+            { currency_id: company.currency_lc },
+            useApi
+          ),
+          db.executeQuery(
+            databaseName,
+            'SELECT cur_code FROM m_currencies WHERE id = @currency_id',
+            { currency_id: company.currency_sys },
+            useApi
+          )
+        ]);
+
+        if (currencyResult?.length > 0) {
+          quotation.currency_lc = currencyResult[0].cur_code;
+        }
+
+        if (currencyResultSY?.length > 0) {
+          quotation.currency_sc = currencyResultSY[0].cur_code;
+        }
+      }
+      
+    }
+
     if (quotation.incoterm) {
       const incotermResult = await db.executeQuery(
         databaseName,
