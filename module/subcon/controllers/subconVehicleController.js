@@ -89,6 +89,7 @@ async function deleteVehicle(req, res) {
 
 module.exports = {
   listVehicleStatus,
+  listVehicles,
   getVehicleById,
   createVehicle,
   updateVehicle,

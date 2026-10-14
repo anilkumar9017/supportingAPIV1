@@ -104,6 +104,7 @@ async function deleteVehicle(databaseName, vehicleId, subcontractorId) {
 
 module.exports = {
   getVehicleStatus,
+  getVehicles,
   getVehicleById,
   createVehicle,
   updateVehicle,
