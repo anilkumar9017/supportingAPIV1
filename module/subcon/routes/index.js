@@ -844,6 +844,19 @@ router.put('/shipments/:id', validateShipmentOrderUpdate, subconShipmentControll
  */
 router.post('/shipments/:id/upload-pod', upload.single('podFile'), subconShipmentController.uploadPODDocuments);
 
+/**
+ * @swagger
+ * /api/subcon/vehicle-status:
+ *   get:
+ *     summary: Get vehicle status from NG
+ *     tags: [Subcon]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of vehicle Status
+ */
+router.get('/vehicle-status', subconVehicleController.listVehicleStatus);
 
 /**
  * @swagger

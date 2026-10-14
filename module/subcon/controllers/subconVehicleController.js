@@ -1,5 +1,15 @@
 const subconVehicleService = require('../services/subconVehicleService');
 
+
+async function listVehicleStatus(req, res) {
+  try {
+    const result = await subconVehicleService.getVehicleStatus(req.databaseName, req.user.subcontractor_id);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to fetch vehicle status' });
+  }
+}
+
 async function listVehicles(req, res) {
   try {
     const result = await subconVehicleService.getVehicles(req.databaseName, req.user.subcontractor_id);
@@ -78,7 +88,7 @@ async function deleteVehicle(req, res) {
 }
 
 module.exports = {
-  listVehicles,
+  listVehicleStatus,
   getVehicleById,
   createVehicle,
   updateVehicle,

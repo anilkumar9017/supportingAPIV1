@@ -1,6 +1,15 @@
 const db = require('../../../config/database');
 const subconCommitService = require('./subconCommitService');
 
+async function getVehicleStatus(databaseName, subcontractorId) {
+  const query = `
+    SELECT *
+    FROM [databaseName].[m_vehicle_status]
+  `;
+
+  return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
+}
+
 async function getVehicles(databaseName, subcontractorId) {
   const query = `
     SELECT id, subcontractor_id, vehicle_reg_no, asset_type, max_payload_tonnes,
@@ -94,7 +103,7 @@ async function deleteVehicle(databaseName, vehicleId, subcontractorId) {
 }
 
 module.exports = {
-  getVehicles,
+  getVehicleStatus,
   getVehicleById,
   createVehicle,
   updateVehicle,
