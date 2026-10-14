@@ -37,6 +37,7 @@ async function createVehicle(req, res) {
       current_location: payload.current_location || null,
       route_location: payload.route_location || null,
       container_size: payload.container_size || null,
+      remarks: payload.remarks || null,
       createdby: req.user?.id || null,
       updatedby: req.user?.id || null,
       log_inst: payload.log_inst || 1

@@ -1021,6 +1021,8 @@ router.delete('/subcontractors/:id', subconSubcontractorController.deleteSubcont
  *                 type: string
  *               container_size:
  *                 type: string
+ *               remarks:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Vehicle created
@@ -1069,6 +1071,8 @@ router.post('/vehicles', validateVehicleCreate, subconVehicleController.createVe
  *               route_location:
  *                 type: string
  *               container_size:
+ *                 type: string
+ *               remarks:
  *                 type: string
  *     responses:
  *       200:
