@@ -1,5 +1,6 @@
 const db = require('../../../config/database');
 const subconCommitService = require('./subconCommitService');
+const { startEmailWorker } = require('../../../services/emailWorker');
 
 async function getVehicleStatus(databaseName, subcontractorId) {
   const query = `
@@ -83,17 +84,83 @@ async function updateVehicle(databaseName, vehicleId, payload, updatedBy, subcon
     throw new Error('No valid fields to update');
   }
 
+  params.subId = subcontractorId;
+  const currentVehicleRows = await db.executeQuery(
+    databaseName,
+    `
+      SELECT CONVERT(char(10), available_date, 23) AS available_date
+      FROM [subcon].[vehicles]
+      WHERE id = @id AND subcontractor_id = @subId
+    `,
+    { id: vehicleId, subId: subcontractorId },
+    false
+  );
+  const currentVehicle = currentVehicleRows?.[0];
+  if (!currentVehicle) {
+    throw new Error('Vehicle not found');
+  }
+
+  const hasAvailableDate = Object.prototype.hasOwnProperty.call(payload, 'available_date');
+  const currentAvailableDate = currentVehicle.available_date || null;
+  const requestedAvailableDate = payload.available_date == null
+    ? null
+    : String(payload.available_date).slice(0, 10);
+  const skipEmailEvent = hasAvailableDate && currentAvailableDate === requestedAvailableDate;
+
   const query = `
     UPDATE [subcon].[vehicles]
     SET ${updates.join(', ')}, updatedate = GETUTCDATE(), updatedby = @updatedby
     WHERE id = @id AND subcontractor_id = @subId
   `;
 
-  params.subId = subcontractorId;
-
   await db.executeQuery(databaseName, query, params, false);
   await subconCommitService.commit(databaseName, 'subcon.vehicles', 'U', vehicleId);
-  return { success: true, message: 'Vehicle updated successfully.' };
+
+  let emailQueueItemsTriggered = 0;
+  if (!skipEmailEvent) {
+    const queueItems = await subconCommitService.processEmailEvent(
+      databaseName,
+      'subcon.vehicles',
+      'U',
+      vehicleId
+    );
+
+    for (const item of queueItems) {
+      let triggerStatus = 'N';
+      try {
+        await startEmailWorker({
+          dbName: databaseName,
+          ID: item.ID,
+          Email_Event_Config_Id: item.Email_Event_Config_Id,
+          EntityId: item.EntityId,
+          ChildId: item.ChildId,
+          CombinedIds: item.CombinedIds
+        });
+        triggerStatus = 'Y';
+        emailQueueItemsTriggered += 1;
+      } catch (error) {
+        console.error(`Failed to trigger email queue item ${item.ID}:`, error.message);
+      }
+
+      await db.executeQuery(
+        databaseName,
+        `
+          UPDATE [dbo].[d_email_queue]
+          SET tgr_status = @status, updatedate = GETDATE()
+          WHERE id = @id
+        `,
+        { status: triggerStatus, id: item.ID },
+        false
+      );
+    }
+  }
+
+  return {
+    success: true,
+    message: 'Vehicle updated successfully.',
+    emailWorkerTriggered: emailQueueItemsTriggered > 0,
+    emailQueueItemsTriggered
+  };
 }
 
 async function deleteVehicle(databaseName, vehicleId, subcontractorId) {

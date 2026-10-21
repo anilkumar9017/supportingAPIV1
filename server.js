@@ -28,6 +28,8 @@ const emailRoutes = require('./routes/email');
 const excelRoutes = require('./routes/excel.routes');
 // sagaroutes powerBi
 const sagaRoutes = require('./routes/sanaga.routes');
+// geofence routes
+const geofenceRoutes = require('./module/tracking-geofence/routes');
 // subcon routes
 const subconRoutes = require('./module/subcon/routes');
 
@@ -46,6 +48,9 @@ app.use('/api/ie', excelRoutes);
 
 //saga routes
 app.use('/api/saga', sagaRoutes);
+
+//geofence routes
+app.use('/api/geofence', geofenceRoutes);
 
 // subcon routes
 app.use('/api/subcon', subconRoutes);
