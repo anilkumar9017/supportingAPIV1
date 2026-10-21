@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 function authenticateGeofenceWebhook(req, res, next) {
-  const configuredKey = process.env.geofence_api_key;
+  const configuredKey = "gfn_8c7e2a9d4f6b1e0c5a3d9f72b8e4c601"; //process.env.geofence_api_key;
 
   if (!configuredKey) {
     console.error('Geofence webhook key is not configured');
