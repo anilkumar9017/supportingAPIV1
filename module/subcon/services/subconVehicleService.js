@@ -5,7 +5,7 @@ const { startEmailWorker } = require('../../../services/emailWorker');
 async function getVehicleStatus(databaseName, subcontractorId) {
   const query = `
     SELECT *
-    FROM [databaseName].[m_vehicle_status]
+    FROM m_vehicle_status
   `;
 
   return db.executeQuery(databaseName, query, { subId: subcontractorId }, false);
